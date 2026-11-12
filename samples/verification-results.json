@@ -1,0 +1,572 @@
+[
+  {
+    "name": "带筋电机支架",
+    "projectId": "6579ec31-71a0-4812-ba83-1526191556ed",
+    "revisionId": "1794499705670-9a8314e1",
+    "passed": true,
+    "size": [
+      100.0,
+      70.0,
+      78.0
+    ],
+    "volume": 117742.3837,
+    "checks": [
+      {
+        "name": "STEP重新导入后为有效实体",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "单一实体",
+        "passed": true,
+        "actual": 1,
+        "expected": 1
+      },
+      {
+        "name": "STL三角面与文件长度一致",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "外形100×70×78",
+        "passed": true,
+        "actual": [
+          100.0,
+          70.0,
+          78.0
+        ],
+        "expected": [
+          100,
+          70,
+          78
+        ]
+      },
+      {
+        "name": "底板材料",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "电机轴通孔",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "电机孔周围的竖板材料",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "电机安装通孔-23,22",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "电机安装通孔-23,68",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "电机安装通孔23,22",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "电机安装通孔23,68",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,-12偏移-8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,-12偏移0",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,-12偏移8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,12偏移-8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,12偏移0",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽-36,12偏移8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,-12偏移-8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,-12偏移0",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,-12偏移8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,12偏移-8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,12偏移0",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "Y向长槽36,12偏移8",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "加强筋-43",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "加强筋43",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "两筋之间保持开放",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      }
+    ]
+  },
+  {
+    "name": "带柱散热外壳",
+    "projectId": "3dd95af2-0265-46ff-a801-fec09da8545a",
+    "revisionId": "1794499584602-90772a2f",
+    "passed": true,
+    "size": [
+      120.0,
+      80.0,
+      36.0
+    ],
+    "volume": 79994.8378,
+    "checks": [
+      {
+        "name": "STEP重新导入后为有效实体",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "单一实体",
+        "passed": true,
+        "actual": 1,
+        "expected": 1
+      },
+      {
+        "name": "STL三角面与文件长度一致",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "外形120×80×36",
+        "passed": true,
+        "actual": [
+          120.0,
+          80.0,
+          36.0
+        ],
+        "expected": [
+          120,
+          80,
+          36
+        ]
+      },
+      {
+        "name": "底板材料",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "顶部开口和内腔",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "顶部无盖",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "安装柱材料-49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱盲孔-49,-29",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "盲孔保留底部-49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱连接筋-49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱材料-49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱盲孔-49,29",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "盲孔保留底部-49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱连接筋-49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱材料49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱盲孔49,-29",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "盲孔保留底部49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱连接筋49,-29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱材料49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱盲孔49,29",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "盲孔保留底部49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "安装柱连接筋49,29",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "前面接口孔",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "接口旁保留壁",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "背面散热槽-28",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽-20",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽-12",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽-4",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽4",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽12",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽20",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "背面散热槽28",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "散热槽间壁",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      }
+    ]
+  },
+  {
+    "name": "键槽法兰轴套",
+    "projectId": "10258d77-2d9f-4e04-bcae-faafca9bd1c4",
+    "revisionId": "1794499626785-343468ac",
+    "passed": true,
+    "size": [
+      100.0,
+      100.0,
+      53.0
+    ],
+    "volume": 121750.4474,
+    "checks": [
+      {
+        "name": "STEP重新导入后为有效实体",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "单一实体",
+        "passed": true,
+        "actual": 1,
+        "expected": 1
+      },
+      {
+        "name": "STL三角面与文件长度一致",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "外形100×100×53",
+        "passed": true,
+        "actual": [
+          100.0,
+          100.0,
+          53.0
+        ],
+        "expected": [
+          100,
+          100,
+          53
+        ]
+      },
+      {
+        "name": "轴孔贯穿Z5",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽贯穿Z5",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽底外材料Z5",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "轴孔贯穿Z30",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽贯穿Z30",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽底外材料Z30",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "轴孔贯穿Z49",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽贯穿Z49",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "键槽底外材料Z49",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "法兰螺栓通孔1",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "法兰螺栓通孔2",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "法兰螺栓通孔3",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "法兰螺栓通孔4",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "法兰螺栓通孔5",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "法兰螺栓通孔6",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "环槽挖空",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "环槽底部保留",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "下部轴套外径46",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      },
+      {
+        "name": "顶部台阶外径38",
+        "passed": true,
+        "actual": false,
+        "expected": false
+      },
+      {
+        "name": "顶部台阶材料",
+        "passed": true,
+        "actual": true,
+        "expected": true
+      }
+    ]
+  }
+]

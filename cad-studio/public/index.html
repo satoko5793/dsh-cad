@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>构形 CAD · 把想法变成零件</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/refinements.css">
+  <link rel="stylesheet" href="/workflow.css">
+  <script type="importmap">{"imports":{"three":"/vendor/three/build/three.module.js","three/addons/":"/vendor/three/examples/jsm/"}}</script>
+</head>
+<body>
+  <aside class="rail">
+    <a class="brand" href="/" aria-label="构形 CAD 首页"><span class="brand-mark">⌘</span><span>构形<span class="brand-sub">CAD STUDIO</span></span></a>
+    <button class="new-project" id="newProject"><span>＋</span> 新建零件</button>
+    <div class="section-label">你的设计 <span id="projectCount">0</span></div>
+    <nav id="projects" aria-label="项目列表"></nav>
+    <div class="rail-bottom"><span class="online-dot"></span><div>本地工作空间<small>设计文件保存在这台电脑</small></div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div class="breadcrumb">我的零件 <span>/</span> <strong id="projectTitle">新的想法</strong></div><div class="top-actions"><span class="local-badge">自动保存在本机</span><span class="engine-status" id="engineStatus"><i></i> 正在检查引擎</span></div></header>
+    <ol class="workflow" aria-label="设计流程"><li id="stepDescribe" class="current"><span>1</span>描述零件</li><li id="stepView"><span>2</span>查看模型</li><li id="stepEdit"><span>3</span>调整尺寸</li><li id="stepExport"><span>4</span>下载文件</li></ol>
+    <div class="workbench">
+      <section class="conversation" aria-label="设计对话">
+        <div class="panel-heading"><div><span class="eyebrow">你的零件设计助手</span><h1 id="conversationTitle">先说说，你想做什么？</h1><p class="panel-subtitle">形状、尺寸、孔位，想到什么就说什么。</p></div><span class="sparkle">✳</span></div>
+        <div id="messages" class="messages" aria-live="polite"></div>
+        <div class="suggestions" id="suggestions">
+          <button data-prompt="生成一块 80×40×5 mm 的安装板，四角各一个直径 6 mm 的通孔，孔中心距相邻边各 8 mm。">▱ 四孔安装板 <span>↗</span></button>
+          <button data-prompt="生成一个 L 型安装支架，底板 60×40×5 mm，竖板高 50 mm、宽 40 mm、厚 5 mm。底板上放两个直径 6 mm 的通孔。">⌑ L 型支架 <span>↗</span></button>
+          <button data-prompt="生成一个顶部敞开的电子外壳，外形 80×50×30 mm，壁厚和底厚都是 3 mm，不需要盖子。">▣ 电子外壳 <span>↗</span></button>
+        </div>
+        <div class="quick-edits" id="quickEdits" hidden><button type="button" id="editDimensions">调整尺寸</button><button type="button" data-edit="请给这个零件合适的外边缘添加 1 mm 圆角，保持其他尺寸和孔位不变。">加圆角</button><button type="button" data-edit="请用简单的话说明这个零件的尺寸和孔位，只使用实际测量的数据。">查看尺寸说明</button></div>
+        <form id="chatForm" class="composer"><label for="prompt" class="sr-only">描述零件或修改需求</label><textarea id="prompt" rows="3" placeholder="例如：做一个长 80、宽 40、厚 5 mm 的安装板…"></textarea><div class="composer-footer"><span><i class="online-dot"></i> DeepSeek API <small>已配置</small></span><button id="send" type="submit" aria-label="发送设计需求">↑</button></div></form>
+        <div class="composer-note">尺寸默认使用毫米 · AI 建模结果请核对后使用</div>
+      </section>
+      <section class="model-area" aria-label="三维模型工作区">
+        <div class="viewer-heading"><div class="view-tabs"><button class="active" id="solidView">实体视图</button><button id="wireView">线框</button></div><div class="viewer-heading-right"><span id="versionBadge">尚未生成</span><button class="icon-btn" id="resetView" title="重置视角" aria-label="重置视角">⤢</button></div></div>
+        <div class="viewport" id="viewport"><canvas id="canvas" aria-label="可旋转缩放的三维模型"></canvas><div class="empty-state" id="emptyState"><div class="wire-cube"><span></span></div><span class="eyebrow">YOUR NEXT IDEA, IN THREE DIMENSIONS</span><h2>让想法，有形可见。</h2><p>描述一个零件，模型将在这里生成。<br>从支架、外壳或一块安装板开始。</p><div class="empty-tags"><span>参数化设计</span><span>真实 CAD 实体</span><span>STEP 导出</span></div></div><div class="model-info" id="modelInfo" hidden><span class="valid-label">✓ 有效实体</span><strong id="modelName"></strong><small id="modelSize"></small></div><div class="axis"><span class="axis-z">Z</span><span class="axis-y">Y</span><span class="axis-x">X</span></div><div class="view-help">拖动旋转 <span>·</span> 右键平移 <span>·</span> 滚轮缩放</div><div class="job-status" id="jobStatus" hidden><span class="spinner"></span><span id="jobStatusText"></span></div></div>
+        <div class="preview-review" id="previewReview" hidden><div><strong>修改预览 · 尚未保存</strong><p id="previewChanges"></p></div><div class="preview-actions"><button id="cancelPreview" type="button">取消修改</button><button id="savePreview" type="button">保存这个版本</button></div></div>
+        <div class="model-footer"><span><i class="online-dot"></i> <span id="geometrySummary">等待第一个设计</span></span><div class="export-group"><button id="downloadStep" disabled title="用于 CAD 软件中继续设计">↓ STEP</button><button id="downloadStl" disabled title="用于切片或 3D 打印">↓ STL</button></div></div>
+        <p class="export-hint">STEP：在 CAD 软件中继续设计 <span>·</span> STL：切片与 3D 打印</p>
+        <div class="details-grid">
+          <section class="parameters"><div class="detail-heading"><h2>调整尺寸</h2><button id="rebuild" disabled>预览修改 ↗</button></div><div class="parameter-note-row"><p class="parameter-note" id="parameterNote">先生成零件，再调整这里的尺寸。</p><button type="button" id="resetParameters" hidden>重置</button></div><div id="parameterFields" class="parameter-fields"><p class="muted">生成后，可直接调整尺寸并预览。</p></div><div class="parameter-error" id="parameterError" role="alert"></div><details id="geometryDetails" hidden><summary>更多：测量数据与建模源码</summary><div id="geometryMeasurements"></div><button id="downloadSource" disabled type="button">下载建模源码</button></details></section>
+          <section class="versions"><div class="detail-heading"><h2>版本记录</h2><span id="versionCount">0 个版本</span></div><div id="versionList"><p class="muted">每次成功建模都会保存一个版本。</p></div></section>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div class="toast" id="toast" role="alert" hidden></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

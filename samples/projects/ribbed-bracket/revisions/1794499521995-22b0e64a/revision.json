@@ -1,0 +1,317 @@
+{
+  "id": "1794499521995-22b0e64a",
+  "title": "带筋电机支架",
+  "parameters": {
+    "base_width": 100,
+    "base_depth": 70,
+    "base_thickness": 8,
+    "plate_thickness": 8,
+    "plate_height": 70,
+    "motor_hole_diameter": 32,
+    "motor_hole_center_z": 45,
+    "mount_hole_diameter": 5,
+    "mount_hole_offset_x": 23,
+    "mount_hole_offset_z": 23,
+    "slot_length": 18,
+    "slot_width": 7,
+    "slot_offset_x": 36,
+    "slot_offset_y": 12,
+    "rib_thickness": 6,
+    "rib_offset_x": 43,
+    "rib_start_y": -25,
+    "rib_top_z": 65,
+    "fuse_overlap": 2
+  },
+  "parameterSpec": {
+    "base_width": {
+      "label": "底板宽度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "base_depth": {
+      "label": "底板深度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "base_thickness": {
+      "label": "底板厚度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "plate_thickness": {
+      "label": "竖板厚度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "plate_height": {
+      "label": "竖板高度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "motor_hole_diameter": {
+      "label": "电机轴孔直径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "motor_hole_center_z": {
+      "label": "电机轴孔中心高度",
+      "unit": "mm",
+      "step": 1
+    },
+    "mount_hole_diameter": {
+      "label": "安装孔直径",
+      "unit": "mm",
+      "step": 0.5,
+      "positive": true
+    },
+    "mount_hole_offset_x": {
+      "label": "安装孔横向偏距",
+      "unit": "mm",
+      "step": 1
+    },
+    "mount_hole_offset_z": {
+      "label": "安装孔垂向偏距",
+      "unit": "mm",
+      "step": 1
+    },
+    "slot_length": {
+      "label": "长圆槽长度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "slot_width": {
+      "label": "长圆槽宽度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "slot_offset_x": {
+      "label": "长圆槽横向中心距",
+      "unit": "mm",
+      "step": 1
+    },
+    "slot_offset_y": {
+      "label": "长圆槽纵向中心距",
+      "unit": "mm",
+      "step": 1
+    },
+    "rib_thickness": {
+      "label": "加强筋厚度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "rib_offset_x": {
+      "label": "加强筋中心偏距",
+      "unit": "mm",
+      "step": 1
+    },
+    "rib_start_y": {
+      "label": "加强筋前端位置",
+      "unit": "mm",
+      "step": 1
+    },
+    "rib_top_z": {
+      "label": "加强筋顶点高度",
+      "unit": "mm",
+      "step": 1
+    },
+    "fuse_overlap": {
+      "label": "内部融合搭接量",
+      "unit": "mm",
+      "step": 0.5
+    }
+  },
+  "geometry": {
+    "size": [
+      100,
+      70,
+      78
+    ],
+    "volume": 101242.1954,
+    "area": 31865.1681,
+    "solids": 1,
+    "faces": 29,
+    "cylindricalSurfaces": [
+      {
+        "diameter": 7,
+        "center": [
+          36,
+          19.7282,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          36,
+          4.2718,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -36,
+          19.7282,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -36,
+          4.2718,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          36,
+          -4.2718,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          36,
+          -19.7282,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -36,
+          -4.2718,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -36,
+          -19.7282,
+          4
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 5,
+        "center": [
+          23,
+          31,
+          68
+        ],
+        "axis": [
+          0,
+          -1,
+          0
+        ]
+      },
+      {
+        "diameter": 32,
+        "center": [
+          0,
+          31,
+          45
+        ],
+        "axis": [
+          0,
+          -1,
+          0
+        ]
+      },
+      {
+        "diameter": 5,
+        "center": [
+          23,
+          31,
+          22
+        ],
+        "axis": [
+          0,
+          -1,
+          0
+        ]
+      },
+      {
+        "diameter": 5,
+        "center": [
+          -23,
+          31,
+          68
+        ],
+        "axis": [
+          0,
+          -1,
+          0
+        ]
+      },
+      {
+        "diameter": 5,
+        "center": [
+          -23,
+          31,
+          22
+        ],
+        "axis": [
+          0,
+          -1,
+          0
+        ]
+      }
+    ],
+    "valid": true,
+    "units": "mm"
+  },
+  "createdAt": "2026-11-12T16:05:24.462Z"
+}

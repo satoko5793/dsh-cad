@@ -1,0 +1,16 @@
+node_modules/
+logs/
+.env
+.env.*
+*.log
+*.pem
+*.key
+.dsh/
+credentials.json
+vendor/*.tgz
+research/cad-tools/sources/
+research/cad-tools/runtime/
+research/cad-tools/evidence/**/.dsh-cad/
+research/cad-tools/evidence/**/.soma/
+research/cad-tools/evidence/**/__pycache__/
+__pycache__/

@@ -1,0 +1,12 @@
+{
+  "initial": {
+    "volume": 15434.513322353832,
+    "expected": 15434.513322353838,
+    "operationCount": 7
+  },
+  "modified": {
+    "volume": 23991.504561362017,
+    "expected": 23991.504561362024,
+    "operationCount": 7
+  }
+}

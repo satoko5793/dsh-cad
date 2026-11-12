@@ -1,0 +1,4 @@
+{
+  "success": false,
+  "error": "Docker is not available — install docker and the docker Python SDK, then build the executor image with: docker build -t chamfer-ai-cad-executor ."
+}

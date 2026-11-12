@@ -1,0 +1,23 @@
+{
+  "outer_length": 120,
+  "outer_width": 80,
+  "outer_height": 36,
+  "wall_thickness": 3,
+  "bottom_thickness": 4,
+  "post_x_offset": 49,
+  "post_y_offset": 29,
+  "post_outer_dia": 10,
+  "post_top_z": 24,
+  "post_hole_dia": 3.2,
+  "post_hole_bottom_z": 6,
+  "rib_width": 5,
+  "rib_top_z": 12,
+  "port_width": 24,
+  "port_height": 10,
+  "port_center_z": 17,
+  "slot_count": 8,
+  "slot_width": 3,
+  "slot_height": 16,
+  "slot_center_z": 21,
+  "slot_span": 56
+}

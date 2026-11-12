@@ -1,0 +1,566 @@
+[
+  {
+    "key": "ribbed-bracket",
+    "name": "带筋电机支架",
+    "prompt": "请直接生成一个复杂一些的单体机械零件，名称“带筋电机支架”。坐标约定：X为宽、Y为底板深、Z向上。底板100×70×8，底面Z=0，范围X=-50..50、Y=-35..35；后侧竖板100宽、8厚、高70，范围Y=27..35、Z=8..78。竖板上沿Y方向开直径32的电机轴通孔，中心X=0、Z=45；周围4个直径5的安装通孔，中心X=±23、Z=45±23。底板上沿Y方向布置4个长18、宽7的贯穿长圆槽，中心(X,Y)=(±36,±12)。在X=±43位置各加一条厚6的三角加强筋，筋位于底板顶面和竖板前侧之间，三角顶点在YZ面为(-25,8)、(27,8)、(27,65)；加强筋与底板/竖板有实体相交并融合，保证单实体。不要圆角，不要螺纹。所有尺寸作为可编辑参数。根据工具实际结果检查实体数和外形，不能把工具成功等同于所有特征正确。",
+    "projectId": "6579ec31-71a0-4812-ba83-1526191556ed",
+    "revisionId": "1794499705670-9a8314e1",
+    "geometry": {
+      "size": [
+        100,
+        70,
+        78
+      ],
+      "volume": 117742.3837,
+      "area": 36997.1123,
+      "solids": 1,
+      "faces": 35,
+      "cylindricalSurfaces": [
+        {
+          "diameter": 7,
+          "center": [
+            36,
+            19.7282,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            36,
+            4.2718,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -36,
+            19.7282,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -36,
+            4.2718,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            36,
+            -4.2718,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            36,
+            -19.7282,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -36,
+            -4.2718,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -36,
+            -19.7282,
+            4
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 5,
+          "center": [
+            23,
+            31,
+            68
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "diameter": 32,
+          "center": [
+            0,
+            31,
+            45
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "diameter": 5,
+          "center": [
+            23,
+            31,
+            22
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "diameter": 5,
+          "center": [
+            -23,
+            31,
+            68
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ]
+        },
+        {
+          "diameter": 5,
+          "center": [
+            -23,
+            31,
+            22
+          ],
+          "axis": [
+            0,
+            -1,
+            0
+          ]
+        }
+      ],
+      "valid": true,
+      "units": "mm"
+    },
+    "parameters": {
+      "base_width": 100,
+      "base_depth": 70,
+      "base_thickness": 8,
+      "plate_thickness": 8,
+      "plate_height": 70,
+      "motor_hole_diameter": 32,
+      "motor_hole_center_z": 45,
+      "mount_hole_diameter": 5,
+      "mount_hole_offset_x": 23,
+      "mount_hole_offset_z": 23,
+      "slot_length": 18,
+      "slot_width": 7,
+      "slot_offset_x": 36,
+      "slot_offset_y": 12,
+      "rib_thickness": 6,
+      "rib_offset_x": 43,
+      "rib_start_y": -25,
+      "rib_top_z": 65,
+      "fuse_overlap": 2
+    },
+    "seconds": 93,
+    "status": "built",
+    "initialRevisionId": "1794499521995-22b0e64a",
+    "repairPrompt": "请修正当前支架，独立复核发现加强筋实际缺失：(43,0,15)与(-43,0,15)两点均不在实体内。原因是make_rib的六顶点轮廓只构成底板下薄条和竖板内薄条，没有从前端底部到后端顶部的三角斜边。请保留现有所有尺寸、孔和长槽，仅修复两条实体三角筋。建议在YZ平面使用三角顶点(rib_start_y,base_thickness-fuse_overlap)、(plate_front_y+fuse_overlap,base_thickness-fuse_overlap)、(plate_front_y+fuse_overlap,rib_top_z)，闭合后沿X双向拉伸rib_thickness/2，并平移到X=±rib_offset_x；最后与主体融合。修复后必须是单实体，外形仍100×70×78。把所有设计尺寸继续留在params。"
+  },
+  {
+    "key": "vented-enclosure",
+    "name": "带柱散热外壳",
+    "prompt": "请直接生成一个复杂一些的单体机械零件，名称“带柱散热外壳”。开口朝上的电子外壳，外形120×80×36mm，底面Z=0，外侧X=±60、Y=±40；壁厚3，底厚4，内部完全挖空至Z=4。外壳内四角各一个螺钉安装柱，柱中心(X,Y)=(±49,±29)，外径10，从Z=4延伸到Z=24；柱中心孔直径3.2，盲孔从Z=24到底Z=6，不穿底。每个安装柱用一个宽5的水平连接肋连到最近的X侧壁，肋从Z=4到Z=12，使柱、底板、肋与壳体融为单实体。正面Y=-40一侧开一个24宽×10高的矩形接口孔，中心X=0、Z=17，沿Y贯穿壁厚；背面Y=+40侧开8条竖向散热通槽，每条3宽×16高，槽中心X由-28到28等距排列，中心Z=21。无盖板、无圆角、无螺纹。所有设计尺寸参数化。检查有效实体、外形尺寸，以实际工具数据报告，不要声称制造或强度已验证。",
+    "projectId": "3dd95af2-0265-46ff-a801-fec09da8545a",
+    "revisionId": "1794499584602-90772a2f",
+    "geometry": {
+      "size": [
+        120,
+        80,
+        36
+      ],
+      "volume": 79994.8378,
+      "area": 48644.4173,
+      "solids": 1,
+      "faces": 75,
+      "cylindricalSurfaces": [
+        {
+          "diameter": 10,
+          "center": [
+            48.659,
+            29,
+            14.4286
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 10,
+          "center": [
+            48.659,
+            -29,
+            14.4286
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 10,
+          "center": [
+            -48.659,
+            -29,
+            14.4286
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 10,
+          "center": [
+            -48.659,
+            29,
+            14.4286
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 3.2,
+          "center": [
+            49,
+            29,
+            15
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 3.2,
+          "center": [
+            49,
+            -29,
+            15
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 3.2,
+          "center": [
+            -49,
+            -29,
+            15
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 3.2,
+          "center": [
+            -49,
+            29,
+            15
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        }
+      ],
+      "valid": true,
+      "units": "mm"
+    },
+    "parameters": {
+      "outer_length": 120,
+      "outer_width": 80,
+      "outer_height": 36,
+      "wall_thickness": 3,
+      "bottom_thickness": 4,
+      "post_x_offset": 49,
+      "post_y_offset": 29,
+      "post_outer_dia": 10,
+      "post_top_z": 24,
+      "post_hole_dia": 3.2,
+      "post_hole_bottom_z": 6,
+      "rib_width": 5,
+      "rib_top_z": 12,
+      "port_width": 24,
+      "port_height": 10,
+      "port_center_z": 17,
+      "slot_count": 8,
+      "slot_width": 3,
+      "slot_height": 16,
+      "slot_center_z": 21,
+      "slot_span": 56
+    },
+    "seconds": 43,
+    "status": "built"
+  },
+  {
+    "key": "keyed-flange",
+    "name": "键槽法兰轴套",
+    "prompt": "请直接生成一个复杂一些的单体机械零件，名称“键槽法兰轴套”。轴线为Z。底部圆法兰直径100、厚10，底面Z=0；法兰上方同轴轴套外径46、高35，范围Z=10..45；轴套顶部再加外径38、高8的台阶，Z=45..53。中心直径22轴孔贯穿全部53高度；在中心轴孔+X方向开6宽键槽，槽宽方向Y=-3..3，X从0延伸至14，贯穿全部高度；即键槽底距轴线14。法兰上6个均布直径7通孔，分布圆直径76，第一个沿+X。法兰顶面Z=10加工一个宽3、深1的同心环槽，环槽内径58、外径64，不能切穿。不要倒角、圆角、螺纹。所有尺寸、孔数量和分布圆直径参数化。检查只有一个有效实体，外形Z尺寸53，按实际测量报告。",
+    "projectId": "10258d77-2d9f-4e04-bcae-faafca9bd1c4",
+    "revisionId": "1794499626785-343468ac",
+    "geometry": {
+      "size": [
+        100,
+        100,
+        53
+      ],
+      "volume": 121750.4474,
+      "area": 29326.791,
+      "solids": 1,
+      "faces": 21,
+      "cylindricalSurfaces": [
+        {
+          "diameter": 100,
+          "center": [
+            0,
+            0,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -19,
+            -32.909,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            19,
+            -32.909,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 22,
+          "center": [
+            -1.047,
+            0,
+            26.5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            38,
+            0,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -38,
+            0,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            -19,
+            32.909,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 7,
+          "center": [
+            19,
+            32.909,
+            5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 64,
+          "center": [
+            0,
+            0,
+            9.5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 38,
+          "center": [
+            0,
+            0,
+            49
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 58,
+          "center": [
+            0,
+            0,
+            9.5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        },
+        {
+          "diameter": 46,
+          "center": [
+            0,
+            0,
+            27.5
+          ],
+          "axis": [
+            0,
+            0,
+            -1
+          ]
+        }
+      ],
+      "valid": true,
+      "units": "mm"
+    },
+    "parameters": {
+      "flange_diameter": 100,
+      "flange_thickness": 10,
+      "sleeve_outer_diameter": 46,
+      "sleeve_height": 35,
+      "step_outer_diameter": 38,
+      "step_height": 8,
+      "bore_diameter": 22,
+      "keyway_width": 6,
+      "keyway_bottom_distance": 14,
+      "hole_count": 6,
+      "hole_diameter": 7,
+      "bolt_circle_diameter": 76,
+      "groove_inner_diameter": 58,
+      "groove_outer_diameter": 64,
+      "groove_depth": 1
+    },
+    "seconds": 43,
+    "status": "built"
+  }
+]

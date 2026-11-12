@@ -1,0 +1,17 @@
+{
+  "flange_diameter": 100,
+  "flange_thickness": 10,
+  "sleeve_outer_diameter": 46,
+  "sleeve_height": 35,
+  "step_outer_diameter": 38,
+  "step_height": 8,
+  "bore_diameter": 22,
+  "keyway_width": 6,
+  "keyway_bottom_distance": 14,
+  "hole_count": 6,
+  "hole_diameter": 7,
+  "bolt_circle_diameter": 76,
+  "groove_inner_diameter": 58,
+  "groove_outer_diameter": 64,
+  "groove_depth": 1
+}

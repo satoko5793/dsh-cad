@@ -1,0 +1,90 @@
+{
+  "features": [
+    {
+      "id": "a447161cd125",
+      "name": "Sketch 1",
+      "params": {
+        "loops": [
+          [
+            {
+              "type": "line",
+              "x1": -40.0,
+              "x2": 40.0,
+              "y1": -20.0,
+              "y2": -20.0
+            },
+            {
+              "type": "line",
+              "x1": 40.0,
+              "x2": 40.0,
+              "y1": -20.0,
+              "y2": 20.0
+            },
+            {
+              "type": "line",
+              "x1": 40.0,
+              "x2": -40.0,
+              "y1": 20.0,
+              "y2": 20.0
+            },
+            {
+              "type": "line",
+              "x1": -40.0,
+              "x2": -40.0,
+              "y1": 20.0,
+              "y2": -20.0
+            }
+          ],
+          [
+            {
+              "cx": -32.0,
+              "cy": -12.0,
+              "r": 4.0,
+              "type": "circle"
+            }
+          ],
+          [
+            {
+              "cx": 32.0,
+              "cy": -12.0,
+              "r": 4.0,
+              "type": "circle"
+            }
+          ],
+          [
+            {
+              "cx": -32.0,
+              "cy": 12.0,
+              "r": 4.0,
+              "type": "circle"
+            }
+          ],
+          [
+            {
+              "cx": 32.0,
+              "cy": 12.0,
+              "r": 4.0,
+              "type": "circle"
+            }
+          ]
+        ],
+        "plane": "XY"
+      },
+      "suppressed": false,
+      "type": "sketch"
+    },
+    {
+      "id": "0f1238d67d8f",
+      "name": "Extrude 1",
+      "params": {
+        "direction": "normal",
+        "distance": 8.0,
+        "operation": "new",
+        "sketch": "a447161cd125"
+      },
+      "suppressed": false,
+      "type": "extrude"
+    }
+  ],
+  "ok": true
+}

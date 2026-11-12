@@ -1,0 +1,21 @@
+{
+  "base_width": 100,
+  "base_depth": 70,
+  "base_thickness": 8,
+  "plate_thickness": 8,
+  "plate_height": 70,
+  "motor_hole_diameter": 32,
+  "motor_hole_center_z": 45,
+  "mount_hole_diameter": 5,
+  "mount_hole_offset_x": 23,
+  "mount_hole_offset_z": 23,
+  "slot_length": 18,
+  "slot_width": 7,
+  "slot_offset_x": 36,
+  "slot_offset_y": 12,
+  "rib_thickness": 6,
+  "rib_offset_x": 43,
+  "rib_start_y": -25,
+  "rib_top_z": 65,
+  "fuse_overlap": 2
+}

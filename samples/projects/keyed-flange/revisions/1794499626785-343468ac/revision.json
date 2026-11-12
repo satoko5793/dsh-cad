@@ -1,0 +1,284 @@
+{
+  "id": "1794499626785-343468ac",
+  "title": "键槽法兰轴套",
+  "parameters": {
+    "flange_diameter": 100,
+    "flange_thickness": 10,
+    "sleeve_outer_diameter": 46,
+    "sleeve_height": 35,
+    "step_outer_diameter": 38,
+    "step_height": 8,
+    "bore_diameter": 22,
+    "keyway_width": 6,
+    "keyway_bottom_distance": 14,
+    "hole_count": 6,
+    "hole_diameter": 7,
+    "bolt_circle_diameter": 76,
+    "groove_inner_diameter": 58,
+    "groove_outer_diameter": 64,
+    "groove_depth": 1
+  },
+  "parameterSpec": {
+    "flange_diameter": {
+      "label": "法兰直径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "flange_thickness": {
+      "label": "法兰厚度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "sleeve_outer_diameter": {
+      "label": "轴套外径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "sleeve_height": {
+      "label": "轴套高度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "step_outer_diameter": {
+      "label": "顶部台阶外径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "step_height": {
+      "label": "顶部台阶高度",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "bore_diameter": {
+      "label": "中心轴孔直径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "keyway_width": {
+      "label": "键槽宽度",
+      "unit": "mm",
+      "step": 0.5,
+      "positive": true
+    },
+    "keyway_bottom_distance": {
+      "label": "键槽底距轴线",
+      "unit": "mm",
+      "step": 0.5
+    },
+    "hole_count": {
+      "label": "法兰孔数量",
+      "unit": "个",
+      "step": 1,
+      "integer": true
+    },
+    "hole_diameter": {
+      "label": "法兰孔直径",
+      "unit": "mm",
+      "step": 0.5,
+      "positive": true
+    },
+    "bolt_circle_diameter": {
+      "label": "法兰孔分布圆直径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "groove_inner_diameter": {
+      "label": "环槽内径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "groove_outer_diameter": {
+      "label": "环槽外径",
+      "unit": "mm",
+      "step": 1,
+      "positive": true
+    },
+    "groove_depth": {
+      "label": "环槽深度",
+      "unit": "mm",
+      "step": 0.5,
+      "positive": true
+    }
+  },
+  "geometry": {
+    "size": [
+      100,
+      100,
+      53
+    ],
+    "volume": 121750.4474,
+    "area": 29326.791,
+    "solids": 1,
+    "faces": 21,
+    "cylindricalSurfaces": [
+      {
+        "diameter": 100,
+        "center": [
+          0,
+          0,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -19,
+          -32.909,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          19,
+          -32.909,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 22,
+        "center": [
+          -1.047,
+          0,
+          26.5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          38,
+          0,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -38,
+          0,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          -19,
+          32.909,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 7,
+        "center": [
+          19,
+          32.909,
+          5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 64,
+        "center": [
+          0,
+          0,
+          9.5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 38,
+        "center": [
+          0,
+          0,
+          49
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 58,
+        "center": [
+          0,
+          0,
+          9.5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      },
+      {
+        "diameter": 46,
+        "center": [
+          0,
+          0,
+          27.5
+        ],
+        "axis": [
+          0,
+          0,
+          -1
+        ]
+      }
+    ],
+    "valid": true,
+    "units": "mm"
+  },
+  "createdAt": "2026-11-12T16:07:09.110Z"
+}

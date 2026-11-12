@@ -1,0 +1,286 @@
+{
+  "id": "3dd95af2-0265-46ff-a801-fec09da8545a",
+  "title": "带柱散热外壳",
+  "createdAt": "2026-11-12T16:05:47.944Z",
+  "updatedAt": "2026-11-12T16:06:26.646Z",
+  "messages": [
+    {
+      "role": "user",
+      "text": "请直接生成一个复杂一些的单体机械零件，名称“带柱散热外壳”。开口朝上的电子外壳，外形120×80×36mm，底面Z=0，外侧X=±60、Y=±40；壁厚3，底厚4，内部完全挖空至Z=4。外壳内四角各一个螺钉安装柱，柱中心(X,Y)=(±49,±29)，外径10，从Z=4延伸到Z=24；柱中心孔直径3.2，盲孔从Z=24到底Z=6，不穿底。每个安装柱用一个宽5的水平连接肋连到最近的X侧壁，肋从Z=4到Z=12，使柱、底板、肋与壳体融为单实体。正面Y=-40一侧开一个24宽×10高的矩形接口孔，中心X=0、Z=17，沿Y贯穿壁厚；背面Y=+40侧开8条竖向散热通槽，每条3宽×16高，槽中心X由-28到28等距排列，中心Z=21。无盖板、无圆角、无螺纹。所有设计尺寸参数化。检查有效实体、外形尺寸，以实际工具数据报告，不要声称制造或强度已验证。",
+      "createdAt": "2026-11-12T16:05:47.952Z"
+    },
+    {
+      "role": "assistant",
+      "text": "已生成 **带柱散热外壳**（单一有效实体），按你给的尺寸建模。\n\n**关键尺寸（取自工具测量）**\n- 外形包围盒 120 × 80 × 36 mm，底面 Z=0，外侧 X=±60、Y=±40\n- 壁厚 3、底厚 4，内腔自 Z=4 完全挖通至顶部开口（无盖板）\n- 4 个安装柱：外径 10（圆柱面实测 Ø10），中心 (±49, ±29)，柱顶 Z=24\n- 柱中心盲孔 Ø3.2（实测 Ø3.2），自 Z=24 向下至 Z=6，孔底留有 2 mm 材料，未穿底\n- 4 条连接肋：宽 5，Z=4→12，由各柱水平接到最近的 X 侧壁\n- 正面 Y=−40：24 宽 × 10 高矩形接口孔，中心 X=0、Z=17，贯穿壁厚\n- 背面 Y=+40：8 条竖向通槽，每条 3 宽 × 16 高，中心 Z=21，槽心 X 由 −28 到 28 等距（间距 8）\n- 体积 79994.8 mm³，表面积 48644.4 mm²，实体数 1，几何有效性检查通过\n\n**采用的建模处理（不影响外观尺寸）**\n- 柱与肋在底板内部向下多延伸 2 mm 作为布尔融合重叠量，保证柱—肋—底板—壳体融为单实体，外部轮廓仍为 Z=4 起\n- 接口孔与散热槽的切割体向内外各留 2 mm 穿透余量，确保真正贯穿 3 mm 壁厚\n- 无圆角、无螺纹、无盖板；槽位按 8 条等距由参数 `slot_count` / `slot_span` 计算\n\n以上仅为几何建模结果，未做强度、散热性能或可制造性验证。需要调整柱位、肋高、槽数或开口位置，告诉我参数即可。",
+      "createdAt": "2026-11-12T16:06:31.123Z"
+    }
+  ],
+  "revisions": [
+    {
+      "id": "1794499584602-90772a2f",
+      "title": "带柱散热外壳",
+      "parameters": {
+        "outer_length": 120,
+        "outer_width": 80,
+        "outer_height": 36,
+        "wall_thickness": 3,
+        "bottom_thickness": 4,
+        "post_x_offset": 49,
+        "post_y_offset": 29,
+        "post_outer_dia": 10,
+        "post_top_z": 24,
+        "post_hole_dia": 3.2,
+        "post_hole_bottom_z": 6,
+        "rib_width": 5,
+        "rib_top_z": 12,
+        "port_width": 24,
+        "port_height": 10,
+        "port_center_z": 17,
+        "slot_count": 8,
+        "slot_width": 3,
+        "slot_height": 16,
+        "slot_center_z": 21,
+        "slot_span": 56
+      },
+      "parameterSpec": {
+        "outer_length": {
+          "label": "外形长度(X)",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "outer_width": {
+          "label": "外形宽度(Y)",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "outer_height": {
+          "label": "外形高度(Z)",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "wall_thickness": {
+          "label": "侧壁厚度",
+          "unit": "mm",
+          "step": 0.5,
+          "positive": true
+        },
+        "bottom_thickness": {
+          "label": "底厚",
+          "unit": "mm",
+          "step": 0.5,
+          "positive": true
+        },
+        "post_x_offset": {
+          "label": "安装柱X偏距",
+          "unit": "mm",
+          "step": 1
+        },
+        "post_y_offset": {
+          "label": "安装柱Y偏距",
+          "unit": "mm",
+          "step": 1
+        },
+        "post_outer_dia": {
+          "label": "安装柱外径",
+          "unit": "mm",
+          "step": 1
+        },
+        "post_top_z": {
+          "label": "安装柱顶面Z",
+          "unit": "mm",
+          "step": 1
+        },
+        "post_hole_dia": {
+          "label": "柱中心孔直径",
+          "unit": "mm",
+          "step": 0.1
+        },
+        "post_hole_bottom_z": {
+          "label": "柱孔底Z",
+          "unit": "mm",
+          "step": 0.5
+        },
+        "rib_width": {
+          "label": "连接肋宽度",
+          "unit": "mm",
+          "step": 0.5,
+          "positive": true
+        },
+        "rib_top_z": {
+          "label": "连接肋顶面Z",
+          "unit": "mm",
+          "step": 1
+        },
+        "port_width": {
+          "label": "接口孔宽度",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "port_height": {
+          "label": "接口孔高度",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "port_center_z": {
+          "label": "接口孔中心Z",
+          "unit": "mm",
+          "step": 1
+        },
+        "slot_count": {
+          "label": "散热槽数量",
+          "unit": "个",
+          "step": 1,
+          "integer": true
+        },
+        "slot_width": {
+          "label": "散热槽宽度",
+          "unit": "mm",
+          "step": 0.5,
+          "positive": true
+        },
+        "slot_height": {
+          "label": "散热槽高度",
+          "unit": "mm",
+          "step": 1,
+          "positive": true
+        },
+        "slot_center_z": {
+          "label": "散热槽中心Z",
+          "unit": "mm",
+          "step": 1
+        },
+        "slot_span": {
+          "label": "散热槽分布跨度",
+          "unit": "mm",
+          "step": 1
+        }
+      },
+      "geometry": {
+        "size": [
+          120,
+          80,
+          36
+        ],
+        "volume": 79994.8378,
+        "area": 48644.4173,
+        "solids": 1,
+        "faces": 75,
+        "cylindricalSurfaces": [
+          {
+            "diameter": 10,
+            "center": [
+              48.659,
+              29,
+              14.4286
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 10,
+            "center": [
+              48.659,
+              -29,
+              14.4286
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 10,
+            "center": [
+              -48.659,
+              -29,
+              14.4286
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 10,
+            "center": [
+              -48.659,
+              29,
+              14.4286
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 3.2,
+            "center": [
+              49,
+              29,
+              15
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 3.2,
+            "center": [
+              49,
+              -29,
+              15
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 3.2,
+            "center": [
+              -49,
+              -29,
+              15
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          },
+          {
+            "diameter": 3.2,
+            "center": [
+              -49,
+              29,
+              15
+            ],
+            "axis": [
+              0,
+              0,
+              -1
+            ]
+          }
+        ],
+        "valid": true,
+        "units": "mm"
+      },
+      "createdAt": "2026-11-12T16:06:26.646Z"
+    }
+  ],
+  "activeRevision": "1794499584602-90772a2f"
+}

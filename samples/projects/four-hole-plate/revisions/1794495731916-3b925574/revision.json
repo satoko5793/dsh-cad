@@ -1,0 +1,25 @@
+{
+  "id": "1794495731916-3b925574",
+  "title": "四孔安装板",
+  "parameters": {
+    "length": 80,
+    "width": 40,
+    "thickness": 5,
+    "hole_diameter": 6,
+    "edge_offset": 8
+  },
+  "geometry": {
+    "size": [
+      80,
+      40,
+      5
+    ],
+    "volume": 15434.5133,
+    "area": 7750.7964,
+    "solids": 1,
+    "faces": 10,
+    "valid": true,
+    "units": "mm"
+  },
+  "createdAt": "2026-11-12T15:02:13.926Z"
+}
