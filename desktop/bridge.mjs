@@ -16,7 +16,7 @@ export class FreeCADBridge {
   }
   async connect(executable) {
     const current=await this.snapshot();
-    if (this.launching || (current.connected&&current.protocol>=2&&current.capabilities?.includes('capture_view'))) throw Error('FreeCAD 已连接或正在启动');
+    if (this.launching || (current.connected&&current.protocol>=2&&current.capabilities?.includes('displayed_view'))) throw Error('FreeCAD 已连接或正在启动');
     await access(executable); this.launching = true;
     try {
       this.directory = path.join(this.dataDir, 'freecad', randomUUID());
@@ -65,7 +65,7 @@ export class FreeCADBridge {
   }
   async capture(view='current') {
     const context=await this.snapshot();
-    if(!context.capabilities?.includes('capture_view'))throw Error('当前 CAD 连接尚无视觉工具，请点击升级连接；原工程保持打开');
+    if(!context.capabilities?.includes('capture_view')||!context.capabilities.includes('displayed_view'))throw Error('当前 CAD 连接需要升级视觉工具，请点击升级连接；原工程保持打开');
     const result=await this.execute({action:'capture_view',view,expected:context.fingerprint});
     const observation=result.observation;
     if(!/^[a-f0-9-]{36}$/.test(observation?.id||''))throw Error('无效的 CAD 截图标识');

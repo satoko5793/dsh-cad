@@ -57,7 +57,7 @@ function render(state){
   if(document.activeElement!==$('draft')&&$('draft').value!==state.draft)$('draft').value=state.draft;
   const c=state.context,doc=c.document,selections=c.selection||[];
   $('sidebar-connection').textContent=c.connected?`已连接 · ${(c.version||[]).join('.')} · ${c.instance?.slice(0,6)||''}`:'尚未连接';
-  const upgrade=c.connected&&(c.protocol!==2||!c.capabilities?.includes('capture_view'));
+  const upgrade=c.connected&&(c.protocol!==2||!c.capabilities?.includes('displayed_view'));
   $('connect').disabled=c.connected&&!upgrade;$('connect').textContent=upgrade?'升级连接':'连接 FreeCAD';$('compact-connect').hidden=c.connected&&!upgrade;$('compact-connect').textContent=upgrade?'升级':'连接';
   $('focus-cad').hidden=!c.connected||upgrade;$('open').disabled=!c.connected||upgrade;
   $('connection-dot').classList.toggle('connected',c.connected);

@@ -66,7 +66,8 @@ async function run(){
     if((await state()).window.small){await call('toggle');await delay(150);}
     await call('capture');await js(`document.getElementById('observation-panel').open=true`);await screenshot('full-review');
     await call('toggle');await delay(150);const p=await probe();assert.equal(p.compact,true);assert.equal(p.overflow,false);assert.ok(p.height>=90,'compact conversation must remain readable');await screenshot('compact-review');
-    check('Production compact layout retains readable chat with the actual CAD preview',{chatHeight:p.height,viewportHeight:p.viewport});
+    assert.equal(await js(`(()=>{const b=document.getElementById('send').getBoundingClientRect();return b.top>=0&&b.bottom<=innerHeight&&!document.querySelector('.task-area').contains(document.getElementById('send'));})()`),true,'send must remain visible with expanded CAD preview');
+    check('Production compact layout retains readable chat and visible composer with actual CAD preview',{chatHeight:p.height,viewportHeight:p.viewport});
     await js(`document.getElementById('settings').click()`);await delay(100);await js(`document.getElementById('settings-dialog').scrollTop=10000`);await delay(100);
     const controls=await js(`(()=>{const d=document.getElementById('settings-dialog').getBoundingClientRect(),c=document.getElementById('settings-close').getBoundingClientRect(),s=document.getElementById('settings-save').getBoundingClientRect();return c.top>=d.top&&c.bottom<=d.bottom&&s.top>=d.top&&s.bottom<=d.bottom;})()`);assert.equal(controls,true);await screenshot('compact-settings');check('Settings close/save stay visible after compact scrolling');
     await js(`document.getElementById('settings-close').click();document.getElementById('observation-panel').open=false`);

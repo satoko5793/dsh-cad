@@ -32,6 +32,7 @@ async function run(){
   await js(`document.querySelector('.reasoning').open=true;document.getElementById('messages').scrollTop=40`);await delay(100);const before=(await probe()).top;
   message.attempts[0].blocks[1].text+='\n继续生成的示例内容。';publish();await delay(150);assert.ok(Math.abs((await probe()).top-before)<4);assert.equal(await js(`document.querySelector('.reasoning').open`),true);
   await js(`document.getElementById('latest').click();document.getElementById('toggle').click()`);await delay(200);assert.ok((await probe()).distance<4);assert.equal((await probe()).draft,state.draft);
+  assert.equal(await js(`(()=>{const b=document.getElementById('send').getBoundingClientRect();return b.top>=0&&b.bottom<=innerHeight&&!document.querySelector('.task-area').contains(document.getElementById('send'));})()`),true,'composer must remain outside the scrolling task panel');
   await js(`document.getElementById('settings').click()`);await delay(100);assert.equal(await js(`document.getElementById('settings-dialog').open`),true);
   await js(`document.getElementById('settings-dialog').scrollTop=10000`);await delay(100);
   assert.equal(await js(`(()=>{const d=document.getElementById('settings-dialog').getBoundingClientRect(),c=document.getElementById('settings-close').getBoundingClientRect(),s=document.getElementById('settings-save').getBoundingClientRect();return c.top>=d.top&&c.bottom<=d.bottom&&s.top>=d.top&&s.bottom<=d.bottom;})()`),true,'compact settings must keep close and save visible after scrolling');

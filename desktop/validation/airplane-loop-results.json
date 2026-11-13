@@ -186,10 +186,10 @@
   ],
   "layout": [
     {
-      "name": "Production compact layout retains readable chat with the actual CAD preview",
+      "name": "Production compact layout retains readable chat and visible composer with actual CAD preview",
       "passed": true,
-      "chatHeight": 135,
-      "viewportHeight": 591
+      "chatHeight": 158,
+      "viewportHeight": 590
     },
     {
       "name": "Settings close/save stay visible after compact scrolling",
@@ -205,5 +205,6 @@
     "A visual symmetry misjudgment was corrected using coordinates; image interpretation alone is not geometry validation.",
     "Renderer integration checks and application render captures do not constitute full OS focus, shortcut or multi-monitor acceptance.",
     "Complete external MCP servers and external skill execution are not integrated."
-  ]
+  ],
+  "layoutRetestedAt": "2026-11-13T06:35:42.662Z"
 }

@@ -8,6 +8,12 @@ import {FollowLatest} from '../ui/scroll.mjs';
 import {defaults,validateConfig,saveConfig,configView,importSkill} from '../agent-config.mjs';
 import {Session} from '../session.mjs';
 import {apply as applyPlugin} from '../plan-plugin.mjs';
+import {FreeCADBridge} from '../bridge.mjs';
+test('old visual bridge requires upgrade before screenshot dispatch',async()=>{
+  const bridge=new FreeCADBridge('unused');let dispatched=0;
+  bridge.snapshot=async()=>({connected:true,protocol:2,capabilities:['capture_view']});bridge.execute=async()=>dispatched++;
+  await assert.rejects(bridge.capture(),/升级/);assert.equal(dispatched,0);
+});
 test('live frames preserve order, deduplicate and exclude abandoned attempts',()=>{
   const m={text:''},start=id=>applyFrame(m,{type:'start',attemptId:id}),chunk=(id,index,c)=>applyFrame(m,{type:'chunk',attemptId:id,index,chunk:c});
   start('a');chunk('a',0,{type:'reasoning-delta',index:0,text:'读取实际几何'});chunk('a',1,{type:'text-delta',index:1,text:'你好'});chunk('a',1,{type:'text-delta',index:1,text:'重复'});assert.equal(m.text,'你好');

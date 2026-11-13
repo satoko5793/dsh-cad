@@ -46,7 +46,7 @@ class Bridge:
         doc = App.ActiveDocument
         selection = [{'document': s.DocumentName, 'object': s.ObjectName,
                       'subelements': list(s.SubElementNames)} for s in Gui.Selection.getSelectionEx()]
-        value = {'protocol': 2, 'capabilities': ['capture_view'], 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
+        value = {'protocol': 2, 'capabilities': ['capture_view', 'displayed_view'], 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
         if doc:
             objects = []
             for obj in doc.Objects:

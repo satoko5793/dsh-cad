@@ -73,7 +73,7 @@ async function start(){
         case 'minimize':window.minimize();break;
         case 'close':window.close();break;
         case 'connect':{
-          const current=await bridge.snapshot();if(current.connected&&current.protocol===2&&current.capabilities?.includes('capture_view'))break;
+          const current=await bridge.snapshot();if(current.connected&&current.protocol===2&&current.capabilities?.includes('displayed_view'))break;
           let executable=process.env.FREECAD_EXE||preferences.freecad;
           if(executable){try{await access(executable);}catch{executable='';}}
           if(!executable){const selected=await dialog.showOpenDialog(window,{title:'选择 FreeCAD.exe',properties:['openFile'],filters:[{name:'FreeCAD',extensions:['exe']}]});if(selected.canceled)break;executable=selected.filePaths[0];}

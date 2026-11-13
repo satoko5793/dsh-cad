@@ -28,7 +28,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`。当前共26个测试通过：桌面20项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；新增流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)及[`agent.test.mjs`](../desktop/test/agent.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`。当前共27个测试通过：桌面21项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；新增流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)及[`agent.test.mjs`](../desktop/test/agent.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -48,7 +48,7 @@
 
 实际改善是更修长的机身、更薄的翼面及更大的主尾翼间距；缺少垂尾、圆滑机头和翼型等结构问题仍未解决，当前参数工具无法补齐。Agent 曾将透视观感误说成不对称，独立坐标镜像检查确认主翼/尾翼平面轮廓对称；第四轮加载补充后的视觉核对说明，模型读取坐标和新截图后明确纠正。不能把首次看图意见当成几何事实。
 
-四轮真实文字版本数为22、11、22、23，reasoning版本数为212、304、280、212（采样观察计数，不是token数/性能指标）。截图工具执行中及返回状态可见；第二轮快速读取/提案在采样时已结束，不声称看到每个工具的瞬时执行态。第一、四轮生成中切换完整/小窗，草稿、renderer输入焦点、历史阅读位置保持；后续自己的应用渲染截图检查确认预览展开后小窗对话仍有135 CSS px，设置滚动后关闭/保存可见，六参数计划可查看/取消。系统级焦点、所有全局快捷键与多屏没有完整验收。
+四轮真实文字版本数为22、11、22、23，reasoning版本数为212、304、280、212（采样观察计数，不是token数/性能指标）。截图工具执行中及返回状态可见；第二轮快速读取/提案在采样时已结束，不声称看到每个工具的瞬时执行态。第一、四轮生成中切换完整/小窗，草稿、renderer输入焦点、历史阅读位置保持；后续自己的应用渲染截图检查确认预览展开后小窗对话仍有158 CSS px，输入框/发送按钮固定可见，设置滚动后关闭/保存可见，六参数计划可查看/取消。系统级焦点、所有全局快捷键与多屏没有完整验收。
 
 复现：设置 FREECAD_EXE、DSH_HOME 和模型路由后运行 `node desktop/test/run-airplane-loop.mjs`。单独的模型对称性复查或布局复查使用 `GOUXING_SYMMETRY_ONLY=1` / `GOUXING_LAYOUT_ONLY=1` 并通过 `GOUXING_REVIEW_DIR` 指向已存在的隔离 airplane-loop 目录；布局复查不请求模型、不执行修改。汇总证据：[`airplane-loop-results.json`](../desktop/validation/airplane-loop-results.json)。
 
