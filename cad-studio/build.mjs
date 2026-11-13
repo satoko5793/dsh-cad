@@ -24,7 +24,7 @@ async function runWorker(dir,source,parameters,signal) {
   await writeFile(path.join(dir,'parameters.json'),JSON.stringify(parameters,null,2));
   const python=process.env.CAD_PYTHON || path.join(ROOT,'.venv','Scripts','python.exe');
   const result=await new Promise((resolve,reject)=>{
-    const child=spawn(python,['-I',path.join(ROOT,'runner.py')],{cwd:dir,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,PYTHONIOENCODING:'utf-8'}});
+    const child=spawn(python,['-I','-X','utf8',path.join(ROOT,'runner.py')],{cwd:dir,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,PYTHONIOENCODING:'utf-8'}});
     let stdout='',stderr='',stopped=false;
     const stop=()=>{stopped=true;child.kill();};
     const timer=setTimeout(stop,90000);
