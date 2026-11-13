@@ -1,6 +1,6 @@
 # 使用指南
 
-产品目标见[产品目标](product.md)，能力边界见[验证记录](validation.md)。当前主要运行环境为 Windows，使用单人本机工作台。
+本文仅用于现有网页与 CadQuery 验证原型，当前主要运行环境为 Windows。目标桌面 Harness、悬浮小窗与专业 CAD 接入尚未提供，交互规格见[桌面 Harness](desktop-harness.md)，能力边界见[验证记录](validation.md)。下文的 `npm start` 启动网页原型，不会连接或修改 SolidWorks、Fusion 工程。
 
 ## 首次安装
 
