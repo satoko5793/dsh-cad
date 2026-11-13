@@ -19,12 +19,7 @@ import lifecycle
 import importlib
 importlib.reload(lifecycle)
 from view_context import get_displayed_3d_view
-
-
-def atomic_json(filename, value):
-    temporary = str(filename) + '.tmp'
-    pathlib.Path(temporary).write_text(json.dumps(value, ensure_ascii=False), encoding='utf-8')
-    os.replace(temporary, str(filename))
+from bridge_io import atomic_json
 
 
 class Bridge:
@@ -35,6 +30,9 @@ class Bridge:
         self.revision = lifecycle.revision()
         self.last_error = None
         self.command_id = None
+        self.pending_publications = {}
+        self.io_warnings = []
+        self.progress_retry_at = 0
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.tick)
         App.addDocumentObserver(self)
@@ -111,8 +109,31 @@ class Bridge:
         return self.schema(doc) in ('gouxing-plate-v1', 'gouxing-design-v2', 'gouxing-native-v1')
 
     def progress(self, current, total, label):
-        atomic_json(self.directory / 'progress.json', {'id': self.command_id, 'active': True,
+        self.write_progress({'id': self.command_id, 'active': True,
                     'current': current, 'total': total, 'label': label, 'heartbeat': time.time()})
+
+    def write_progress(self, value):
+        if value.get('active') and time.monotonic() < self.progress_retry_at:
+            return
+        try:
+            atomic_json(self.directory / 'progress.json', value, retry_delays=(.005, .01, .02))
+            self.progress_retry_at = 0
+        except OSError as error:
+            self.progress_retry_at = time.monotonic() + 1
+            warning = '进度状态暂时无法写入（文件占用或访问受限），不影响CAD事务结果。'
+            if warning not in self.io_warnings:
+                self.io_warnings.append(warning)
+                App.Console.PrintWarning(warning + '\n')
+
+    def publish_pending(self):
+        for request_id, value in list(self.pending_publications.items()):
+            if 'snapshot' not in value:
+                value['snapshot'] = self.snapshot()
+            # Critical publications remain pending on failure. A later timer tick
+            # republishes this result, never executes the consumed CAD command.
+            atomic_json(self.directory / 'snapshot.json', value['snapshot'])
+            atomic_json(self.directory / 'results' / (request_id + '.json'), value)
+            del self.pending_publications[request_id]
 
     def validate(self, doc, diameter):
         shape = doc.getObject('ThroughHoles').Shape
@@ -303,6 +324,7 @@ class Bridge:
             return
         self.processing = True
         try:
+            self.publish_pending()
             for filename in sorted((self.directory / 'inbox').glob('*.json')):
                 command = json.loads(filename.read_text(encoding='utf-8'))
                 result_file = self.directory / 'results' / filename.name
@@ -311,21 +333,21 @@ class Bridge:
                 filename.rename(consumed)
                 if result_file.exists():
                     continue
+                self.command_id = command.get('id')
+                self.io_warnings = []
                 try:
                     if time.time() > command.get('deadline', 0):
                         raise ValueError('请求已过期，未执行')
-                    self.command_id = command.get('id')
                     self.progress(0, 1, '核对工程并准备执行')
                     value = {'ok': True, **self.execute(command)}
                 except Exception as error:
                     value = {'ok': False, 'error': str(error)}
                 finally:
-                    atomic_json(self.directory / 'progress.json', {'id': self.command_id, 'active': False, 'heartbeat': time.time()})
-                value['snapshot'] = self.snapshot()
-                # Publish context before acknowledging, so an immediate next command
-                # cannot read the pre-transaction heartbeat/context from disk.
-                atomic_json(self.directory / 'snapshot.json', value['snapshot'])
-                atomic_json(result_file, value)
+                    self.write_progress({'id': self.command_id, 'active': False, 'heartbeat': time.time()})
+                if self.io_warnings:
+                    value['warnings'] = list(self.io_warnings)
+                self.pending_publications[filename.stem] = value
+                self.publish_pending()
             snapshot = self.snapshot()
             title = 'FreeCAD · ' + ((snapshot.get('document') or {}).get('label', '构形工作区'))
             if Gui.getMainWindow().windowTitle() != title:

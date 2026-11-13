@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-13T09:48:28.530Z",
+  "passed": true,
+  "checks": [
+    "real Windows no-delete-share handles: transient lock recovers; permanent lock is bounded and preserves old JSON",
+    "injected progress failure does not fail execution; snapshot/result publication retries execute only once",
+    "existing FreeCAD process and document/selection/geometry preserved on bridge upgrade",
+    "real readonly document-list request acknowledged through updated progress/snapshot/result publications"
+  ],
+  "note": "No new CAD process, model changes, camera commands or automatic replay of the failed user plan. File-lock injection uses temporary test files, not the user workspace."
+}

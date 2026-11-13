@@ -39,6 +39,8 @@ npm run start:web          # 保留的网页原型
 
 普通测试不调用真实模型、不启动 CAD。`npm run status` 检查的是旧网页原型服务，不是桌面连接健康。
 
+桥接文件占用回归使用 Python 标准库，默认解释器为原型虚拟环境，可用 `CAD_PYTHON` 指定；`desktop/test/bridge-io-check.py` 在独立临时目录复现 Windows 句柄占用及发布失败，不访问用户工程。显式 `node desktop/test/bridge-io-live.mjs` 仅复用已有连接，在原进程升级桥接并只读核对，不启动 CAD、不改变模型或视角。文件占用边界见[连接说明](cad-connection.md)。
+
 修改共享 Harness、Node 选择或 Electron 启动链路时，还需显式运行：
 
 ```powershell

@@ -29,6 +29,7 @@
 - DSH owns credentials; never print/copy them into code, renderer, docs, tests or reports. Preserve the user's DSH web profile; use separate experimental profiles.
 - One CAD and the current related document are the normal workflow. Reuse `desktop/.data/cad-workspace/`; do not create new CAD windows/documents on retries or tests. The connector installs app-owned Mod/GouxingConnect files and uses FreeCAD single-instance mode. Supported upgrades reload in the same CAD process. Initial pre-component CAD may need one save/reopen; ordinary users do not run macros/Python. See `docs/cad-connection.md`.
 - Do not force-close/restart CAD or change the user's camera/model to verify unrelated work. Assistant exit preserves CAD and unsaved work. Existing Electron processes retain loaded modules; do not claim new code is active in the user's window without observing a normal restart.
+- Bridge JSON writes use bounded Windows sharing-error retries. Progress is telemetry and cannot abort CAD work; failed critical publications stay pending and must never replay consumed commands. `bridge-io-check.py` tests temporary file locks without CAD; `bridge-io-live.mjs` only reuses/upgrades an existing idle connection. Preserve the real result and uncertainty handling.
 
 ## Tests and publishing
 

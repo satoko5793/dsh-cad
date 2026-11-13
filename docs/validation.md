@@ -28,7 +28,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`，自动发现两端的普通测试。当前共42个测试通过：桌面36项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新；新增分层导入边界、稳定入口兼容及共享运行时显式路径检查。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)、[`agent.test.mjs`](../desktop/test/agent.test.mjs)及[`layers.test.mjs`](../desktop/test/layers.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`，自动发现两端的普通测试。当前共43个测试通过：桌面37项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新；新增分层导入边界、稳定入口兼容及共享运行时显式路径检查。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)、[`agent.test.mjs`](../desktop/test/agent.test.mjs)及[`layers.test.mjs`](../desktop/test/layers.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -41,6 +41,14 @@
 测试使用独立临时数据目录，不通过真实大模型生成。源码见 [`cad-studio/test/`](../cad-studio/test/)。
 
 ## 桌面与 FreeCAD 常驻桥接实测
+
+### v1.2.3：Windows 文件占用不再中止建模
+
+本机私有记录确认：一批64步计划因progress.json原子替换返回WinError 5而失败。对比执行前后的结果快照，工程对象、相关属性和组件测量完全一致，仅选择状态不同；未留下该批新增对象。目录和目标文件ACL允许当前用户修改，但未捕获当时具体占用进程，不能把错误直接归因于某个读取器或杀毒软件。
+
+新增Python标准库回归4组：使用Windows真实CreateFileW句柄不共享删除，复现短暂占用后的恢复；持续占用时有限退出且保留旧JSON、清理自身临时文件；强制全部进度写入失败仍返回真实执行成功；快照/结果分别失败后分次补发，已消费请求只执行一次。Node普通测试封装这4组检查，不启动CAD。
+
+修复通过受支持的reload_bridge加载到现有FreeCAD 1.1.4进程，核对进程/桥接实例、文档及所有对象/测量/选择保持；实际只读doc.list请求经过新进度/快照/结果链路返回成功。未新建CAD、切换相机、修改模型或重跑用户计划。摘要：[`bridge-io-results.json`](../desktop/validation/bridge-io-results.json)。长期磁盘/权限故障、进程强制退出仍需保留状态待核对，不把内存中的待回传队列当成跨崩溃事务系统。
 
 ### v1.2.2：思考可展开、增量显示与输出上限
 
