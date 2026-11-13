@@ -3,9 +3,10 @@ import { readFile, mkdir, copyFile, access } from 'node:fs/promises';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { FreeCADBridge, ROOT, atomicJson } from './bridge.mjs';
+import { FreeCADBridge, ROOT, atomicJson, bridgeRevision } from './bridge.mjs';
 import { Session, cleanError } from './session.mjs';
 import {configView,saveConfig,importSkill} from './agent-config.mjs';
+import {discoverFreeCAD} from './cad-connector.mjs';
 
 const data=process.env.GOUXING_DATA_DIR||path.join(ROOT,'.data');
 app.setName('构形');app.setPath('userData',path.join(data,'electron'));
@@ -14,7 +15,8 @@ async function start(){
   await app.whenReady();
   const appVersion=JSON.parse(await readFile(path.join(ROOT,'..','package.json'),'utf8')).version;
   await mkdir(data,{recursive:true});
-  const bridge=new FreeCADBridge(data);await bridge.restore();
+  const bridge=new FreeCADBridge(data,{workspace:process.env.GOUXING_CAD_WORKSPACE||path.join(ROOT,'.data','cad-workspace')});await bridge.restore();
+  const localRevision=await bridgeRevision();
   const session=new Session(data,bridge);await session.load();await session.poll();
   let agentConfig=await configView(data);
   let preferences={small:false,pinned:true,full:{width:1120,height:800},compact:{width:390,height:590},freecad:''};
@@ -29,7 +31,7 @@ async function start(){
   window.webContents.on('will-navigate',(event,url)=>{if(url!==entry)event.preventDefault();});
   window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   window.setAlwaysOnTop(preferences.small&&preferences.pinned);
-  const snapshot=()=>({...session.state,agentConfig,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
+  const snapshot=()=>({...session.state,context:{...session.state.context,needsUpgrade:session.state.context.connected&&session.state.context.bridgeRevision!==localRevision},agentConfig,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
   const broadcast=()=>{if(!window.isDestroyed())window.webContents.send('harness:state',snapshot());};
   const persistPreferences=()=>atomicJson(path.join(data,'window.json'),preferences).catch(error=>{session.state.status=`窗口设置保存失败：${cleanError(error)}`;broadcast();});
   session.on('change',broadcast);session.on('storageError',error=>{session.state.status=`会话保存失败：${cleanError(error)}`;broadcast();});
@@ -73,13 +75,14 @@ async function start(){
         case 'minimize':window.minimize();break;
         case 'close':window.close();break;
         case 'connect':{
-          const current=await bridge.snapshot();if(current.connected&&current.protocol===2&&current.capabilities?.includes('displayed_view'))break;
-          let executable=process.env.FREECAD_EXE||preferences.freecad;
+          const current=await bridge.snapshot();if(current.connected&&current.bridgeRevision===localRevision)break;
+          let executable=process.env.FREECAD_EXE||preferences.freecad||await discoverFreeCAD();
           if(executable){try{await access(executable);}catch{executable='';}}
           if(!executable){const selected=await dialog.showOpenDialog(window,{title:'选择 FreeCAD.exe',properties:['openFile'],filters:[{name:'FreeCAD',extensions:['exe']}]});if(selected.canceled)break;executable=selected.filePaths[0];}
           if(path.basename(executable).toLowerCase()!=='freecad.exe')throw Error('请选择 FreeCAD.exe');
-          session.state.status='正在启动专用 FreeCAD 实例…';session.publish(false);
-          await bridge.connect(executable);preferences.freecad=executable;await persistPreferences();
+          preferences.freecad=executable;await persistPreferences();
+          session.state.status='正在准备 FreeCAD 连接…';session.publish(false);
+          await bridge.connect(executable);
           session.state.status='FreeCAD 已连接 · 可创建多零件设计';await session.poll();session.publish();break;
         }
         case 'save':{

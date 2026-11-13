@@ -1,0 +1,439 @@
+{
+  "date": "2026-11-13T07:52:56.655Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "Agent chooses native curved modeling and prepares explicit reviewed API steps",
+      "passed": true,
+      "steps": 37,
+      "methods": [
+        "doc.create",
+        "sketch.create",
+        "sketch.add_circle",
+        "part.loft",
+        "sketch.add_polyline",
+        "part.mirror",
+        "part.extrude"
+      ]
+    },
+    {
+      "name": "Live compact/full switch preserves draft, renderer focus and reading position",
+      "passed": true
+    },
+    {
+      "name": "Confirmed native model contains valid curved fuselage and multiple independent components",
+      "passed": true
+    },
+    {
+      "name": "Agent modifies existing native wing features and preserves other geometry",
+      "passed": true,
+      "changed": [
+        "Wing_R",
+        "Wing_L"
+      ]
+    },
+    {
+      "name": "Agent inspects actual updated CAD images and reports remaining issues",
+      "passed": true
+    },
+    {
+      "name": "Production stream, tool cards and compact composer stay visible",
+      "passed": true,
+      "cards": 13
+    },
+    {
+      "name": "Native API catalog and its tool group appear in actual settings",
+      "passed": true
+    }
+  ],
+  "turns": [
+    {
+      "request": "做一架像样一点的小飞机，机身圆滑、机翼渐缩，有水平尾翼和垂直尾翼，机长约150毫米。先准备一个可修改的原生模型计划。",
+      "textVersions": 8,
+      "reasoningVersions": 614,
+      "toolRunning": true,
+      "toolReturned": true,
+      "externalFocusObserved": true,
+      "compactDraftFocusAndHistory": true,
+      "phase": "ready",
+      "tools": [
+        {
+          "name": "freecad_inspect",
+          "state": "done"
+        },
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_native_plan",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "request": "把左右主翼的翼尖分别向外移动10毫米，加大翼展，机身和尾翼保持不变。先读取当前特征，直接修改这个工程。",
+      "textVersions": 5,
+      "reasoningVersions": 82,
+      "toolRunning": true,
+      "toolReturned": true,
+      "phase": "ready",
+      "tools": [
+        {
+          "name": "obj_get",
+          "state": "done"
+        },
+        {
+          "name": "obj_get",
+          "state": "done"
+        },
+        {
+          "name": "freecad_native_plan",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "request": "现在看看真实模型的等轴测和俯视图，检查它像不像飞机，翼展修改得对不对；结合几何数据说明还存在哪些外观问题，先别修改。",
+      "textVersions": 29,
+      "reasoningVersions": 349,
+      "toolRunning": true,
+      "toolReturned": true,
+      "phase": "idle",
+      "tools": [
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        }
+      ]
+    }
+  ],
+  "creationMethods": [
+    "doc.create",
+    "sketch.create",
+    "sketch.add_circle",
+    "part.loft",
+    "sketch.add_polyline",
+    "part.mirror",
+    "part.extrude"
+  ],
+  "creationSteps": 37,
+  "before": [
+    {
+      "id": "Fuselage",
+      "object": "Fuselage",
+      "name": "Fuselage",
+      "valid": true,
+      "solids": 1,
+      "volume": 44276.098521185304,
+      "dimensions": [
+        149.4000002000001,
+        23.08228703181364,
+        23.082286997534354
+      ],
+      "bounds": [
+        0.5999998999999996,
+        -11.541143515875165,
+        -11.541143498767168,
+        150.0000001000001,
+        11.541143515938474,
+        11.541143498767184
+      ]
+    },
+    {
+      "id": "Wing_R",
+      "object": "Wing_R",
+      "name": "Wing_R",
+      "valid": true,
+      "solids": 1,
+      "volume": 6433.350000000002,
+      "dimensions": [
+        47.0000002,
+        66.00000019999999,
+        8.900000200000003
+      ],
+      "bounds": [
+        34.999999900000006,
+        7.999999899999999,
+        -2.700000100000001,
+        82.00000010000001,
+        74.0000001,
+        6.200000100000002
+      ]
+    },
+    {
+      "id": "Wing_L",
+      "object": "Wing_L",
+      "name": "Wing_L",
+      "valid": true,
+      "solids": 1,
+      "volume": 6433.350000000002,
+      "dimensions": [
+        47.0000002,
+        66.0000002,
+        8.900000200000003
+      ],
+      "bounds": [
+        34.999999900000006,
+        -74.0000001,
+        -2.700000100000001,
+        82.00000010000001,
+        -7.999999899999998,
+        6.200000100000002
+      ]
+    },
+    {
+      "id": "HTail_R",
+      "object": "HTail_R",
+      "name": "HTail_R",
+      "valid": true,
+      "solids": 1,
+      "volume": 647.4000000000002,
+      "dimensions": [
+        26.000000199999988,
+        36.0000002,
+        4.300000200000001
+      ],
+      "bounds": [
+        123.99999990000003,
+        1.9999998999999997,
+        0.2999998999999999,
+        150.00000010000002,
+        38.0000001,
+        4.600000100000001
+      ]
+    },
+    {
+      "id": "HTail_L",
+      "object": "HTail_L",
+      "name": "HTail_L",
+      "valid": true,
+      "solids": 1,
+      "volume": 647.4000000000002,
+      "dimensions": [
+        26.000000199999988,
+        36.0000002,
+        4.300000200000001
+      ],
+      "bounds": [
+        123.99999990000003,
+        -38.0000001,
+        0.2999998999999999,
+        150.00000010000002,
+        -1.9999998999999995,
+        4.600000100000001
+      ]
+    },
+    {
+      "id": "Fin",
+      "object": "Fin",
+      "name": "Fin",
+      "valid": true,
+      "solids": 1,
+      "volume": 2013.6000000000006,
+      "dimensions": [
+        38,
+        2.4000000000000066,
+        29.000000000000007
+      ],
+      "bounds": [
+        110.00000000000003,
+        -1.2000000000000068,
+        2.0000000000000004,
+        148.00000000000003,
+        1.1999999999999995,
+        31.000000000000007
+      ]
+    }
+  ],
+  "editOperations": [
+    {
+      "method": "obj.set_placement",
+      "args": {
+        "name": "WingTip",
+        "pos": [
+          0,
+          84,
+          0
+        ],
+        "rotation": [
+          1,
+          0,
+          0,
+          90
+        ]
+      }
+    },
+    {
+      "method": "doc.recompute",
+      "args": {}
+    }
+  ],
+  "changed": [
+    "Wing_R",
+    "Wing_L"
+  ],
+  "after": [
+    {
+      "id": "Fuselage",
+      "object": "Fuselage",
+      "name": "Fuselage",
+      "valid": true,
+      "solids": 1,
+      "volume": 44276.098521185304,
+      "dimensions": [
+        149.4000002000001,
+        23.08228703181364,
+        23.082286997534354
+      ],
+      "bounds": [
+        0.5999998999999996,
+        -11.541143515875165,
+        -11.541143498767168,
+        150.0000001000001,
+        11.541143515938474,
+        11.541143498767184
+      ]
+    },
+    {
+      "id": "Wing_R",
+      "object": "Wing_R",
+      "name": "Wing_R",
+      "valid": true,
+      "solids": 1,
+      "volume": 7408.100000000002,
+      "dimensions": [
+        47.0000002,
+        76.00000019999999,
+        8.900000200000003
+      ],
+      "bounds": [
+        34.999999900000006,
+        7.999999899999999,
+        -2.700000100000001,
+        82.00000010000001,
+        84.0000001,
+        6.200000100000002
+      ]
+    },
+    {
+      "id": "Wing_L",
+      "object": "Wing_L",
+      "name": "Wing_L",
+      "valid": true,
+      "solids": 1,
+      "volume": 7408.100000000002,
+      "dimensions": [
+        47.0000002,
+        76.0000002,
+        8.900000200000003
+      ],
+      "bounds": [
+        34.999999900000006,
+        -84.0000001,
+        -2.700000100000001,
+        82.00000010000001,
+        -7.999999899999998,
+        6.200000100000002
+      ]
+    },
+    {
+      "id": "HTail_R",
+      "object": "HTail_R",
+      "name": "HTail_R",
+      "valid": true,
+      "solids": 1,
+      "volume": 647.4000000000002,
+      "dimensions": [
+        26.000000199999988,
+        36.0000002,
+        4.300000200000001
+      ],
+      "bounds": [
+        123.99999990000003,
+        1.9999998999999997,
+        0.2999998999999999,
+        150.00000010000002,
+        38.0000001,
+        4.600000100000001
+      ]
+    },
+    {
+      "id": "HTail_L",
+      "object": "HTail_L",
+      "name": "HTail_L",
+      "valid": true,
+      "solids": 1,
+      "volume": 647.4000000000002,
+      "dimensions": [
+        26.000000199999988,
+        36.0000002,
+        4.300000200000001
+      ],
+      "bounds": [
+        123.99999990000003,
+        -38.0000001,
+        0.2999998999999999,
+        150.00000010000002,
+        -1.9999998999999995,
+        4.600000100000001
+      ]
+    },
+    {
+      "id": "Fin",
+      "object": "Fin",
+      "name": "Fin",
+      "valid": true,
+      "solids": 1,
+      "volume": 2013.6000000000006,
+      "dimensions": [
+        38,
+        2.4000000000000066,
+        29.000000000000007
+      ],
+      "bounds": [
+        110.00000000000003,
+        -1.2000000000000068,
+        2.0000000000000004,
+        148.00000000000003,
+        1.1999999999999995,
+        31.000000000000007
+      ]
+    }
+  ],
+  "finishedAt": "2026-11-13T07:55:50.890Z",
+  "note": "Actual production Electron renderer/IPC, standalone DSH model, native FreeCAD API calls. capturePage is application rendering evidence, not OS focus/shortcut acceptance. No physical manufacturing or aerodynamics validation.",
+  "wingspanBefore": 148.0000002,
+  "wingspanAfter": 168.0000002,
+  "measurementCheck": "Wingspan delta computed from recorded native geometry bounds; 20 mm total. Other recorded component bounds and volumes preserved.",
+  "preservedObjects": [
+    "Fuselage",
+    "HTail_R",
+    "HTail_L",
+    "Fin"
+  ]
+}

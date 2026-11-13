@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-13T06:30:14.209Z",
+  "date": "2026-11-13T07:50:15.688Z",
   "parent": {
     "electron": "45.3.1",
     "node": "24.22.2"
   },
   "child": {
-    "node": "24.22.1",
+    "node": "24.22.3",
     "electron": null
   },
   "legacyProbe": {
@@ -14,7 +14,7 @@
   },
   "checks": [
     {
-      "request": "我想做一个飞机模型",
+      "request": "我想做一个简化飞机模型，使用已有airplane参数配方示例即可。",
       "passed": true
     },
     {

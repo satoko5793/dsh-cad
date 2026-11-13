@@ -42,7 +42,7 @@ async function ask(text,{compact=false}={}){
       await js(`document.getElementById('toggle').click()`);await delay(120);
       await js(`(()=>{const d=document.getElementById('draft');d.focus();d.value='下一步再检查机尾';d.dispatchEvent(new Event('input',{bubbles:true}));})()`);await delay(250);
       const p=await probe();assert.equal(p.compact,true);assert.equal(p.overflow,false);assert.ok(p.height>=40);assert.ok(p.composerBottom<p.viewport);stats.switchedDuringRun=true;stats.draftHeld=p.draft==='下一步再检查机尾';stats.focusHeld=p.focused;switched=true;
-      await js(`(()=>{const d=document.querySelector('.reasoning');if(d)d.open=true;const c=document.getElementById('messages');c.scrollTop=0;})()`);await delay(100);readTop=(await probe()).top;readUntil=Date.now()+1700;didRead=true;
+      await js(`(()=>{const d=document.querySelector('.reasoning');if(d)d.open=true;const c=document.getElementById('messages');c.dispatchEvent(new WheelEvent('wheel',{deltaY:-100}));c.scrollTop=0;})()`);await delay(100);readTop=(await probe()).top;readUntil=Date.now()+1700;didRead=true;
     }
     if(didRead&&Date.now()<readUntil){const p=await probe();assert.ok(Math.abs(p.top-readTop)<6,'stream must preserve history reading position');stats.scrollHeld=true;stats.draftHeld&&=p.draft==='下一步再检查机尾';stats.focusHeld&&=p.focused;}
     if(didRead&&Date.now()>=readUntil&&!expanded){await js(`document.getElementById('latest').click();document.getElementById('toggle').click()`);await delay(150);const p=await probe();assert.equal(p.compact,false);assert.equal(p.draft,'下一步再检查机尾');expanded=true;}

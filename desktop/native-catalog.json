@@ -1,0 +1,2505 @@
+[
+  {
+    "name": "doc_list",
+    "method": "doc.list",
+    "readOnly": true,
+    "description": "List all open FreeCAD documents.",
+    "parameters": {}
+  },
+  {
+    "name": "doc_create",
+    "method": "doc.create",
+    "readOnly": false,
+    "description": "Create a new empty document. `name` is the internal id, `label` is the display name.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII document ID."
+      },
+      "label": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "doc_recompute",
+    "method": "doc.recompute",
+    "readOnly": false,
+    "description": "Recompute the document and return any errors found.",
+    "parameters": {
+      "name": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "expr_set",
+    "method": "expr.set",
+    "readOnly": false,
+    "description": "Bind a property to a FreeCAD expression.\n\nExamples:\n  expr_set(\"Pad\", \"Length\", \"Spreadsheet.wall_thickness * 2\")\n  expr_set(\"Box\", \"Width\", \"Box.Length / 2\")",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "prop": {
+        "type": "string",
+        "required": true
+      },
+      "expression": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "expr_get",
+    "method": "expr.get",
+    "readOnly": true,
+    "description": "Return all expression bindings on an object.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "expr_clear",
+    "method": "expr.clear",
+    "readOnly": false,
+    "description": "Remove the expression binding on a property.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "prop": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_import_step",
+    "method": "io.import_step",
+    "readOnly": false,
+    "description": "Import a STEP file into the active (or named) document.",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_import_iges",
+    "method": "io.import_iges",
+    "readOnly": false,
+    "description": "Import an IGES file into the active (or named) document.",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_export_step",
+    "method": "io.export_step",
+    "readOnly": false,
+    "description": "Export objects to STEP. If `names` is omitted, exports the whole document.",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "names": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_export_iges",
+    "method": "io.export_iges",
+    "readOnly": false,
+    "description": "Export objects to IGES.",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "names": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_export_stl",
+    "method": "io.export_stl",
+    "readOnly": false,
+    "description": "Export objects to STL (mesh). Use for 3D printing pipelines.",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "names": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "io_export_obj",
+    "method": "io.export_obj",
+    "readOnly": false,
+    "description": "Export objects to OBJ (mesh).",
+    "parameters": {
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "names": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_list",
+    "method": "obj.list",
+    "readOnly": true,
+    "description": "List objects in a document (active doc if `doc` omitted). Returns name/label/type only.",
+    "parameters": {
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_get",
+    "method": "obj.get",
+    "readOnly": true,
+    "description": "Return a compact summary of one object (name, label, type, placement, shape validity).",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_get_tree",
+    "method": "obj.get_tree",
+    "readOnly": true,
+    "description": "Return the dependency tree (each object's InList/OutList) for the document.",
+    "parameters": {
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_get_properties",
+    "method": "obj.get_properties",
+    "readOnly": true,
+    "description": "Return all properties of an object as a flat dict. Use sparingly — payload can be large.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_set_property",
+    "method": "obj.set_property",
+    "readOnly": false,
+    "description": "Set a single property on an object and recompute.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "prop": {
+        "type": "string",
+        "required": true
+      },
+      "value": {
+        "type": "json",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_delete",
+    "method": "obj.delete",
+    "readOnly": false,
+    "description": "Delete an object from its document.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_set_placement",
+    "method": "obj.set_placement",
+    "readOnly": false,
+    "description": "Set placement. `pos` is [x,y,z]; `rotation` is [yaw,pitch,roll] degrees or [ax,ay,az,deg].",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "obj_set_label",
+    "method": "obj.set_label",
+    "readOnly": false,
+    "description": "Change an object's display label.",
+    "parameters": {
+      "name": {
+        "type": "string",
+        "required": true
+      },
+      "label": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_box",
+    "method": "part.box",
+    "readOnly": false,
+    "description": "Create a Part::Box. Dimensions in document units (mm by default).",
+    "parameters": {
+      "length": {
+        "type": "number",
+        "default": 10
+      },
+      "width": {
+        "type": "number",
+        "default": 10
+      },
+      "height": {
+        "type": "number",
+        "default": 10
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_cylinder",
+    "method": "part.cylinder",
+    "readOnly": false,
+    "description": "Create a Part::Cylinder. Use `angle` < 360 for a wedge.",
+    "parameters": {
+      "radius": {
+        "type": "number",
+        "default": 5
+      },
+      "height": {
+        "type": "number",
+        "default": 10
+      },
+      "angle": {
+        "type": "number",
+        "default": 360
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_sphere",
+    "method": "part.sphere",
+    "readOnly": false,
+    "description": "Create a Part::Sphere. angle1/angle2 cap latitude; angle3 sweeps longitude.",
+    "parameters": {
+      "radius": {
+        "type": "number",
+        "default": 5
+      },
+      "angle1": {
+        "type": "number",
+        "default": -90
+      },
+      "angle2": {
+        "type": "number",
+        "default": 90
+      },
+      "angle3": {
+        "type": "number",
+        "default": 360
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_cone",
+    "method": "part.cone",
+    "readOnly": false,
+    "description": "Create a Part::Cone (truncated if radius1 != radius2).",
+    "parameters": {
+      "radius1": {
+        "type": "number",
+        "default": 2
+      },
+      "radius2": {
+        "type": "number",
+        "default": 4
+      },
+      "height": {
+        "type": "number",
+        "default": 10
+      },
+      "angle": {
+        "type": "number",
+        "default": 360
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_torus",
+    "method": "part.torus",
+    "readOnly": false,
+    "description": "Create a Part::Torus. radius1 = ring radius; radius2 = tube radius.",
+    "parameters": {
+      "radius1": {
+        "type": "number",
+        "default": 10
+      },
+      "radius2": {
+        "type": "number",
+        "default": 2
+      },
+      "angle1": {
+        "type": "number",
+        "default": -180
+      },
+      "angle2": {
+        "type": "number",
+        "default": 180
+      },
+      "angle3": {
+        "type": "number",
+        "default": 360
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_plane",
+    "method": "part.plane",
+    "readOnly": false,
+    "description": "Create a flat Part::Plane face.",
+    "parameters": {
+      "length": {
+        "type": "number",
+        "default": 10
+      },
+      "width": {
+        "type": "number",
+        "default": 10
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_extrude",
+    "method": "part.extrude",
+    "readOnly": false,
+    "description": "Extrude a 2D profile (sketch/wire/face) along `direction` for `length`.",
+    "parameters": {
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "direction": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "length": {
+        "type": "number",
+        "default": 10
+      },
+      "solid": {
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_revolve",
+    "method": "part.revolve",
+    "readOnly": false,
+    "description": "Revolve a profile around `axis` through `base_point` for `angle` degrees.",
+    "parameters": {
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "axis": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "base_point": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "angle": {
+        "type": "number",
+        "default": 360
+      },
+      "solid": {
+        "type": "boolean",
+        "default": true
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_loft",
+    "method": "part.loft",
+    "readOnly": false,
+    "description": "Loft through a list of section profiles (by name).",
+    "parameters": {
+      "sections": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "solid": {
+        "type": "boolean",
+        "default": true
+      },
+      "ruled": {
+        "type": "boolean",
+        "default": false
+      },
+      "closed": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_sweep",
+    "method": "part.sweep",
+    "readOnly": false,
+    "description": "Sweep a profile along a path.",
+    "parameters": {
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "path": {
+        "type": "string",
+        "required": true
+      },
+      "solid": {
+        "type": "boolean",
+        "default": true
+      },
+      "frenet": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_fuse",
+    "method": "part.fuse",
+    "readOnly": false,
+    "description": "Boolean union: base ∪ tool.",
+    "parameters": {
+      "base": {
+        "type": "string",
+        "required": true
+      },
+      "tool": {
+        "type": "string",
+        "required": true
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_cut",
+    "method": "part.cut",
+    "readOnly": false,
+    "description": "Boolean difference: base − tool.",
+    "parameters": {
+      "base": {
+        "type": "string",
+        "required": true
+      },
+      "tool": {
+        "type": "string",
+        "required": true
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_common",
+    "method": "part.common",
+    "readOnly": false,
+    "description": "Boolean intersection: base ∩ tool.",
+    "parameters": {
+      "base": {
+        "type": "string",
+        "required": true
+      },
+      "tool": {
+        "type": "string",
+        "required": true
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_fillet",
+    "method": "part.fillet",
+    "readOnly": false,
+    "description": "Fillet (round) selected edges of `base`. `edges` are 1-based edge indices.",
+    "parameters": {
+      "base": {
+        "type": "string",
+        "required": true
+      },
+      "edges": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "default": 1.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_chamfer",
+    "method": "part.chamfer",
+    "readOnly": false,
+    "description": "Chamfer selected edges of `base`. `edges` are 1-based edge indices.",
+    "parameters": {
+      "base": {
+        "type": "string",
+        "required": true
+      },
+      "edges": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "required": true
+      },
+      "size": {
+        "type": "number",
+        "default": 1.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_mirror",
+    "method": "part.mirror",
+    "readOnly": false,
+    "description": "Mirror an object across a plane defined by `normal` through `base_point`.",
+    "parameters": {
+      "source": {
+        "type": "string",
+        "required": true
+      },
+      "normal": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "base_point": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_pattern_linear",
+    "method": "part.pattern_linear",
+    "readOnly": false,
+    "description": "Linear array of `source` along `direction` with `count` copies spaced `interval` apart.",
+    "parameters": {
+      "source": {
+        "type": "string",
+        "required": true
+      },
+      "direction": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "count": {
+        "type": "integer",
+        "default": 2
+      },
+      "interval": {
+        "type": "number",
+        "default": 10.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "part_pattern_polar",
+    "method": "part.pattern_polar",
+    "readOnly": false,
+    "description": "Polar array of `source` around `axis` through `center` for total `angle` degrees.",
+    "parameters": {
+      "source": {
+        "type": "string",
+        "required": true
+      },
+      "axis": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "count": {
+        "type": "integer",
+        "default": 4
+      },
+      "angle": {
+        "type": "number",
+        "default": 360.0
+      },
+      "center": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_create_body",
+    "method": "pd.create_body",
+    "readOnly": false,
+    "description": "Create a new PartDesign Body. Features are added to one Body at a time.",
+    "parameters": {
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_pad",
+    "method": "pd.pad",
+    "readOnly": false,
+    "description": "Pad (extrude) a sketch profile inside a Body. `midplane` extrudes symmetrically.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "length": {
+        "type": "number",
+        "default": 10.0
+      },
+      "reversed": {
+        "type": "boolean",
+        "default": false
+      },
+      "midplane": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_pocket",
+    "method": "pd.pocket",
+    "readOnly": false,
+    "description": "Pocket (subtract by extruding) a sketch profile inside a Body.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "length": {
+        "type": "number",
+        "default": 10.0
+      },
+      "reversed": {
+        "type": "boolean",
+        "default": false
+      },
+      "midplane": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_revolution",
+    "method": "pd.revolution",
+    "readOnly": false,
+    "description": "Revolve a profile around an axis to create a solid feature on a Body.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "axis": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "base_point": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "angle": {
+        "type": "number",
+        "default": 360.0
+      },
+      "reversed": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_groove",
+    "method": "pd.groove",
+    "readOnly": false,
+    "description": "Groove (subtractive revolution) a profile around an axis.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "profile": {
+        "type": "string",
+        "required": true
+      },
+      "axis": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "base_point": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "angle": {
+        "type": "number",
+        "default": 360.0
+      },
+      "reversed": {
+        "type": "boolean",
+        "default": false
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_fillet",
+    "method": "pd.fillet",
+    "readOnly": false,
+    "description": "Fillet edges on a Body feature. `edges` are sub-names like ['Edge1', 'Edge3'].",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "base_feature": {
+        "type": "string",
+        "required": true
+      },
+      "edges": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "default": 1.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_chamfer",
+    "method": "pd.chamfer",
+    "readOnly": false,
+    "description": "Chamfer edges on a Body feature. `edges` are sub-names like ['Edge1', 'Edge3'].",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "base_feature": {
+        "type": "string",
+        "required": true
+      },
+      "edges": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "size": {
+        "type": "number",
+        "default": 1.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_pattern_linear",
+    "method": "pd.pattern_linear",
+    "readOnly": false,
+    "description": "Linear pattern of features on a Body.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "originals": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "direction": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "count": {
+        "type": "integer",
+        "default": 2
+      },
+      "length": {
+        "type": "number",
+        "default": 10.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_pattern_polar",
+    "method": "pd.pattern_polar",
+    "readOnly": false,
+    "description": "Polar pattern of features on a Body.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "originals": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "axis": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "count": {
+        "type": "integer",
+        "default": 4
+      },
+      "angle": {
+        "type": "number",
+        "default": 360.0
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "pd_mirrored",
+    "method": "pd.mirrored",
+    "readOnly": false,
+    "description": "Mirror features across a plane (normal + base point) on a Body.",
+    "parameters": {
+      "body": {
+        "type": "string",
+        "required": true
+      },
+      "originals": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "required": true
+      },
+      "normal": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "base_point": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sheet_create",
+    "method": "sheet.create",
+    "readOnly": false,
+    "description": "Create a Spreadsheet object. Pair with sheet_set_cell + sheet_set_alias to expose\ncells as named parameters that expr_set can reference.",
+    "parameters": {
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sheet_set_cell",
+    "method": "sheet.set_cell",
+    "readOnly": false,
+    "description": "Set a cell. `cell` is A1-style ('A1', 'B3'). `value` is a string:\nnumber ('12.5'), formula ('=A1*2'), text ('hello').",
+    "parameters": {
+      "sheet": {
+        "type": "string",
+        "required": true
+      },
+      "cell": {
+        "type": "string",
+        "required": true
+      },
+      "value": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sheet_get_cell",
+    "method": "sheet.get_cell",
+    "readOnly": true,
+    "description": "Get a cell's raw contents and evaluated value.",
+    "parameters": {
+      "sheet": {
+        "type": "string",
+        "required": true
+      },
+      "cell": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sheet_set_alias",
+    "method": "sheet.set_alias",
+    "readOnly": false,
+    "description": "Alias a cell so expressions can reference it as `<SheetLabel>.<alias>`.",
+    "parameters": {
+      "sheet": {
+        "type": "string",
+        "required": true
+      },
+      "cell": {
+        "type": "string",
+        "required": true
+      },
+      "alias": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_create",
+    "method": "sketch.create",
+    "readOnly": false,
+    "description": "Create a sketch on a base plane preset (xy/xz/yz) or attached to an existing face.\n\nFor a face attachment pass `support`=face-owner-name (a generic attachment is created;\nfor fine control use script.execute_python).",
+    "parameters": {
+      "plane": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": "xy"
+      },
+      "support": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "pos": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "rotation": {
+        "oneOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "label": {
+        "type": "string",
+        "required": true,
+        "description": "Unique ASCII object ID; use obj_set_label for human display labels."
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_line",
+    "method": "sketch.add_line",
+    "readOnly": false,
+    "description": "Add a line segment to a sketch. Points are 2D [x, y] in sketch coordinates.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "start": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "end": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "construction": {
+        "type": "boolean",
+        "default": false
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_circle",
+    "method": "sketch.add_circle",
+    "readOnly": false,
+    "description": "Add a circle to a sketch.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "center": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "required": true
+      },
+      "construction": {
+        "type": "boolean",
+        "default": false
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_arc",
+    "method": "sketch.add_arc",
+    "readOnly": false,
+    "description": "Add a circular arc to a sketch. Angles in degrees from +X axis, CCW.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "center": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "radius": {
+        "type": "number",
+        "required": true
+      },
+      "start_angle": {
+        "type": "number",
+        "required": true
+      },
+      "end_angle": {
+        "type": "number",
+        "required": true
+      },
+      "construction": {
+        "type": "boolean",
+        "default": false
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_point",
+    "method": "sketch.add_point",
+    "readOnly": false,
+    "description": "Add an isolated point to a sketch.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "point": {
+        "type": "array",
+        "items": {
+          "type": "number"
+        },
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_polyline",
+    "method": "sketch.add_polyline",
+    "readOnly": false,
+    "description": "Add a chain of connected line segments. Auto-adds Coincident constraints between\nconsecutive endpoints. If `closed`, closes the polyline back to the first point.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "points": {
+        "type": "array",
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "required": true
+      },
+      "closed": {
+        "type": "boolean",
+        "default": false
+      },
+      "construction": {
+        "type": "boolean",
+        "default": false
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_add_constraint",
+    "method": "sketch.add_constraint",
+    "readOnly": false,
+    "description": "Add a constraint to a sketch.\n\n`kind` is one of: Coincident, Horizontal, Vertical, Parallel, Perpendicular,\nTangent, Equal, Symmetric, Block, Distance, DistanceX, DistanceY, Radius,\nDiameter, Angle, PointOnObject.\n\n`refs` flattens (geo_index, point_index) pairs:\n  - For \"the curve itself\", point_index = 0\n  - Endpoints: 1 = start, 2 = end (for line/arc); 3 = center (arc/circle)\n  - Coincident([3, 2, 5, 1]) = end of geo3 coincident with start of geo5\n\n`value` required for dimensional constraints (Distance*, Radius, Diameter, Angle).\nLengths in mm, angles in degrees.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "kind": {
+        "type": "string",
+        "required": true
+      },
+      "refs": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "required": true
+      },
+      "value": {
+        "oneOf": [
+          {
+            "type": "number"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_set_constraint_value",
+    "method": "sketch.set_constraint_value",
+    "readOnly": false,
+    "description": "Change the driving value of an existing dimensional constraint. Lengths in mm,\nangles in degrees.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "constraint_index": {
+        "type": "integer",
+        "required": true
+      },
+      "value": {
+        "type": "number",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_list_geometry",
+    "method": "sketch.list_geometry",
+    "readOnly": true,
+    "description": "List all geometry in a sketch with index, type, and key parameters.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_list_constraints",
+    "method": "sketch.list_constraints",
+    "readOnly": true,
+    "description": "List all constraints in a sketch with index, type, refs, and value (if dimensional).",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_delete_geometry",
+    "method": "sketch.delete_geometry",
+    "readOnly": false,
+    "description": "Delete geometry elements by index.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "indices": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "sketch_delete_constraint",
+    "method": "sketch.delete_constraint",
+    "readOnly": false,
+    "description": "Delete constraints by index.",
+    "parameters": {
+      "sketch": {
+        "type": "string",
+        "required": true
+      },
+      "indices": {
+        "type": "array",
+        "items": {
+          "type": "integer"
+        },
+        "required": true
+      },
+      "doc": {
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "default": null
+      }
+    }
+  },
+  {
+    "name": "view_set_view",
+    "method": "view.set_view",
+    "readOnly": true,
+    "description": "Switch the active 3D view direction. `direction` ∈ iso, top, bottom, front, rear, left, right.",
+    "parameters": {
+      "direction": {
+        "type": "string",
+        "default": "iso"
+      }
+    }
+  },
+  {
+    "name": "view_fit_all",
+    "method": "view.fit_all",
+    "readOnly": true,
+    "description": "Zoom-fit all visible objects in the active 3D view.",
+    "parameters": {}
+  }
+]

@@ -1,8 +1,9 @@
-import { writeFile } from 'node:fs/promises';
+import { writeFile, readFile } from 'node:fs/promises';
 import { defineTool } from '@deepseek-ai/dsh-tools';
 import {admitEncodedImages} from '@deepseek-ai/dsh-attachment';
-import {FreeCADBridge} from './bridge.mjs';
-import {loadConfig,listSkills} from './agent-config.mjs';
+import {FreeCADBridge,atomicJson} from './bridge.mjs';
+import {NATIVE_TOOLS,validateNativeCall,validateNativeOperations} from './native-tools.mjs';
+import {loadConfig,listSkills,readSkillResource} from './agent-config.mjs';
 import {DESIGN_GUIDE} from './design.mjs';
 export const name='freecad-plan-tools';
 export const inject=['tools','attachments','llm'];
@@ -12,11 +13,30 @@ export async function apply(ctx) {
   const config=await loadConfig(directory),skills=(await listSkills(directory)).filter(s=>!config.disabledSkills.includes(s.id));
   const bridge=new FreeCADBridge(directory);await bridge.restore();
   const output={schema:{type:'string'},render:(_args,value)=>[{type:'text',text:value}]};
+  async function appendNative(added,explanation){
+    const context=await bridge.snapshot();let previous;try{previous=JSON.parse(await readFile(process.env.GOUXING_PLAN_PATH,'utf8'));}catch(e){if(e.code!=='ENOENT')throw e;}
+    if(previous&&previous.action!=='native_operations')throw Error('本轮已有配方计划，不能混合原生事务');
+    if(previous?.anchor&&previous.anchor!==context.fingerprint)throw Error('准备计划时工程已变化，请取消后重提');
+    const operations=validateNativeOperations([...(previous?.operations||[]),...added],context);
+    await atomicJson(process.env.GOUXING_PLAN_PATH,{action:'native_operations',anchor:context.fingerprint,operations,explanation:explanation||previous?.explanation});
+    return JSON.stringify({ok:true,planned:true,executed:false,steps:operations.length,message:'已加入待确认计划。新增对象尚未存在于实际CAD中；用户确认整个计划后才执行。'});
+  }
+  ctx.tools.register(defineTool({name:'freecad_native_plan',description:'Prepare one batch of explicit native API calls for user confirmation. Use for long modeling sequences instead of many tool round trips. operationsJson is [{"method":"doc.create","args":{"name":"Aircraft"}},{"method":"part.sphere","args":{"label":"Nose","radius":5}}]. Only supported typed native methods are accepted; no code. Does NOT execute CAD.',parameters:{operationsJson:{type:'string',required:true},explanation:{type:'string',required:true}},output,async execute({operationsJson,explanation}){const operations=JSON.parse(operationsJson);if(!Array.isArray(operations))throw Error('需要接口步骤数组');return appendNative(operations,explanation);}}));
+  for(const tool of NATIVE_TOOLS)ctx.tools.register(defineTool({
+    name:tool.name,description:(tool.readOnly?'Read actual native CAD state immediately. ':'Queue this typed native CAD operation for user confirmation. Does NOT execute until the complete plan is confirmed. Use stable unique ASCII labels for new objects; later queued operations may reference them. ')+tool.description,
+    parameters:tool.parameters,output,
+    async execute(args){
+      const operation=validateNativeCall(tool.method,args),context=await bridge.snapshot();
+      if(!context.connected||!context.capabilities?.includes('native_interfaces'))throw Error('请先升级 FreeCAD 原生接口连接');
+      if(tool.readOnly){const result=await bridge.execute({action:'native_read',operation,expected:context.fingerprint});return JSON.stringify(result.value);}
+      return appendNative([operation]);
+    }
+  }));
   ctx.on('agent/assistant-stream',({agent,frame})=>notify('gouxing.stream',{sessionId:agent.session.id,frame}));
   ctx.on('tools/execute',async(exec,next)=>{notify('gouxing.tool',{sessionId:exec.agent?.session.id,id:exec.callId,name:exec.name,arguments:exec.arguments,state:'running'});return next();});
   ctx.on('tools/result',(exec,result)=>{notify('gouxing.tool',{sessionId:exec.agent?.session.id,id:exec.callId,name:exec.name,state:result.isError?'error':'done',result:result.content.filter(b=>b.type==='text').map(b=>b.text).join('\n').slice(0,14000)});});
   ctx.tools.register(defineTool({name:'freecad_inspect',description:'Read the latest actual CAD document, selection, native components and geometric checks. Does not modify CAD.',parameters:{},output,async execute(){return JSON.stringify(await bridge.snapshot());}}));
-  ctx.tools.register(defineTool({name:'skill_read',description:'Load an enabled skill when relevant. Available: '+JSON.stringify(skills.map(({id,description})=>({id,description}))),parameters:{id:{type:'string',required:true}},output,async execute({id}){const skill=skills.find(s=>s.id===id);if(!skill)throw Error('技能不存在或未启用');return skill.text;}}));
+  ctx.tools.register(defineTool({name:'skill_read',description:'Load an enabled skill and its optional resource when relevant. Available: '+JSON.stringify(skills.map(({id,description})=>({id,description}))),parameters:{id:{type:'string',required:true},resource:{type:'string'}},output,async execute({id,resource}){const skill=skills.find(s=>s.id===id);if(!skill)throw Error('技能不存在或未启用');return readSkillResource(skill,resource);}}));
   ctx.tools.register(defineTool({
     name:'freecad_capture',description:'Observe the actual FreeCAD model viewport. view: current, isometric, front, top, right. Temporarily changes camera then restores it. Returns a real image only for a vision-capable model; combine visible evidence with geometry, do not assume manufacturability.',
     parameters:{view:{type:'string',required:true}},
@@ -47,5 +67,5 @@ export async function apply(ctx) {
       } catch(error){return JSON.stringify({ok:false,error:error.message});}
     }
   }));
-  ctx.on('agent/created',({agent})=>agent.ctx.tools.restrict({allow:config.tools}));
+  ctx.on('agent/created',({agent})=>agent.ctx.tools.restrict({allow:config.tools.flatMap(id=>id==='native_interfaces'?[...NATIVE_TOOLS.map(t=>t.name),'freecad_native_plan']:[id])}));
 }

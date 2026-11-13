@@ -9,6 +9,7 @@ import {defaults,validateConfig,saveConfig,configView,importSkill} from '../agen
 import {Session} from '../session.mjs';
 import {apply as applyPlugin} from '../plan-plugin.mjs';
 import {FreeCADBridge} from '../bridge.mjs';
+import {NATIVE_TOOLS} from '../native-tools.mjs';
 test('old visual bridge requires upgrade before screenshot dispatch',async()=>{
   const bridge=new FreeCADBridge('unused');let dispatched=0;
   bridge.snapshot=async()=>({connected:true,protocol:2,capabilities:['capture_view']});bridge.execute=async()=>dispatched++;
@@ -24,8 +25,10 @@ test('scroll follows after layout, preserves reading position, jumps and handles
   const listeners={},callbacks=[],container={scrollHeight:200,scrollTop:0,clientHeight:200,addEventListener:(e,fn)=>listeners[e]=fn},button={};
   const follow=new FollowLatest(container,button,fn=>callbacks.push(fn)),flush=()=>{for(const cb of callbacks.splice(0))cb();};
   follow.changed();container.scrollHeight=600;flush();assert.equal(container.scrollTop,600);
-  container.scrollTop=100;listeners.scroll();container.scrollHeight=900;follow.changed();flush();assert.equal(container.scrollTop,100);assert.equal(button.hidden,false);
+  container.scrollTop=100;listeners.wheel({deltaY:-100});listeners.scroll();container.scrollHeight=900;follow.changed();flush();assert.equal(container.scrollTop,100);assert.equal(button.hidden,false);
   button.onclick();flush();assert.equal(container.scrollTop,900);container.clientHeight=100;follow.changed();flush();assert.equal(button.hidden,true);
+  container.scrollHeight=1200;listeners.scroll();assert.equal(follow.follow,true,'late layout scroll must not disable following');follow.changed();flush();assert.equal(container.scrollTop,1200);
+  listeners.wheel({deltaY:100});assert.equal(follow.follow,true,'scrolling down at latest must retain following');listeners.keydown({key:'ArrowDown'});assert.equal(follow.follow,true);
 });
 test('configuration persists exact allowed tools and imports bounded skill descriptions',async t=>{
   const dir=await mkdtemp(path.join(os.tmpdir(),'gouxing-config-'));t.after(()=>rm(dir,{recursive:true,force:true}));
@@ -39,7 +42,7 @@ test('plugin applies the configured allowlist and only loads enabled skills',asy
   const original=process.env.GOUXING_DATA_DIR;process.env.GOUXING_DATA_DIR=dir;t.after(()=>{if(original===undefined)delete process.env.GOUXING_DATA_DIR;else process.env.GOUXING_DATA_DIR=original;});
   const tools=new Map(),events=new Map();await applyPlugin({tools:{register:tool=>tools.set(tool.name,tool)},on:(name,callback)=>events.set(name,callback)});
   let restriction;events.get('agent/created')({agent:{ctx:{tools:{restrict:value=>restriction=value}}}});
-  assert.deepEqual(restriction.allow,['freecad_inspect','skill_read']);assert.equal(tools.size,4);
+  assert.deepEqual(restriction.allow,['freecad_inspect','skill_read']);assert.equal(tools.size,5+NATIVE_TOOLS.length);
   assert.doesNotMatch(tools.get('skill_read').description,/visual-review/);
   await assert.rejects(tools.get('skill_read').execute({id:'visual-review'},{}),/未启用/);
   assert.match(await tools.get('skill_read').execute({id:'native-modeling'},{}),/freecad_propose/);

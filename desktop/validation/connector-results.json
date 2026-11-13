@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-13T08:19:46.127Z",
+  "passed": true,
+  "checks": [
+    "startup component installed automatically through FreeCADCmd reported user directory",
+    "FreeCAD startup loaded component without user macro/Python actions",
+    "reconnect and second session preserve one process"
+  ],
+  "note": "Real installed FreeCAD 1.1.4 user startup addon; application-owned files only. Existing normal GUI preferences retained."
+}

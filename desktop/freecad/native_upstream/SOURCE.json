@@ -1,0 +1,66 @@
+{
+  "repository": "https://github.com/seansackowitz/mcp-freecad",
+  "commit": "685341437f26f2a62e0122cdb893d09ae30b5034",
+  "license": "MIT",
+  "files": [
+    {
+      "file": "_common.py",
+      "upstreamSha256": "de1558bc0f582a4fffd27330a1344520a17fc7f2e04806ff70a374a4f42ecda3"
+    },
+    {
+      "file": "document.py",
+      "upstreamSha256": "6b5c29e3d5cb0aa2d3ed5173e18ed0cb58ac580f136ddbfc0756911d202aaef8"
+    },
+    {
+      "file": "expr.py",
+      "upstreamSha256": "625485054113234ae2df1f05ad41e66dd48fb213eb6d52c41d8e8a6a2b3fa392"
+    },
+    {
+      "file": "io.py",
+      "upstreamSha256": "7a653ed1d133f6417514dd35e37e313955a9acfad9abbdc8f23f55ad12f00988"
+    },
+    {
+      "file": "obj.py",
+      "upstreamSha256": "0d09c3e2f24f8321cf8177130a9a453a63a9bbf94818acae31eddad251b67aa6"
+    },
+    {
+      "file": "part.py",
+      "upstreamSha256": "ae69e28bcfaff46798ade38bea3d673df93cc591a7a9145bd8c29eb63c058f81"
+    },
+    {
+      "file": "partdesign.py",
+      "upstreamSha256": "d75afccb9d5a6e7328e6f2e05b62c67416f335ee87d714342fee7b91fb6598bf"
+    },
+    {
+      "file": "sheet.py",
+      "upstreamSha256": "c54731bf1f731fc70e62540992de7d405cfbfd4fed5be342f7180fc13aac7561"
+    },
+    {
+      "file": "sketch.py",
+      "upstreamSha256": "33b7515d2036625bdccf5d7fffe52aaada56ba41493badfc34773b21927d51a0"
+    },
+    {
+      "file": "view.py",
+      "upstreamSha256": "e909e9f351799c2852f1d8fd5bcee3d0ed5964c0c446d90bce585c281f4de2c4"
+    }
+  ],
+  "patches": [
+    "package-relative imports; no RPC server or script executor",
+    "scope get_doc to the reviewed document during writes; unambiguous label fallback",
+    "correct XZ/YZ sketch plane rotations for FreeCAD axis-angle convention",
+    "PartDesign profiles join target Body; revolutions use datum/origin ReferenceAxis",
+    "Draft polar array uses angle for FreeCAD 1.1.4",
+    "view operations target the displayed 3D tab",
+    "IGES import uses Part.insert as registered by FreeCAD Mod/Part/Init.py; default export includes visible geometry only",
+    "object summaries include real shape validity and visibility; get_properties includes bounded view metadata; set_property permits a limited ViewObject style allowlist",
+    "catalog requires stable names for planned objects; geometry/transaction validation in native_api.py; mirror retains source visibility"
+  ],
+  "excluded": [
+    "doc.close",
+    "doc.open",
+    "doc.save",
+    "doc.set_active",
+    "script.execute_python",
+    "view.screenshot"
+  ]
+}

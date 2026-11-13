@@ -16,6 +16,7 @@ test('only supported precise offline commands bypass model; dimensions are never
   assert.equal(localIntent('做一个四孔安装板').action,'create_plate');
   assert.equal(localIntent('孔径改成8毫米，其他不变').diameter,8);
   assert.equal(localIntent('做一个100毫米长的安装板'),null);
+  assert.equal(localIntent('做一个飞机'),null);assert.equal(localIntent('做一个小飞机'),null);assert.equal(localIntent('生成一个简化飞机').example,'airplane');
   assert.equal(localIntent('这个孔改成-8毫米'),null);
 });
 test('reject ambiguous selections, foreign documents, unsupported shapes and invalid diameters',()=>{

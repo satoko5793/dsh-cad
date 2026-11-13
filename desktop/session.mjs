@@ -8,6 +8,7 @@ import {validateDesign,changeParameters} from './design.mjs';
 import {instantiateExample} from './examples.mjs';
 import {applyFrame,settleTools} from './stream.mjs';
 import {configView} from './agent-config.mjs';
+import {validateNativeOperations} from './native-tools.mjs';
 
 export const cleanError=error=>String(error.message||error).replace(/sk-[\w-]+/g,'[redacted]').slice(0,1200);
 export function modelErrorMessage(error) {
@@ -17,6 +18,11 @@ export function modelErrorMessage(error) {
 }
 export function validateProposal(raw, snapshot) {
   if(!snapshot.connected)throw Error('请先连接 FreeCAD，再准备操作');
+  if(raw.action==='native_operations'){
+    const operations=validateNativeOperations(raw.operations,snapshot);
+    const explanation=typeof raw.explanation==='string'?raw.explanation.slice(0,1500):'使用原生 CAD 接口创建或修改特征';
+    return {id:randomUUID(),action:'native_operations',expected:snapshot.fingerprint,operations,description:`${explanation}（${operations.length} 项原生操作）${snapshot.document?.design&&!operations.some(o=>o.method==='doc.create')?'。本工程将转为原生特征编辑，参数配方面板不再自动重建':''}`,details:operations.map((o,i)=>({label:`${i+1}. ${o.method}`,after:JSON.stringify(o.args),unit:''}))};
+  }
   if(!['create_plate','create_design','update_design','set_diameter','undo','redo','save_as','open_native'].includes(raw.action))throw Error('不支持这项 CAD 操作');
   if(!['create_plate','create_design','open_native'].includes(raw.action)&&!snapshot.document?.owned)throw Error('仅能修改本应用创建的工程，其他工程只读取上下文');
   if(['create_design','update_design','open_native'].includes(raw.action)&&snapshot.protocol!==2)throw Error('CAD 连接需要升级，请点击“升级连接”。原来的 CAD 工程会保持打开。');
@@ -46,7 +52,7 @@ export function validateProposal(raw, snapshot) {
 export function localIntent(text,context) {
   if(/^(做|创建|新建|生成)(一个)?(带盖|带上盖的?)?(控制盒|电子盒|电路板盒)[。！!\s]*$/.test(text))return {action:'create_design',example:'enclosure'};
   if(/^(做|创建|新建|生成)(一个)?(五零件)?(小|桌面)?龙门架[。！!\s]*$/.test(text))return {action:'create_design',example:'gantry'};
-  if(/^(做|创建|新建|生成)(一个)?(简化的?|小)?飞机[。！!\s]*$/.test(text))return {action:'create_design',example:'airplane'};
+  if(/^(做|创建|新建|生成)(一个)?简化的?飞机[。！!\s]*$/.test(text))return {action:'create_design',example:'airplane'};
   if(/^(做|创建|新建|生成)(一个)?(四孔)?安装板[。！!\s]*$/.test(text))return {action:'create_plate'};
   const diameter=/^(?:把)?(?:这个孔|这些孔|四个孔|四孔|孔径)(?:直径|的直径|孔径)?(?:改成|改为|设为|变成|改到)(\d+(?:\.\d+)?)\s*(?:毫米|mm)?(?:[，,]?其他不变)?[。！!\s]*$/i.exec(text);
   if(diameter&&!context?.document?.design)return {action:'set_diameter',diameter:Number(diameter[1])};

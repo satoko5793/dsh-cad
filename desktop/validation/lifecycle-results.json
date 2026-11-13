@@ -1,0 +1,10 @@
+{
+  "date": "2026-11-13T08:32:26.505Z",
+  "passed": true,
+  "checks": [
+    "same-process reload preserves document token, selection, geometry and camera",
+    "reconnect is idempotent without process launch",
+    "separate conversation directories restore one shared CAD"
+  ],
+  "note": "Reuse-only real FreeCAD test; no new CAD process was launched."
+}

@@ -1,0 +1,164 @@
+{
+  "date": "2026-11-13T07:51:55.821Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "primitive solids and native document",
+      "passed": true
+    },
+    {
+      "name": "boolean, fillet, chamfer, mirror and Part arrays",
+      "passed": true
+    },
+    {
+      "name": "mirror copy retains source; bounded native view properties",
+      "passed": true
+    },
+    {
+      "name": "sketch planes, solid extrusion, revolution, loft and sweep",
+      "passed": true
+    },
+    {
+      "name": "PartDesign body, pad, pocket and edge treatments",
+      "passed": true
+    },
+    {
+      "name": "PartDesign revolution and groove",
+      "passed": true
+    },
+    {
+      "name": "PartDesign linear/polar patterns and mirror",
+      "passed": true
+    },
+    {
+      "name": "spreadsheet parameters and expression-driven property editing",
+      "passed": true
+    },
+    {
+      "name": "property, placement, label and expression removal",
+      "passed": true
+    },
+    {
+      "name": "sketch editing and constraints",
+      "passed": true
+    },
+    {
+      "name": "delete sketch geometry, constraint and object",
+      "passed": true
+    },
+    {
+      "name": "export step",
+      "passed": true
+    },
+    {
+      "name": "export iges",
+      "passed": true
+    },
+    {
+      "name": "export stl",
+      "passed": true
+    },
+    {
+      "name": "export obj",
+      "passed": true
+    },
+    {
+      "name": "import STEP",
+      "passed": true
+    },
+    {
+      "name": "import IGES",
+      "passed": true
+    },
+    {
+      "name": "invalid batch rolls back all native changes",
+      "passed": true
+    },
+    {
+      "name": "cross-document writes rejected",
+      "passed": true
+    },
+    {
+      "name": "native lifecycle document",
+      "passed": true
+    },
+    {
+      "name": "initial transaction undo/redo retains native ownership",
+      "passed": true
+    },
+    {
+      "name": "native save/reopen remains locally editable",
+      "passed": true
+    }
+  ],
+  "methods": [
+    "doc.create",
+    "doc.list",
+    "doc.recompute",
+    "expr.clear",
+    "expr.get",
+    "expr.set",
+    "io.export_iges",
+    "io.export_obj",
+    "io.export_step",
+    "io.export_stl",
+    "io.import_iges",
+    "io.import_step",
+    "obj.delete",
+    "obj.get",
+    "obj.get_properties",
+    "obj.get_tree",
+    "obj.list",
+    "obj.set_label",
+    "obj.set_placement",
+    "obj.set_property",
+    "part.box",
+    "part.chamfer",
+    "part.common",
+    "part.cone",
+    "part.cut",
+    "part.cylinder",
+    "part.extrude",
+    "part.fillet",
+    "part.fuse",
+    "part.loft",
+    "part.mirror",
+    "part.pattern_linear",
+    "part.pattern_polar",
+    "part.plane",
+    "part.revolve",
+    "part.sphere",
+    "part.sweep",
+    "part.torus",
+    "pd.chamfer",
+    "pd.create_body",
+    "pd.fillet",
+    "pd.groove",
+    "pd.mirrored",
+    "pd.pad",
+    "pd.pattern_linear",
+    "pd.pattern_polar",
+    "pd.pocket",
+    "pd.revolution",
+    "sheet.create",
+    "sheet.get_cell",
+    "sheet.set_alias",
+    "sheet.set_cell",
+    "sketch.add_arc",
+    "sketch.add_circle",
+    "sketch.add_constraint",
+    "sketch.add_line",
+    "sketch.add_point",
+    "sketch.add_polyline",
+    "sketch.create",
+    "sketch.delete_constraint",
+    "sketch.delete_geometry",
+    "sketch.list_constraints",
+    "sketch.list_geometry",
+    "sketch.set_constraint_value",
+    "view.fit_all",
+    "view.set_view"
+  ],
+  "methodCount": 66,
+  "note": "Real isolated FreeCAD 1.1.4 native handler execution; no model request. Source methods reuse MIT mcp-freecad with documented adapter fixes."
+}

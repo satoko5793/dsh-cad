@@ -50,7 +50,7 @@ async function run(){
   assert.ok(await js(`document.querySelectorAll('.reasoning').length>0&&document.querySelectorAll('.tool-card').length>=3`));
   checks.push({name:'real Electron → DSH live text/reasoning/tools → native multiview images → model response',passed:true});
   await js(`document.getElementById('settings').click()`);await delay(150);assert.equal(await js(`document.getElementById('settings-dialog').open`),true);
-  assert.equal(await js(`document.querySelectorAll('#tool-settings input').length`),4);checks.push({name:'settings dialog loads actual tool and skill configuration',passed:true});
+  assert.equal(await js(`document.querySelectorAll('#tool-settings input').length`),5);checks.push({name:'settings dialog loads actual tool and skill configuration',passed:true});
   await session.saving;await writeFile(path.join(directory,'visual-response.txt'),response.text);
   await atomicJson(path.join(ROOT,'validation','agent-experience-results.json'),{date:new Date().toISOString(),electron:process.versions.electron,checks,stats,captures,images:tools.filter(t=>t.name==='freecad_capture').length,passed:true,note:'Isolated native airplane; real model image route. No physical fabrication/assembly test.'});
   console.log(JSON.stringify({directory,checks,stats,response:response.text},null,2));

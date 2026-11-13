@@ -5,6 +5,8 @@ import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {ROOT,atomicJson} from '../bridge.mjs';
+if(process.env.GOUXING_ALLOW_ISOLATED_CAD!=='1')throw Error('历史独立进程探针默认停用。日常测试复用同一CAD；确需隔离时显式设置GOUXING_ALLOW_ISOLATED_CAD=1。');
+process.env.GOUXING_DISABLE_AUTO_CONNECT='1';
 const directory=path.join(ROOT,'.data','view-context-check',randomUUID());await mkdir(directory,{recursive:true});
 const output=path.join(directory,'results.json'),macro=path.join(directory,'probe.FCMacro');
 const literal=value=>JSON.stringify(value.replaceAll('\\','/'));

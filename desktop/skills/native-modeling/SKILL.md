@@ -3,7 +3,7 @@ name: native-modeling
 description: 创建或修改 FreeCAD 多零件原生设计时，保持参数、组件和用户手工变更的一致性。
 ---
 
-先依据实时工程识别组件与参数；需要更新上下文时调用 freecad_inspect。修改现有设计仅提交 changes，保持其他组件和参数。遇到 editable=false 时解释手工修改冲突，不覆盖。
+先依据实时工程识别组件与参数；需要更新上下文时调用 freecad_inspect。配方参数修改提交 changes；新增或局部编辑原生特征时加载 freecad-native，使用实际接口并保留无关零件。遇到 editable=false 时解释手工修改冲突，不覆盖。
 
 新建设计可组合原生矩形、圆、多边形草图与 Pad/Pocket。单个 Body 必须连通为单实体；独立物体使用独立组件。未指定的尺寸说明默认值，明确用户给出的尺寸优先。
 

@@ -34,7 +34,7 @@ async function run(){
     await session.confirm(session.state.plan.id);assert.equal(session.state.phase,'done',session.state.status);
     checks.push({request:text,passed:true});console.log('PASS Electron → standalone Node → DSH → FreeCAD:',text);
   }
-  await ask('我想做一个飞机模型',plan=>{assert.equal(plan.action,'create_design');assert.ok(plan.design.components.length>=3);});
+  await ask('我想做一个简化飞机模型，使用已有airplane参数配方示例即可。',plan=>{assert.equal(plan.action,'create_design');assert.ok(plan.design.components.length>=3);});
   assert.equal(session.state.context.document.components.length,3);
   const before=structuredClone(session.state.context.document);
   await ask('机翼展长改成120毫米，其他不变。',plan=>{assert.equal(plan.action,'update_design');assert.deepEqual(plan.changes,{span:120});});

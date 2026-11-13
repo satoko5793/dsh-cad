@@ -7,6 +7,7 @@ import {FreeCADBridge,ROOT} from '../bridge.mjs';
 import {Session} from '../session.mjs';
 import {resolveNode,standaloneEnvironment} from '../../cad-studio/node-runtime.mjs';
 const directory=path.join(ROOT,'.data','ui-validation',randomUUID());
+process.env.GOUXING_CAD_WORKSPACE ||= path.join(ROOT,'.data','cad-workspace');
 if(!process.env.FREECAD_EXE)throw Error('Set FREECAD_EXE');
 const bridge=new FreeCADBridge(directory);await bridge.connect(process.env.FREECAD_EXE);
 const session=new Session(directory,bridge);await session.load();await session.send('做一个带盖控制盒');await session.confirm(session.state.plan.id);

@@ -4,7 +4,7 @@
 
 
 
-桌面提供完整工作台与悬浮小窗，通过受限特征结构操作FreeCAD原生多零件设计。结构与边界见[原生设计指南](native-designs.md)，完整目标交互见[桌面Harness规格](desktop-harness.md)，未验收项见[验证记录](validation.md)。
+桌面提供完整工作台与悬浮小窗，通过明确的类型化原生接口或旧参数配方操作FreeCAD。v1.2.0原生66项接口的来源、契约、事务和边界见[原生接口](native-interfaces.md)，旧配方见[原生设计指南](native-designs.md)，完整交互见[桌面Harness规格](desktop-harness.md)。
 
 ## 桌面实现
 
@@ -22,11 +22,15 @@ renderer 保留消息节点，只刷新变化的消息内容；折叠状态保�
 
 `cad-studio/node-runtime.mjs` 选择并探测独立Node：启动器通过 `GOUXING_NODE_EXE` 传递自身Node路径，Harness在子进程启动前检查版本、发行类型以及不存在Electron标识；直接运行Electron时可从PATH查找Node。DSH子进程不再使用Electron的 `process.execPath`，不继承 `ELECTRON_RUN_AS_NODE`。原生插件不兼容错误在对话中显示简短提示，技术原因脱敏写入私有 `model-errors.log`。创建示例允许空或与默认一致的尺寸覆盖；修改已有设计仍要求真实参数变化。
 
-`desktop/bridge.mjs` 启动带独立配置的 FreeCAD 实例。宏 `desktop/freecad/bridge.py` 在 GUI 线程每350ms轮询本地 inbox，并写出快照和按请求ID存储的结果。请求先消费后执行，附12秒启动期限；已消费请求不重跑。主进程20秒未收结果会锁住后续写入并等待迟到结果，不自动重试。
+`desktop/cad-connector.mjs`通过FreeCADCmd探测用户目录并安装自有Mod组件，`freecad-addon/InitGui.py`在CAD启动后自动连接。主进程优先复用共享工作区，使用FreeCAD的single-instance启动入口、保留CAD用户配置；断连但旧进程仍活着时不再启动替代窗口。`freecad/bridge.py`在GUI线程每350ms轮询本地inbox，请求先消费再执行，12秒是启动期限。普通操作20秒、原生批次120秒未返回时锁住后续写入并等待迟到结果，不自动重试。源修订变化通过原窗口reload_bridge更新，保留文档令牌、工程、选择、相机；首次未加载组件的旧CAD需保存后重开一次，用户无需跑宏/Python。详见[连接说明](cad-connection.md)。
 
 写入时重读活动文档、文档令牌、对象类型、草图、相关属性、Body BRep与选择并计算指纹；不匹配便拒绝。普通快照超过5秒未更新且无新执行进度视为断连。快照在确认结果前写入，避免连续任务读到旧上下文。复杂工程摘要性能仍需验证，不能称为完整CAD变更监控。
 
 `desktop/freecad/features.py` 将配方生成为原生Body/Sketch/Pad/Pocket；参数更新保留对象名，在事务内重建，逐特征和Body核对单实体有效性。配方与稳定编辑签名保存在 `HarnessInfo`，签名不依赖重开可能变化的BRep字节顺序。发现手工编辑便拒绝配方覆盖，未实现自动合并。旧板仍用四个原生直径约束。撤销/重做作用于最近原生事务；保存仅另存新 `.FCStd`，打开保留其他工程。附件暂不解析，桌面与原型数据不自动迁移。
+
+`native-catalog.json`由固定MIT上游AST生成，`native-tools.mjs`校验参数和单文档计划；`plan-plugin.mjs`注册66项原生工具及批量计划工具。读取立即执行，写入只追加待确认JSON。`freecad/native_api.py`将已确认步骤交给`native_upstream`的本地handler，在目标文档范围和原生事务内执行，实际读回结果。新建标记置于首事务之外，使第一次撤销后仍能重做；几何/导入/导出分别检查。原生批次最长等待120秒，保留逐步进度；其他操作仍为20秒，12秒是请求启动期限。宏避免GUI更新引起重入。快照增加所有Shape、相关属性、可见性和参数表内容，原生工程标记为gouxing-native-v1；旧配方首次原生编辑明确转换模式。没有复制上游网络服务器或任意脚本执行器。
+
+原生组件外形用不含显示网格的optimalBoundingBox测量，快照还提供已列出组件的整体envelope，避免把单翼长度当成总展。可见性与有限ViewObject显示属性可读取/确认修改；镜像保留源对象。边界和有效性仍不能替代装配与制造校核。
 
 Electron [窗口接口](https://www.electronjs.org/docs/latest/api/browser-window)及[contextBridge](https://www.electronjs.org/docs/latest/api/context-bridge)用于原生行为与隔离；FreeCAD 选择读取参考[官方 API 源码文档](https://freecad.github.io/SourceDoc/d4/dca/classGui_1_1SelectionSingleton.html)。具体通过结论以本仓库测试结果为准。
 

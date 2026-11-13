@@ -7,6 +7,7 @@ import {FreeCADBridge,ROOT,atomicJson} from '../bridge.mjs';
 import {Session} from '../session.mjs';
 if(!process.env.FREECAD_EXE)throw Error('Set FREECAD_EXE and DSH model configuration');
 const directory=path.join(ROOT,'.data','model-complex',randomUUID());
+process.env.GOUXING_CAD_WORKSPACE ||= path.join(ROOT,'.data','cad-workspace');
 const bridge=new FreeCADBridge(directory);await bridge.connect(process.env.FREECAD_EXE);
 const session=new Session(directory,bridge);await session.load();
 const checks=[],turns=[];

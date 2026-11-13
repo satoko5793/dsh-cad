@@ -5,6 +5,7 @@ import { mkdir } from 'node:fs/promises';
 import { FreeCADBridge, ROOT, atomicJson } from '../bridge.mjs';
 import { examples } from '../examples.mjs';
 const executable=process.env.FREECAD_EXE;
+process.env.GOUXING_CAD_WORKSPACE ||= path.join(ROOT,'.data','cad-workspace');
 if(!executable)throw Error('Set FREECAD_EXE');
 const output=path.join(ROOT,'.data','complex-validation',randomUUID());
 const bridge=new FreeCADBridge(output),checks=[],measurements={};

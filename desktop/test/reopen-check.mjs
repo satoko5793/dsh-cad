@@ -4,6 +4,8 @@ import path from 'node:path';
 import {randomUUID} from 'node:crypto';
 import {ROOT,atomicJson} from '../bridge.mjs';
 import {examples} from '../examples.mjs';
+if(process.env.GOUXING_ALLOW_ISOLATED_CAD!=='1')throw Error('历史独立进程探针默认停用。日常测试复用同一CAD；确需隔离时显式设置GOUXING_ALLOW_ISOLATED_CAD=1。');
+process.env.GOUXING_DISABLE_AUTO_CONNECT='1';
 const output=path.join(ROOT,'.data','reopen-validation',randomUUID());await mkdir(output,{recursive:true});
 if(!process.env.FREECAD_EXE)throw Error('Set FREECAD_EXE');
 const axes={title:'三个方向草图切除验证',parameters:{length:{label:'长度',value:40},width:{label:'宽度',value:30},height:{label:'高度',value:20},crossDiameter:{label:'X轴孔径',value:6}},components:[{id:'block',name:'交叉孔试块',features:[

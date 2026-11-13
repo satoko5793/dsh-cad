@@ -29,10 +29,10 @@ function showMessages(messages){
   const container=$('messages');
   if(messages.length)container.querySelector('.welcome')?.remove();
   for(const [id,node] of messageNodes)if(!messages.some(m=>m.id===id)){node.remove();messageNodes.delete(id);}
-  if(!messages.length){const welcome=document.createElement('div');welcome.className='welcome';const title=document.createElement('h2');title.textContent='你想做点什么？';const note=document.createElement('p');note.textContent='连接 FreeCAD，创建可继续修改的原生多零件设计。';const examples=document.createElement('div');examples.className='examples';for(const text of ['做一个带盖控制盒','做一个小龙门架','生成一个简化飞机']){const button=document.createElement('button');button.className='example';button.textContent=text;button.onclick=()=>{$('draft').value=text;void call('draft',text);$('draft').focus();};examples.append(button);}welcome.append(title,note,examples);container.append(welcome);}
+  if(!messages.length){const welcome=document.createElement('div');welcome.className='welcome';const title=document.createElement('h2');title.textContent='你想做点什么？';const note=document.createElement('p');note.textContent='连接 FreeCAD，创建可继续修改的原生多零件设计。';const examples=document.createElement('div');examples.className='examples';for(const text of ['做一个带盖控制盒','做一个小龙门架','做一架机身圆滑的小飞机']){const button=document.createElement('button');button.className='example';button.textContent=text;button.onclick=()=>{$('draft').value=text;void call('draft',text);$('draft').focus();};examples.append(button);}welcome.append(title,note,examples);container.append(welcome);}
   for(const message of messages){
     let item=messageNodes.get(message.id);
-    if(!item){item=document.createElement('article');item.className='message '+(message.role==='user'?'user':'assistant');const author=document.createElement('div');author.className='message-author';author.textContent=message.role==='user'?'你':'构形';item.append(author,document.createElement('div'));messageNodes.set(message.id,item);container.append(item);if(message.role==='user')followLatest.follow=true;}
+    if(!item){item=document.createElement('article');item.className='message '+(message.role==='user'?'user':'assistant');const author=document.createElement('div');author.className='message-author';author.textContent=message.role==='user'?'你':'构形';item.append(author,document.createElement('div'));messageNodes.set(message.id,item);container.append(item);if(message.role==='user')followLatest.jump();}
     const key=JSON.stringify(message);if(item._key===key)continue;item._key=key;
     const content=item.lastChild,opened=new Set([...content.querySelectorAll('details[open]')].map(n=>n.dataset.key));content.replaceChildren();
     const paragraph=text=>{const p=document.createElement('p');p.className='message-text';if(message.role==='user')p.textContent=text;else p.append(formattedText(text));content.append(p);};
@@ -56,8 +56,8 @@ function render(state){
   // Polling never overwrites a draft under the user's cursor or changes focus.
   if(document.activeElement!==$('draft')&&$('draft').value!==state.draft)$('draft').value=state.draft;
   const c=state.context,doc=c.document,selections=c.selection||[];
-  $('sidebar-connection').textContent=c.connected?`已连接 · ${(c.version||[]).join('.')} · ${c.instance?.slice(0,6)||''}`:'尚未连接';
-  const upgrade=c.connected&&(c.protocol!==2||!c.capabilities?.includes('displayed_view'));
+  $('sidebar-connection').textContent=c.connected?`已连接 · ${(c.version||[]).join('.')}`:'尚未连接';
+  const upgrade=c.connected&&(c.needsUpgrade||c.protocol!==2||!c.capabilities?.includes('native_interfaces'));
   $('connect').disabled=c.connected&&!upgrade;$('connect').textContent=upgrade?'升级连接':'连接 FreeCAD';$('compact-connect').hidden=c.connected&&!upgrade;$('compact-connect').textContent=upgrade?'升级':'连接';
   $('focus-cad').hidden=!c.connected||upgrade;$('open').disabled=!c.connected||upgrade;
   $('connection-dot').classList.toggle('connected',c.connected);
@@ -66,7 +66,7 @@ function render(state){
   $('context-selection').textContent=c.connected?selectionText:'连接后会读取活动工程与选择';
   $('inspector-title').textContent=c.connected?(doc?.label||'无活动工程'):'等待连接';
   $('cad-version').textContent='FreeCAD '+(c.version||[]).join('.');$('document-file').textContent=c.connected?(doc?.file||'尚未保存'):'—';
-  $('selection-detail').textContent=c.connected?selectionText:'—';$('diameter-label').textContent=doc?.components?'原生零件':'原生孔径';$('diameters').textContent=c.connected&&doc?.components?`${doc.components.length} 个 · 每件实体已检查`:c.connected&&doc?.diameters?doc.diameters.map(v=>Number(v.toFixed(3))).join(' / ')+' mm':'—';
+  $('selection-detail').textContent=c.connected?selectionText:'—';$('diameter-label').textContent=doc?.components?'原生几何':'原生孔径';$('diameters').textContent=c.connected&&doc?.components?`${doc.components.length} 个对象 · ${doc.components.reduce((n,p)=>n+p.solids,0)} 个实体`:c.connected&&doc?.diameters?doc.diameters.map(v=>Number(v.toFixed(3))).join(' / ')+' mm':'—';
   $('save').disabled=!c.connected||!doc?.owned||['planning','executing','uncertain'].includes(state.phase);
   $('plan').hidden=!state.plan;$('plan-description').textContent=state.plan?.description||'';
   $('confirm').disabled=state.phase!=='ready';$('pause').disabled=!['ready','paused'].includes(state.phase);$('pause').textContent=state.phase==='paused'?'继续':'暂停';$('cancel').disabled=state.phase==='executing';
@@ -122,6 +122,7 @@ function renderSettings(){
   const row=(container,id,title,description,checked,type,file)=>{const label=document.createElement('label');label.className='capability-row';const input=document.createElement('input');input.type='checkbox';input.dataset[type]=id;input.checked=checked;const text=document.createElement('span'),name=document.createElement('strong'),note=document.createElement('small');name.textContent=title;note.textContent=description;text.append(name,note);if(file){const location=document.createElement('small');location.className='skill-path';location.textContent=file;text.append(location);}label.append(input,text);container.append(label);};
   $('tool-settings').replaceChildren();$('skill-settings').replaceChildren();
   for(const t of config.toolCatalog)row($('tool-settings'),t.id,t.name,t.description,config.tools.includes(t.id),'tool');
+  if(config.nativeCatalog?.length){const details=document.createElement('details'),summary=document.createElement('summary'),list=document.createElement('div');summary.textContent='查看原生接口清单';list.className='native-interface-list';for(const t of config.nativeCatalog){const entry=document.createElement('p');entry.textContent=`${t.name} · ${t.readOnly?'读取/视图':'确认后执行'}`;list.append(entry);}details.append(summary,list);$('tool-settings').append(details);}
   for(const s of config.skills)row($('skill-settings'),s.id,s.name+' · '+s.source,s.description,s.enabled,'skill',s.file);
 }
 $('settings').onclick=async()=>{await call('agent-config-refresh');renderSettings();$('settings-feedback').textContent='';$('settings-dialog').showModal();$('settings-dialog').scrollTop=0;};

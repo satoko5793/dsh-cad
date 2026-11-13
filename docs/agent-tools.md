@@ -1,6 +1,6 @@
 # Agent 技能、工具与视觉检查
 
-更新：2026-11-13，桌面开发版 v1.1.1。目标是让用户看清 Agent 正在做什么，也让 Agent 能观察真实 CAD 结果。
+更新：2026-11-13，桌面开发版 v1.2.0。目标是让用户看清 Agent 正在做什么，也让 Agent 能观察真实 CAD 结果。
 
 ## 对话过程
 
@@ -20,12 +20,14 @@
 | `freecad_capture` | 实际 CAD 视口与视角来源 | 否；临时观察视角恢复 |
 | `freecad_propose` | 建模或参数修改计划 | 仅提案；确认后才写入 |
 | `skill_read` | 按需加载启用的 SKILL.md | 否 |
+| 原生接口组：66项 | 草图/对象、放样、旋转、扫掠、圆角、布尔、阵列、参数表、导入导出 | 11项读取/视图；55项写入先进入计划 |
+| `freecad_native_plan` | 批量准备明确的原生接口步骤，减少复杂建模往返 | 确认后才执行 |
 
 工具关闭后从本轮 Agent 的可用范围移除；技能不授予新的执行权限。精确示例、参数表和原生操作按钮仍属于用户直接操作路径，同样保留确认和指纹检查。
 
-内置技能：`native-modeling`（原生参数设计）、`visual-review`（看图与数据联合检查）、`fabrication-review`（工艺讨论及验证缺口）。源文件在 `desktop/skills/<id>/SKILL.md`，可编辑，下轮读取。修改后重新打开设置刷新列表。
+内置技能：`freecad-native`（原生接口与上游参考）、`native-modeling`（参数配方）、`visual-review`（看图与数据联合检查）、`fabrication-review`（工艺讨论及验证缺口）。源文件在 `desktop/skills/<id>/SKILL.md`，可编辑，下轮读取。`skill_read` 的resource参数可按需读取技能references清单中的Markdown/JSON，不执行脚本。修改后重新打开设置刷新列表。
 
-新增技能和工具优先查已有实现。已审查 FreeCAD AI 的现成技能、FreeCAD MCP 工具与 Jablonkai 的 FreeCAD skill，固定版本、许可证、接口差异及已复用代码见[来源记录](../research/agent-skills-tools/README.md)。当前三个内置文件是本地适配说明，不能当成已接入上游完整技能库。
+新增技能和工具优先查已有实现。原生66项工具实际复用MIT mcp-freecad的handlers，原生技能包含上游README、按接口拆分的契约与本地适配规则；其他三个技能仍是本地说明。固定版本、许可证、接口差异及已复用代码见[来源记录](../research/agent-skills-tools/README.md)，完整范围见[原生接口](native-interfaces.md)。没有安装整个上游技能库。
 
 点击“导入 SKILL.md”将说明复制到私有 `desktop/.data/skills/<name>/SKILL.md`。文件需包含 frontmatter `name`（1–64位小写字母、数字、连字符）、`description`，最多24000字；同名拒绝覆盖。首版只复制此说明文件，不复制依赖文件、不执行附带脚本，也未实现任意 MCP 服务配置。不要把需要脚本或外部工具的技能标记成现已可执行。
 
@@ -47,7 +49,7 @@ v1.1.1 复用 FreeCAD MCP 的显示中三维视图判断：表格、工程图等
 
 ## 从旧版本升级
 
-退出旧助手，重新打开并核对标题 v1.1.1。缺少视觉能力或仍使用v1.1.0旧宏时会显示“升级连接”，不会把磁盘上的修复当成已在旧CAD进程生效。先保存旧工作区的工程；升级会启动新连接，原 CAD 窗口及其工程保持打开，不会自动迁移未保存内容。随后用“打开原生工程”在新工作区加载 .FCStd 并确认。
+退出旧助手，重新打开并核对标题v1.2.0。连接组件自动配置，支持在原CAD窗口升级，不把磁盘上的修复当成旧进程已更新。最早的旧宏连接首次迁移时可能需保存后重开CAD一次；用户不用手动跑宏或Python。详见[自动连接与单窗口使用](cad-connection.md)。
 
 私有桥接 `observations/` 保留 PNG 与相机来源记录；会话 JSON 保留文字和工具记录，不重复保存图像 base64。当前没有截图自动清理或完整图像历史面板，长期使用需与工程一起备份并管理磁盘占用。
 

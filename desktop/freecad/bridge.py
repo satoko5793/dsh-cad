@@ -14,6 +14,10 @@ import Part
 import Sketcher
 from PySide import QtCore, QtGui
 import features
+import native_api
+import lifecycle
+import importlib
+importlib.reload(lifecycle)
 from view_context import get_displayed_3d_view
 
 
@@ -24,10 +28,11 @@ def atomic_json(filename, value):
 
 
 class Bridge:
-    def __init__(self, directory):
+    def __init__(self, directory, previous=None):
         self.directory = pathlib.Path(directory)
-        self.instance = str(uuid.uuid4())
-        self.tokens = {}
+        self.instance = previous.instance if previous else str(uuid.uuid4())
+        self.tokens = previous.tokens if previous else {}
+        self.revision = lifecycle.revision()
         self.last_error = None
         self.command_id = None
         self.timer = QtCore.QTimer()
@@ -46,24 +51,38 @@ class Bridge:
         doc = App.ActiveDocument
         selection = [{'document': s.DocumentName, 'object': s.ObjectName,
                       'subelements': list(s.SubElementNames)} for s in Gui.Selection.getSelectionEx()]
-        value = {'protocol': 2, 'capabilities': ['capture_view', 'displayed_view'], 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
+        value = {'protocol': 2, 'capabilities': ['capture_view', 'displayed_view', 'native_interfaces', 'reload_bridge'], 'bridgeRevision': self.revision, 'nativeInterfaceCount': len(native_api.CATALOG), 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
         if doc:
             objects = []
             for obj in doc.Objects:
                 item = {'name': obj.Name, 'label': obj.Label, 'type': obj.TypeId}
-                if 'Shape' in obj.PropertiesList and (obj.TypeId == 'PartDesign::Body' or obj.TypeId == 'Part::Feature'):
+                if obj.ViewObject:
+                    item['visible'] = obj.ViewObject.Visibility
+                if 'Shape' in obj.PropertiesList:
                     item['shape'] = hashlib.sha256(obj.Shape.exportBrepToString().encode()).hexdigest()
                 if obj.TypeId == 'Sketcher::SketchObject':
                     item['constraints'] = [str(c) for c in obj.Constraints]
                     item['geometry'] = [str(g) for g in obj.Geometry]
-                for prop in ('Length', 'Placement'):
+                if obj.TypeId == 'Spreadsheet::Sheet':
+                    item['cells'] = {cell: [obj.getContents(cell), obj.getAlias(cell)] for cell in obj.getNonEmptyCells()}
+                for prop in ('Length', 'Width', 'Height', 'Radius', 'Angle', 'Placement', 'ExpressionEngine'):
                     if prop in obj.PropertiesList:
                         item[prop] = str(getattr(obj, prop))
                 objects.append(item)
             value['document'] = {'name': doc.Name, 'label': doc.Label, 'file': doc.FileName,
                                  'token': self.tokens.setdefault(doc.Name, str(uuid.uuid4())),
                                  'objects': objects, 'owned': self.owned(doc)}
-            if self.schema(doc) == 'gouxing-design-v2':
+            if self.schema(doc) == 'gouxing-native-v1':
+                value['document']['native'] = True
+                value['document']['components'] = native_api.describe(doc)
+                parts = value['document']['components']
+                if parts:
+                    lower = [min(p['bounds'][i] for p in parts) for i in range(3)]
+                    upper = [max(p['bounds'][i+3] for p in parts) for i in range(3)]
+                    value['document']['envelope'] = {'scope': 'listed_components', 'bounds': lower+upper, 'dimensions': [upper[i]-lower[i] for i in range(3)]}
+                marker = doc.getObject('HarnessInfo')
+                value['document']['lastNativeResults'] = json.loads(marker.LastNativeResults) if 'LastNativeResults' in marker.PropertiesList else []
+            elif self.schema(doc) == 'gouxing-design-v2':
                 try:
                     design = features.metadata(doc)
                     value['document']['design'] = design
@@ -89,7 +108,7 @@ class Bridge:
         return marker.Schema if marker and 'Schema' in marker.PropertiesList else None
 
     def owned(self, doc):
-        return self.schema(doc) in ('gouxing-plate-v1', 'gouxing-design-v2')
+        return self.schema(doc) in ('gouxing-plate-v1', 'gouxing-design-v2', 'gouxing-native-v1')
 
     def progress(self, current, total, label):
         atomic_json(self.directory / 'progress.json', {'id': self.command_id, 'active': True,
@@ -145,6 +164,13 @@ class Bridge:
         if command.get('expected') != before['fingerprint']:
             raise ValueError('工程、选择或设计已变化，请重新提出需求并确认')
         action = command.get('action')
+        if action == 'reload_bridge':
+            QtCore.QTimer.singleShot(600, lifecycle.reload_bridge)
+            return {'message': '正在原窗口升级连接，工程与视角保留。'}
+        if action == 'native_read':
+            return {'message': '已读取原生接口结果。', 'value': native_api.read(command.get('operation', {}))}
+        if action == 'native_operations':
+            return native_api.execute(command.get('operations'), self.progress, self.owned)
         if action == 'capture_view':
             if not App.ActiveDocument or not Gui.activeDocument():
                 raise ValueError('没有活动工程，无法截取模型视口')
@@ -219,6 +245,13 @@ class Bridge:
         if action == 'update_design':
             return features.update(doc, command.get('changes'), self.progress)
         if action == 'select_component':
+            if self.schema(doc) == 'gouxing-native-v1':
+                obj = doc.getObject(command.get('componentId', ''))
+                if not obj or not hasattr(obj, 'Shape'):
+                    raise ValueError('原生对象不存在')
+                Gui.Selection.clearSelection()
+                Gui.Selection.addSelection(doc.Name, obj.Name)
+                return {'message': '已在 CAD 选中「'+obj.Label+'」。'}
             design = features.metadata(doc)
             component = next((c for c in (design or {}).get('components', []) if c['id'] == command.get('componentId')), None)
             if not component:
@@ -266,6 +299,9 @@ class Bridge:
         raise ValueError('不支持的 CAD 操作')
 
     def tick(self):
+        if getattr(self, 'processing', False):
+            return
+        self.processing = True
         try:
             for filename in sorted((self.directory / 'inbox').glob('*.json')):
                 command = json.loads(filename.read_text(encoding='utf-8'))
@@ -291,13 +327,19 @@ class Bridge:
                 atomic_json(self.directory / 'snapshot.json', value['snapshot'])
                 atomic_json(result_file, value)
             snapshot = self.snapshot()
-            title = 'FreeCAD · 构形工作区 [' + self.instance[:6] + '] · ' + ((snapshot.get('document') or {}).get('label', '无活动工程'))
+            title = 'FreeCAD · ' + ((snapshot.get('document') or {}).get('label', '构形工作区'))
             if Gui.getMainWindow().windowTitle() != title:
                 Gui.getMainWindow().setWindowTitle(title)
             atomic_json(self.directory / 'snapshot.json', snapshot)
         except Exception as error:
             App.Console.PrintError('构形桥接：' + str(error) + '\n')
+        finally:
+            self.processing = False
 
 
 # Keep the timer and document observer alive in the embedded interpreter.
-App.__gouxing_bridge = Bridge(os.environ['GOUXING_BRIDGE_DIR'])
+previous = getattr(App, '__gouxing_bridge', None)
+if previous:
+    previous.timer.stop()
+    App.removeDocumentObserver(previous)
+App.__gouxing_bridge = Bridge(str(previous.directory) if previous else os.environ['GOUXING_BRIDGE_DIR'], previous)
