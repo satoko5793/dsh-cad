@@ -39,7 +39,7 @@ export class Harness {
     });
     const fail=error=>{this.ready=null;this.initialized=false;this.process=null;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(error);}this.pending.clear();};
     child.on('error',fail); child.on('exit',code=>fail(Object.assign(new Error(`DSH runtime exited (${code}). ${this.lastError.slice(-1500)}`),{code:/Unsupported\/no-context|require-builtin/.test(this.lastError)?'DSH_RUNTIME_INCOMPATIBLE':'DSH_RUNTIME_EXITED'}))); child.stdin.on('error',()=>{});
-    const info=await this.request('initialize',{cwd,provider:this.provider,model:this.model,reasoningEffort:'high',maxTokens:12000},45000);
+    const info=await this.request('initialize',{cwd,provider:this.provider,model:this.model,reasoningEffort:this.options.reasoningEffort||'high',maxTokens:this.options.maxTokens||12000},45000);
     this.initialized=true;
     return info;
   }

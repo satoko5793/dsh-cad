@@ -1,6 +1,6 @@
 {
   "name": "gouxing-cad",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "构形 CAD：操作专业 CAD 的桌面对话 Harness 助手",
   "scripts": {
     "setup": "node scripts/setup-cad.mjs",
@@ -18,7 +18,8 @@
     "dsh": "dsh",
     "test:prototype": "node scripts/test.mjs prototype",
     "test:runtime": "node desktop/test/run-runtime-layer.mjs",
-    "test:shell": "node desktop/test/run-shell.mjs"
+    "test:shell": "node desktop/test/run-shell.mjs",
+    "test:stream-live": "node desktop/test/run-shell.mjs --model"
   },
   "keywords": [],
   "author": "",

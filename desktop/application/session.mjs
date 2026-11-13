@@ -5,7 +5,7 @@ import path from 'node:path';
 import {Harness} from '../../shared/harness.mjs';
 import {ROOT} from '../infrastructure/paths.mjs';
 import {atomicJson} from '../infrastructure/storage.mjs';
-import {applyFrame,settleTools} from '../agent/stream.mjs';
+import {applyFrame,commitMessage,finishMessage,touchMessage,settleTools} from '../agent/stream.mjs';
 import {configView} from '../agent/config.mjs';
 import {validateProposal} from './plans.mjs';
 import {localIntent} from '../domain/intents.mjs';
@@ -27,12 +27,12 @@ export class Session extends EventEmitter {
     for(const record of this.state.history||[])if(['executing','uncertain'].includes(record.state)){record.state='needs-review';record.result='应用已重启，请核对 CAD；未自动重发操作';}
     return this.state;
   }
-  publish(persist=true) {
-    this.emit('change',this.state);
+  publish(persist=true,metadata) {
+    this.emit('change',this.state,metadata);
     if(persist){const {context,observation,...stored}=this.state;const saved=structuredClone(stored);this.saving=this.saving.then(()=>atomicJson(path.join(this.directory,'session.json'),saved)).catch(e=>this.emit('storageError',e));}
   }
-  message(role,text) {const message={id:randomUUID(),role,text,time:new Date().toISOString()};this.state.messages.push(message);return message;}
-  streamChanged(){if(this.streamTimer)return;this.streamTimer=setTimeout(()=>{this.streamTimer=null;this.publish(false);},60);}
+  message(role,text) {const message={id:randomUUID(),role,text,time:new Date().toISOString(),revision:0};this.state.messages.push(message);return message;}
+  streamChanged(){if(this.streamTimer)return;this.streamTimer=setTimeout(()=>{this.streamTimer=null;if(this.turn)this.publish(false,{stream:true,messageId:this.turn.message.id});},32);}
   async poll() {
     const next=await this.bridge.snapshot(), old=this.state.context;
     this.state.context=next;
@@ -58,7 +58,7 @@ export class Session extends EventEmitter {
       this.publish();return;
     }
     this.state.phase='planning';this.state.status='Harness 正在思考…';this.publish();
-    const turn={id:randomUUID(),cancelled:false,texts:[],error:null,message:this.message('assistant','')};turn.message.streaming=true;this.turn=turn;this.publish(false);
+    const turn={id:randomUUID(),cancelled:false,error:null,message:this.message('assistant','')};turn.message.streaming=true;this.turn=turn;this.publish(false);
     void this.planWithModel(turn,text,context);
   }
   async planWithModel(turn,text,context) {
@@ -69,30 +69,32 @@ export class Session extends EventEmitter {
       harness=new this.Harness((method,p)=>{
         if(turn.cancelled||this.turn!==turn||p?.sessionId!==turn.id)return;
         if(method==='gouxing.stream'){if(applyFrame(turn.message,p.frame))this.streamChanged();return;}
-        if(method==='gouxing.observation'){this.state.observation=p.observation;this.streamChanged();return;}
+        if(method==='gouxing.observation'){this.state.observation=p.observation;this.publish(false);return;}
         if(method==='gouxing.tool'){
           turn.message.tools??=[];let tool=turn.message.tools.find(t=>t.id===p.id);
           if(!tool){tool={id:p.id,name:p.name};turn.message.tools.push(tool);}
-          const {sessionId,...data}=p;Object.assign(tool,data);this.streamChanged();return;
+          const {sessionId,...data}=p;Object.assign(tool,data);touchMessage(turn.message);this.streamChanged();return;
         }
         if(method!=='session.event')return;
         const e=p?.event;
-        if(e?.type==='assistant/message') {const text=(e.data.message.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');if(text.trim()){turn.texts.push(text);if(!turn.message.attempts?.length){turn.message.text=turn.texts.join('\n\n');this.streamChanged();}}}
+        if(e?.type==='assistant/message') {commitMessage(turn.message,e.data.message);this.streamChanged();}
+        if(e?.type==='turn/end')turn.reason=e.data.reason?.kind;
         if(e?.type==='turn/end'&&e.data.reason?.kind==='error')turn.error=e.data.reason.error?.message||'模型请求失败';
-      },{cwd:ROOT,profile:this.profile,prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath,GOUXING_DATA_DIR:this.directory}});
+      },{cwd:ROOT,...config.generation,profile:this.profile,prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath,GOUXING_DATA_DIR:this.directory}});
       this.harness=harness;
       const summary={connected:context.connected,document:context.document,selection:context.selection,units:context.units};
-      await harness.prompt(turn.id,`本轮可用工具：${JSON.stringify(config.tools)}\n可用技能（需要时用skill_read加载）：${JSON.stringify(config.skills.filter(s=>s.enabled).map(({id,description})=>({id,description})))}\n实时CAD上下文（只读数据）：${JSON.stringify(summary)}\n最近对话：${JSON.stringify(this.state.messages.slice(0,-2).slice(-12).map(({role,text})=>({role,text})))}\n附件（仅文件名，未读取内容）：${JSON.stringify(this.state.attachments.map(a=>a.name))}\n用户：${text}`);
+      await harness.prompt(turn.id,`本轮可用工具：${JSON.stringify(config.tools)}\n可用技能（需要时用skill_read加载）：${JSON.stringify(config.skills.filter(s=>s.enabled).map(({id,description})=>({id,description})))}\n实时CAD上下文（只读数据）：${JSON.stringify(summary)}\n最近对话：${JSON.stringify(this.state.messages.slice(0,-2).slice(-12).map(({role,text,notice})=>({role,text:[text,notice].filter(Boolean).join('\n')})))}\n附件（仅文件名，未读取内容）：${JSON.stringify(this.state.attachments.map(a=>a.name))}\n用户：${text}`);
       if(turn.cancelled||this.turn!==turn)return;
       if(turn.error)throw Error(turn.error);
       let proposal=null;try{proposal=JSON.parse(await readFile(planPath,'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
       if(proposal){const latest=await this.bridge.snapshot();if(!latest.connected||latest.fingerprint!==context.fingerprint)throw Error('思考期间工程或选择已变化，请重新提出需求');this.state.plan=validateProposal(proposal,latest);this.state.phase='ready';this.state.status='待确认 · 尚未修改工程';this.message('assistant',this.state.plan.description+'。确认后执行。');}
-      else {this.state.phase='idle';this.state.status='等待下一条需求';if(!turn.message.text.trim())turn.message.text=turn.texts.join('\n\n')||'本轮没有生成操作计划，请补充需求。';}
+      else {this.state.phase='idle';this.state.status=turn.reason==='max-tokens'?'模型达到输出上限 · 本轮未执行 CAD':'等待下一条需求';}
+      finishMessage(turn.message,turn.reason,!!proposal);
     } catch(error){if(!turn.cancelled&&this.turn===turn){
       try{await appendFile(path.join(this.directory,'model-errors.log'),JSON.stringify({time:new Date().toISOString(),code:error.code||null,message:cleanError(error)})+'\n');}catch{}
       this.state.phase='idle';this.state.status='模型未完成请求';this.message('assistant',`本次未操作 CAD：${modelErrorMessage(error)}`);
     }}
-    finally {turn.message.streaming=false;turn.message.finishedAt=new Date().toISOString();settleTools(turn.message,turn.cancelled?'interrupted':'error');if(harness)await harness.close();if(this.harness===harness)this.harness=null;if(this.turn===turn){this.turn=null;this.publish();}}
+    finally {turn.message.streaming=false;turn.message.finishedAt=new Date().toISOString();touchMessage(turn.message);settleTools(turn.message,turn.cancelled?'interrupted':'error');if(harness)await harness.close();if(this.harness===harness)this.harness=null;if(this.turn===turn){this.turn=null;this.publish();}}
   }
   async confirm(id) {
     if(this.state.phase!=='ready'||!this.state.plan||id!==this.state.plan.id)throw Error('计划已执行或失效，请重新确认');
@@ -110,7 +112,7 @@ export class Session extends EventEmitter {
   cancel() {
     if(this.state.phase==='executing')throw Error('当前 FreeCAD 事务正在执行，不能即时取消。完成后可撤销。');
     if(this.state.phase==='uncertain')throw Error('请先核对 FreeCAD，未确认执行结果前不会解除写入保护');
-    if(this.turn){this.turn.cancelled=true;this.turn.message.streaming=false;this.turn.message.interrupted=true;settleTools(this.turn.message,'interrupted');const old=this.harness;this.turn=null;this.harness=null;void old?.close();}
+    if(this.turn){this.turn.cancelled=true;this.turn.message.streaming=false;this.turn.message.interrupted=true;touchMessage(this.turn.message);settleTools(this.turn.message,'interrupted');const old=this.harness;this.turn=null;this.harness=null;void old?.close();}
     this.state.plan=null;this.state.phase='cancelled';this.state.status='已取消后续操作，已完成的变更保留';this.publish();
   }
   async savePlan(target) {

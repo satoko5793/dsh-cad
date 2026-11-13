@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-13T09:25:48.410Z",
+  "passed": true,
+  "electron": "45.3.1",
+  "fixture": true,
+  "checks": [
+    "stable summary across pointerdown/stream/click",
+    "expanded reasoning remains readable and text selection survives 120 streamed updates",
+    "text is updated during generation",
+    "old reasoning-only fallback and token-limit notice are visible",
+    "late patches do not reopen completed reply",
+    "compact draft, follow and settings controls"
+  ],
+  "timing": {
+    "updates": 120,
+    "p95GapMs": 32.20000000298023,
+    "note": "Local fixture IPC sampling, not model token speed or a cross-machine performance guarantee."
+  }
+}

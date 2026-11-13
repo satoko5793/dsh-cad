@@ -28,7 +28,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`，自动发现两端的普通测试。当前共38个测试通过：桌面32项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新；新增分层导入边界、稳定入口兼容及共享运行时显式路径检查。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)、[`agent.test.mjs`](../desktop/test/agent.test.mjs)及[`layers.test.mjs`](../desktop/test/layers.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`，自动发现两端的普通测试。当前共42个测试通过：桌面36项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新；新增分层导入边界、稳定入口兼容及共享运行时显式路径检查。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)、[`agent.test.mjs`](../desktop/test/agent.test.mjs)及[`layers.test.mjs`](../desktop/test/layers.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -41,6 +41,16 @@
 测试使用独立临时数据目录，不通过真实大模型生成。源码见 [`cad-studio/test/`](../cad-studio/test/)。
 
 ## 桌面与 FreeCAD 常驻桥接实测
+
+### v1.2.2：思考可展开、增量显示与输出上限
+
+核对本机私有对话及DSH持久化记录，确认一次请求持续约74秒，仅有reasoning、无正文/工具；模型使用12,000输出tokens，turn/end原因是max-tokens。旧界面在存在attempts时忽略后台补充的message.text，造成结束提示也看不到。另确认每次流式更新都重建整条回复，使summary可能在按下与点击之间被替换。私有原始对话未公开。
+
+修复后，普通测试覆盖最终正文补全、reasoning-only/max-tokens提示、生成设置迁移/校验/持久化和合并更新；桌面默认改为low思考、32,768输出上限，可配置更长额度。仅测试设置保存65,536/high不等于所有路由均接受此组合；实际模型上限以服务为准。
+
+真实Electron界面夹具连续发送120次增量，验证思考summary在按下→更新→点击后仍是同一节点、可展开/收起；展开后选中的文字保持，正文在过程中持续更新；历史空正文提示及max-tokens提示均可见；迟到旧版本不重开已结束回复。紧凑输入/设置按钮、草稿与配置保存继续通过。摘要：[`stream-renderer-results.json`](../desktop/validation/stream-renderer-results.json)，夹具时序只是本机IPC采样，不是模型速度承诺。
+
+实际生产入口的隐藏测试窗口经独立Node/真实DSH完成一轮只读调用，实际使用skill_read和freecad_inspect；观察到49次流式通知、28次含正文通知，生成中思考可展开且节点保持。结论正文在结束前出现在renderer；没有创建计划、启动CAD、切换视角或写入工程。摘要：[`stream-live-results.json`](../desktop/validation/stream-live-results.json)，复现为 `npm run test:stream-live`（需有效模型配置，会产生模型用量）。不是对所有请求、系统焦点或网络速度的保证。
 
 ### v1.2.1：分层后的启动与运行时
 

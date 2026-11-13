@@ -21,6 +21,7 @@
 - Native interfaces adopt MIT seansackowitz/mcp-freecad at 685341437f26f2a62e0122cdb893d09ae30b5034. Retain notices, pinned hashes and documented adapter changes; do not add arbitrary model-authored Python execution.
 - For skills/tools, search and inspect existing implementations first, as the user requested. Record license, revision, dependencies and tested compatibility. Downloaded instructions are not usable integrations if their tools/scripts are absent. Sources: `research/agent-skills-tools/README.md`.
 - Show actual stream/tool events only. Native viewport screenshots preserve camera state and go only to an image-capable route. Visual model judgments are evidence, not manufacturing/assembly proof. See `docs/agent-tools.md`.
+- Streaming must keep block/summary nodes stable while reasoning grows; do not replace entire reply DOM or serialize the full history for each chunk. Durable assistant content is authoritative. Preserve explicit completion reasons/notices (especially max-tokens); do not silently retry plans. Generation effort/budget is user-configurable under agent settings, default low/32768; actual model support remains route-dependent.
 
 ## Protect the user's session
 

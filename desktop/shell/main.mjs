@@ -34,7 +34,10 @@ async function start(){
   window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   window.setAlwaysOnTop(preferences.small&&preferences.pinned);
   const snapshot=()=>({...session.state,context:{...session.state.context,needsUpgrade:session.state.context.connected&&session.state.context.bridgeRevision!==localRevision},agentConfig,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
-  const broadcast=()=>{if(!window.isDestroyed())window.webContents.send('harness:state',snapshot());};
+  const broadcast=(_state,metadata)=>{if(!window.isDestroyed()){
+    if(metadata?.stream){const message=session.state.messages.find(m=>m.id===metadata.messageId);if(message)window.webContents.send('harness:stream',{message});}
+    else window.webContents.send('harness:state',snapshot());
+  }};
   const persistPreferences=()=>atomicJson(path.join(data,'window.json'),preferences).catch(error=>{session.state.status=`窗口设置保存失败：${cleanError(error)}`;broadcast();});
   session.on('change',broadcast);session.on('storageError',error=>{session.state.status=`会话保存失败：${cleanError(error)}`;broadcast();});
   const toggle=()=>{changing=true;preferences[preferences.small?'compact':'full']=window.getBounds();preferences.small=!preferences.small;window.setMinimumSize(preferences.small?360:760,460);window.setBounds(visibleBounds(preferences.small?preferences.compact:preferences.full));window.setAlwaysOnTop(preferences.small&&preferences.pinned);changing=false;void persistPreferences();broadcast();};

@@ -33,6 +33,7 @@ npm run test:desktop       # 桌面及共享运行时的普通测试
 npm run test:prototype     # 网页/CadQuery 原型测试，需要其 Python 环境
 npm test                   # 两组普通测试；自动发现 *.test.mjs
 npm run test:shell         # 隐藏测试窗口加载实际桌面入口/IPC/UI，无模型或 CAD 操作
+npm run test:stream-live   # 显式真实模型 + 实际入口/renderer流式测试，只允许技能/工程读取
 npm run start:web          # 保留的网页原型
 ```
 
@@ -47,7 +48,7 @@ npm run test:runtime
 
 该回归从独立测试 Electron 进程调用真实 DSH 和工具，会产生模型费用；只允许 `skill_read`、`freecad_inspect`，不创建窗口、不启动 CAD、不提案或写入模型。私有记录保存在 `desktop/.data/runtime-layer/`，公开摘要在 `desktop/validation/runtime-layer-results.json`。需要有效模型配置；普通 Node 测试不能代替这项 Electron 验证。
 
-界面夹具是 `desktop/test/renderer-check.mjs`，需用 Electron 执行并清除 `ELECTRON_RUN_AS_NODE`；不调用模型、不操作 CAD。原生接口、复杂模型、保存重开等集成入口和环境条件见[原生接口](native-interfaces.md)及[验证记录](validation.md)。这些测试必须显式选择，不能加入每次更新的默认命令。
+界面夹具是 `desktop/test/renderer-check.mjs`，需用 Electron 执行并清除 `ELECTRON_RUN_AS_NODE`；默认隐藏测试窗口，不调用模型、不操作 CAD。它复现思考 summary 按下→流式更新→点击、120次增量中的文字选择、空正文提示和生成配置保存。`test:stream-live` 则在隐藏的实际桌面入口中请求真实模型，只允许 `skill_read` 和 `freecad_inspect`，验证正文在结束前出现及思考面板稳定；会产生模型用量。原生接口、复杂模型、保存重开等集成入口和环境条件见[原生接口](native-interfaces.md)及[验证记录](validation.md)。这些测试必须显式选择，不能加入每次更新的默认命令。
 
 保持用户正在使用的 CAD 和工程。日常集成测试复用共享工作区；独立 CAD 探针必须遵守现有隔离开关。不能为了验证而反复启动 CAD、创建新工程、改变用户视角或丢弃未保存内容。
 

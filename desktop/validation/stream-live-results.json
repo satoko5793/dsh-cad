@@ -1,0 +1,28 @@
+{
+  "date": "2026-11-13T09:24:43.617Z",
+  "passed": true,
+  "electron": "45.3.1",
+  "actualProductionEntry": true,
+  "hiddenWindow": true,
+  "tools": [
+    "skill_read",
+    "freecad_inspect"
+  ],
+  "stats": {
+    "patches": 49,
+    "textUpdates": 28,
+    "reasoningOpened": true,
+    "stable": true
+  },
+  "generation": {
+    "reasoningEffort": "low",
+    "maxTokens": 32768
+  },
+  "checks": [
+    "real DSH text rendered before turn finished",
+    "reasoning opens during generation and keeps the same expanded node",
+    "real tools and final answer are visible",
+    "no plan, camera operation, CAD launch or model write"
+  ],
+  "note": "Observed one real read-only run; no model-speed or system-focus guarantee."
+}

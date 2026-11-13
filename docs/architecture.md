@@ -25,9 +25,9 @@
 
 `desktop/application/session.mjs` 识别精确示例指令；其他消息通过DSH与按数据目录隔离的 `gouxing-desktop-<摘要>` profile。`freecad_propose` 只输出计划；`freecad_inspect`、`freecad_capture` 只读工程和视口，`skill_read` 按需读取启用技能。Agent 不能执行任意代码。`desktop/domain/design.mjs` 校验尺寸算式、组件与特征，确认前显示参数差异和涉及零件。每轮模型进程结束后释放，最近对话作为上下文补入，不跨轮保持同一个DSH子进程。
 
-`desktop/agent/tools.mjs` 订阅 DSH `agent/assistant-stream`、`tools/execute` 和 `tools/result`，在同一 JSON-RPC 行协议中转发 `gouxing.stream/tool/observation` 通知。原SDK的 `session.event` 仍提供完成及错误事件。`desktop/agent/stream.mjs` 依 attempt/index 组装真实 text/reasoning/tool-call 增量、去重与标记放弃的输出；Session 约60ms合并通知，结束时持久化。取消保留已生成内容，重启标记已保存的未完成消息；尚无逐增量崩溃恢复，不伪造隐藏思考。
+`desktop/agent/tools.mjs` 订阅 DSH `agent/assistant-stream`、`tools/execute` 和 `tools/result`，在同一 JSON-RPC 行协议中转发 `gouxing.stream/tool/observation` 通知。原SDK的 `session.event` 提供最终内容及结束原因。`desktop/agent/stream.mjs` 依 attempt/index 组装真实 text/reasoning/tool-call 增量、去重与标记放弃的输出，以持久化 assistant/message 校正文段；识别 max-tokens 并单独提示。Session 约32ms合并通知，shell 通过独立 harness:stream 只发送当前回复，不重复发送历史、CAD上下文或截图；观察图片单独走状态更新。结束时持久化。取消保留已生成内容，重启标记已保存的未完成消息；尚无逐增量崩溃恢复，不伪造隐藏思考。
 
-renderer 保留消息节点，只刷新变化的消息内容；折叠状态保留。`ui/scroll.mjs` 记录跟随意图，布局变化后滚动，并为被遮挡窗口的动画帧暂停提供定时备用。翻阅历史时保持位置，发送或点击“回到最新”恢复跟随。格式化只构造 DOM 文本节点，不解析模型 HTML 或本机图片链接。
+`desktop/ui/messages.mjs` 按消息与内容块保留节点，追加文字，保留 summary、展开状态及思考文字选择；不用整段历史的 JSON 序列化判断变化。最终提示与思考独立显示。`ui/scroll.mjs` 记录跟随意图，布局变化后滚动，并为被遮挡窗口的动画帧暂停提供定时备用。翻阅历史时保持位置，发送或点击“回到最新”恢复跟随。格式化只构造 DOM 文本节点，不解析模型 HTML 或本机图片链接。
 
 `desktop/agent/config.mjs` 管理私有 `agent.json` 和本机技能目录；每轮固定工具白名单，任务进行中禁止修改。内置 `desktop/skills/*/SKILL.md` 与导入的纯说明文件按需加载，不赋予执行脚本/MCP的能力。截图在 CAD GUI 线程调用原生 `saveImage`，临时关闭视角动画、取图后恢复相机与动画设置；检测近似空白图，不改变几何/选择。图片经 DSH attachment store 转为 image block；依据实际路由的 inputModalities 决定是否提供图像。私有 PNG 与相机来源记录在桥接目录；当前 UI 图片仅保留在内存，不把 base64 写进会话文件。详见[Agent 能力配置](agent-tools.md)。
 

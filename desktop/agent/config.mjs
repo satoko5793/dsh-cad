@@ -11,10 +11,14 @@ export const TOOLS=[
   {id:'skill_read',name:'读取技能',description:'按需加载已启用的 SKILL.md',enabled:true},
   {id:'native_interfaces',name:`原生 CAD 接口 · ${NATIVE_TOOLS.length} 项`,description:'草图、放样、旋转、圆角、布尔、阵列、参数和导入导出；修改汇总为待确认计划',enabled:true}
 ];
-export const defaults=()=>({version:2,tools:TOOLS.map(t=>t.id),disabledSkills:[]});
+export const DEFAULT_GENERATION={reasoningEffort:'low',maxTokens:32768};
+export const defaults=()=>({version:3,tools:TOOLS.map(t=>t.id),disabledSkills:[],generation:{...DEFAULT_GENERATION}});
 export function validateConfig(value){
   if(!value||!Array.isArray(value.tools)||value.tools.some(id=>!TOOLS.some(t=>t.id===id))||!Array.isArray(value.disabledSkills)||value.disabledSkills.some(id=>typeof id!=='string'||!/^[-a-z0-9]{1,64}$/.test(id)))throw Error('无效的技能或工具配置');
-  return {version:2,tools:[...new Set(value.tools)],disabledSkills:[...new Set(value.disabledSkills)]};
+  const generation={...DEFAULT_GENERATION,...value.generation};
+  if(value.generation!==undefined&&(!value.generation||typeof value.generation!=='object'||Array.isArray(value.generation)))throw Error('无效的模型生成配置');
+  if(!['low','high','max'].includes(generation.reasoningEffort)||!Number.isInteger(generation.maxTokens)||generation.maxTokens<1024||generation.maxTokens>262144)throw Error('请选择有效思考强度，单次输出上限须为1024–262144之间的整数');
+  return {version:3,tools:[...new Set(value.tools)],disabledSkills:[...new Set(value.disabledSkills)],generation};
 }
 export async function loadConfig(directory){try{const value=JSON.parse(await readFile(path.join(directory,'agent.json'),'utf8'));if(value.version===1&&!value.tools.includes('native_interfaces'))value.tools.push('native_interfaces');return validateConfig(value);}catch(e){if(e.code==='ENOENT')return defaults();throw e;}}
 export async function saveConfig(directory,value){const config=validateConfig(value);await atomicJson(path.join(directory,'agent.json'),config);return config;}
