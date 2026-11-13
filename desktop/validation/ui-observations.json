@@ -1,0 +1,17 @@
+{
+  "date": "2026-11-13",
+  "isolatedWorkspace": true,
+  "observed": [
+    "native full window with two component cards and 12 parameters",
+    "click component card selects GX_lid, read back by FreeCAD GUI bridge",
+    "parameter input lidThickness=4 prepares plan 3 to 4 mm affecting only lid",
+    "pause then compact mode retains draft, selected lid and paused state; confirm disabled in accessibility tree",
+    "foreground native FreeCAD shows the airplane and tree entries 机身, 主翼, 尾翼; enclosure and gantry tabs remain open"
+  ],
+  "notVerified": [
+    "compact visual capture after resize was occluded",
+    "confirmation execution through this paused UI plan",
+    "multi-screen, focus, shortcut operation and exit preservation"
+  ],
+  "notes": "The paused UI plan was not confirmed. Native execution, undo/redo and rollback were verified separately by integration tests."
+}

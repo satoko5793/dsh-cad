@@ -48,24 +48,32 @@ async function start(){
         case 'confirm':await session.confirm(payload);break;
         case 'pause':session.pause();break;
         case 'cancel':session.cancel();break;
+        case 'parameters':await session.prepareParameters(payload?.changes,payload?.expected);break;
+        case 'select-component':if(typeof payload!=='string')throw Error('请选择零件');await session.view('select_component',{componentId:payload});break;
+        case 'focus-cad':await session.view('focus_cad');break;
         case 'toggle':toggle();break;
         case 'pin':preferences.pinned=!preferences.pinned;window.setAlwaysOnTop(preferences.small&&preferences.pinned);await persistPreferences();broadcast();break;
         case 'minimize':window.minimize();break;
         case 'close':window.close();break;
         case 'connect':{
-          if((await bridge.snapshot()).connected)break;
+          const current=await bridge.snapshot();if(current.connected&&current.protocol===2)break;
           let executable=process.env.FREECAD_EXE||preferences.freecad;
           if(executable){try{await access(executable);}catch{executable='';}}
           if(!executable){const selected=await dialog.showOpenDialog(window,{title:'选择 FreeCAD.exe',properties:['openFile'],filters:[{name:'FreeCAD',extensions:['exe']}]});if(selected.canceled)break;executable=selected.filePaths[0];}
           if(path.basename(executable).toLowerCase()!=='freecad.exe')throw Error('请选择 FreeCAD.exe');
           session.state.status='正在启动专用 FreeCAD 实例…';session.publish(false);
           await bridge.connect(executable);preferences.freecad=executable;await persistPreferences();
-          session.state.status='FreeCAD 已连接 · 可创建四孔安装板';await session.poll();session.publish();break;
+          session.state.status='FreeCAD 已连接 · 可创建多零件设计';await session.poll();session.publish();break;
         }
         case 'save':{
-          if(!session.state.context.document?.owned)throw Error('请先创建本应用支持的安装板');
-          const selected=await dialog.showSaveDialog(window,{title:'另存 FreeCAD 原生工程（不覆盖已有文件）',defaultPath:'四孔安装板.FCStd',filters:[{name:'FreeCAD 原生工程',extensions:['FCStd']}]});
+          if(!session.state.context.document?.owned)throw Error('请先创建本应用支持的工程');
+          const selected=await dialog.showSaveDialog(window,{title:'另存 FreeCAD 原生工程（不覆盖已有文件）',defaultPath:(session.state.context.document.label||'设计')+'.FCStd',filters:[{name:'FreeCAD 原生工程',extensions:['FCStd']}]});
           if(!selected.canceled&&selected.filePath)await session.savePlan(selected.filePath);break;
+        }
+        case 'open':{
+          if(['preparing','planning','executing','uncertain'].includes(session.state.phase))throw Error('请先处理当前任务');
+          const selected=await dialog.showOpenDialog(window,{title:'打开 FreeCAD 原生工程',properties:['openFile'],filters:[{name:'FreeCAD 原生工程',extensions:['FCStd']}]});
+          if(!selected.canceled&&selected.filePaths[0]){const {validateProposal}=await import('./session.mjs');const context=await bridge.snapshot();session.state.context=context;session.state.plan=validateProposal({action:'open_native',path:selected.filePaths[0]},context);session.state.phase='ready';session.state.status='待确认 · 打开原生工程';session.publish();}break;
         }
         case 'attach':{
           const selected=await dialog.showOpenDialog(window,{title:'附加本地参考文件（首版仅保留附件，不解析内容）',properties:['openFile','multiSelections']});

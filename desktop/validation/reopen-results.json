@@ -1,0 +1,119 @@
+{
+  "date": "2026-11-13T05:10:32.380Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "enclosure: native metadata survives close/reopen",
+      "passed": true
+    },
+    {
+      "name": "enclosure: native edit signature survives reopen",
+      "passed": true
+    },
+    {
+      "name": "enclosure: reopened feature tree remains parameter editable",
+      "passed": true
+    },
+    {
+      "name": "enclosure: undo after reopen restores parameters and signature",
+      "passed": true
+    },
+    {
+      "name": "enclosure: same-geometry user feature is not silently bypassed",
+      "passed": true
+    },
+    {
+      "name": "enclosure: manual native edits are protected from recipe overwrite",
+      "passed": true
+    },
+    {
+      "name": "gantry: native metadata survives close/reopen",
+      "passed": true
+    },
+    {
+      "name": "gantry: native edit signature survives reopen",
+      "passed": true
+    },
+    {
+      "name": "gantry: reopened feature tree remains parameter editable",
+      "passed": true
+    },
+    {
+      "name": "gantry: undo after reopen restores parameters and signature",
+      "passed": true
+    },
+    {
+      "name": "gantry: same-geometry user feature is not silently bypassed",
+      "passed": true
+    },
+    {
+      "name": "gantry: manual native edits are protected from recipe overwrite",
+      "passed": true
+    },
+    {
+      "name": "airplane: native metadata survives close/reopen",
+      "passed": true
+    },
+    {
+      "name": "airplane: native edit signature survives reopen",
+      "passed": true
+    },
+    {
+      "name": "airplane: reopened feature tree remains parameter editable",
+      "passed": true
+    },
+    {
+      "name": "airplane: undo after reopen restores parameters and signature",
+      "passed": true
+    },
+    {
+      "name": "airplane: same-geometry user feature is not silently bypassed",
+      "passed": true
+    },
+    {
+      "name": "airplane: manual native edits are protected from recipe overwrite",
+      "passed": true
+    },
+    {
+      "name": "YZ sketch cuts the intended X-axis bore",
+      "passed": true
+    },
+    {
+      "name": "XZ sketch cuts the intended Y-axis bore",
+      "passed": true
+    },
+    {
+      "name": "cross-hole model retains unrelated material",
+      "passed": true
+    },
+    {
+      "name": "axes: native metadata survives close/reopen",
+      "passed": true
+    },
+    {
+      "name": "axes: native edit signature survives reopen",
+      "passed": true
+    },
+    {
+      "name": "axes: reopened feature tree remains parameter editable",
+      "passed": true
+    },
+    {
+      "name": "axes: undo after reopen restores parameters and signature",
+      "passed": true
+    },
+    {
+      "name": "axes: same-geometry user feature is not silently bypassed",
+      "passed": true
+    },
+    {
+      "name": "axes: manual native edits are protected from recipe overwrite",
+      "passed": true
+    }
+  ],
+  "version": [
+    "1",
+    "1",
+    "4"
+  ]
+}

@@ -1,28 +1,48 @@
 import { EventEmitter } from 'node:events';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { readFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { Harness } from '../cad-studio/harness.mjs';
 import { ROOT, atomicJson } from './bridge.mjs';
+import {validateDesign,changeParameters} from './design.mjs';
+import {examples} from './examples.mjs';
 
 export const cleanError=error=>String(error.message||error).replace(/sk-[\w-]+/g,'[redacted]').slice(0,1200);
 export function validateProposal(raw, snapshot) {
   if(!snapshot.connected)throw Error('请先连接 FreeCAD，再准备操作');
-  if(!['create_plate','set_diameter','undo','redo','save_as'].includes(raw.action))throw Error('首版不支持这项 CAD 操作');
-  if(raw.action!=='create_plate'&&!snapshot.document?.owned)throw Error('首版仅能修改本应用创建的四孔板，其他工程只读取上下文');
+  if(!['create_plate','create_design','update_design','set_diameter','undo','redo','save_as','open_native'].includes(raw.action))throw Error('不支持这项 CAD 操作');
+  if(!['create_plate','create_design','open_native'].includes(raw.action)&&!snapshot.document?.owned)throw Error('仅能修改本应用创建的工程，其他工程只读取上下文');
+  if(['create_design','update_design','open_native'].includes(raw.action)&&snapshot.protocol!==2)throw Error('CAD 连接需要升级，请点击“升级连接”。原来的 CAD 工程会保持打开。');
+  const base={id:randomUUID(),action:raw.action,expected:snapshot.fingerprint};
+  if(raw.action==='create_design'){
+    let source=raw.design;
+    if(raw.example){if(!Object.hasOwn(examples,raw.example))throw Error('示例不存在');source=raw.changes?changeParameters(examples[raw.example],raw.changes).design:examples[raw.example];}
+    const design=validateDesign(source);
+    return {...base,design,description:`新建「${design.title}」，${design.components.length}个零件：${design.components.map(c=>c.name).join('、')}`,details:Object.entries(design.parameters).map(([key,p])=>({key,label:p.label,after:p.value,unit:p.unit??'mm'}))};
+  }
+  if(raw.action==='update_design'){
+    if(!snapshot.document?.design)throw Error('当前工程不支持多零件参数修改');
+    if(snapshot.document.editable===false)throw Error('检测到手动修改原生特征，请先核对工程；不会用旧参数覆盖你的修改');
+    const {diff}=changeParameters(snapshot.document.design,raw.changes);
+    const affected=snapshot.document.design.components.filter(c=>diff.some(p=>new RegExp(`\\b${p.key}\\b`).test(JSON.stringify([c.position,c.features])))).map(c=>c.name);
+    return {...base,changes:Object.fromEntries(diff.map(p=>[p.key,p.after])),details:diff,affected,description:diff.map(p=>`${p.label} ${p.before} → ${p.after}${p.unit}`).join('；')+`。涉及${affected.join('、')||'设计参数'}，其他参数保持不变`};
+  }
   if(raw.action==='set_diameter') {
     if(typeof raw.diameter!=='number'||!Number.isFinite(raw.diameter)||raw.diameter<=0||raw.diameter>=16)throw Error('孔径须大于0且小于16mm');
     const s=snapshot.selection;
     if(s.length!==1||s[0].document!==snapshot.document.name||!['ThroughHoles','MountingHoles'].includes(s[0].object)||s[0].subelements.length)throw Error('请在 FreeCAD 特征树选中整个四孔特征；首版不支持单孔或单面修改');
   }
-  return {id:randomUUID(),action:raw.action,...(raw.action==='set_diameter'?{diameter:raw.diameter}:{}),...(raw.action==='save_as'?{path:raw.path}:{}),expected:snapshot.fingerprint,
-    description:raw.action==='create_plate'?'新建 80 × 40 × 5 mm 四孔安装板，四孔直径 6 mm':raw.action==='set_diameter'?`四个孔一同改为 ${raw.diameter} mm，保持板厚、外形和孔位`:raw.action==='save_as'?`另存原生工程：${raw.path}`:raw.action==='undo'?'撤销 FreeCAD 最近一个事务':'重做 FreeCAD 最近一个事务'};
+  return {...base,...(raw.action==='set_diameter'?{diameter:raw.diameter}:{}),...(['save_as','open_native'].includes(raw.action)?{path:raw.path}:{}),
+    description:raw.action==='create_plate'?'新建 80 × 40 × 5 mm 四孔安装板，四孔直径 6 mm':raw.action==='set_diameter'?`四个孔一同改为 ${raw.diameter} mm，保持板厚、外形和孔位`:raw.action==='save_as'?`另存原生工程：${raw.path}`:raw.action==='open_native'?`打开原生工程：${raw.path}（其他已打开工程保留）`:raw.action==='undo'?'撤销 FreeCAD 最近一个事务':'重做 FreeCAD 最近一个事务'};
 }
 // Precise common commands work offline. Everything else goes through the real Harness.
-export function localIntent(text) {
+export function localIntent(text,context) {
+  if(/^(做|创建|新建|生成)(一个)?(带盖|带上盖的?)?(控制盒|电子盒|电路板盒)[。！!\s]*$/.test(text))return {action:'create_design',example:'enclosure'};
+  if(/^(做|创建|新建|生成)(一个)?(五零件)?(小|桌面)?龙门架[。！!\s]*$/.test(text))return {action:'create_design',example:'gantry'};
+  if(/^(做|创建|新建|生成)(一个)?(简化的?|小)?飞机[。！!\s]*$/.test(text))return {action:'create_design',example:'airplane'};
   if(/^(做|创建|新建|生成)(一个)?(四孔)?安装板[。！!\s]*$/.test(text))return {action:'create_plate'};
   const diameter=/^(?:把)?(?:这个孔|这些孔|四个孔|四孔|孔径)(?:直径|的直径|孔径)?(?:改成|改为|设为|变成|改到)(\d+(?:\.\d+)?)\s*(?:毫米|mm)?(?:[，,]?其他不变)?[。！!\s]*$/i.exec(text);
-  if(diameter)return {action:'set_diameter',diameter:Number(diameter[1])};
+  if(diameter&&!context?.document?.design)return {action:'set_diameter',diameter:Number(diameter[1])};
   if(/^(撤销|撤回)(上一步|一次)?[。！!\s]*$/.test(text))return {action:'undo'};
   if(/^(重做|恢复上一步)[。！!\s]*$/.test(text))return {action:'redo'};
   return null;
@@ -30,11 +50,14 @@ export function localIntent(text) {
 export class Session extends EventEmitter {
   constructor(directory,bridge) {
     super();this.directory=directory;this.bridge=bridge;this.saving=Promise.resolve();this.harness=null;this.turn=null;
-    this.state={version:1,messages:[],draft:'',attachments:[],plan:null,phase:'idle',status:'描述想法，或连接 FreeCAD 开始建模',context:{connected:false,document:null,selection:[]}};
+    this.profile='gouxing-desktop-'+createHash('sha256').update(path.resolve(directory)).digest('hex').slice(0,10);
+    this.state={version:2,messages:[],draft:'',attachments:[],history:[],plan:null,phase:'idle',status:'描述想法，或连接 FreeCAD 开始建模',context:{connected:false,document:null,selection:[]}};
   }
   async load() {
     await mkdir(this.directory,{recursive:true});
     try {const old=JSON.parse(await readFile(path.join(this.directory,'session.json'),'utf8'));Object.assign(this.state,old,{context:this.state.context,plan:null,phase:'idle',status:'会话已恢复；请连接 FreeCAD。未完成的操作不会自动重试。'});}catch(error){if(error.code!=='ENOENT')throw error;}
+    this.state.version=2;
+    for(const record of this.state.history||[])if(['executing','uncertain'].includes(record.state)){record.state='needs-review';record.result='应用已重启，请核对 CAD；未自动重发操作';}
     return this.state;
   }
   publish(persist=true) {
@@ -45,18 +68,21 @@ export class Session extends EventEmitter {
   async poll() {
     const next=await this.bridge.snapshot(), old=this.state.context;
     this.state.context=next;
+    if(next.connected&&this.state.status.startsWith('会话已恢复；请连接'))this.state.status='会话已恢复 · FreeCAD 已连接；旧计划未自动重发';
     if(this.state.phase==='uncertain'){
       const result=await this.bridge.lateResult?.();
-      if(result){this.state.phase=result.ok?'done':'error';this.state.status=result.ok?'延迟结果已读回 · 执行完成':'延迟结果已读回 · 未完成';this.message('assistant',result.ok?result.message:result.error);this.publish();return;}
+      if(result){this.state.phase=result.ok?'done':'error';this.state.status=result.ok?'延迟结果已读回 · 执行完成':'延迟结果已读回 · 未完成';const record=[...(this.state.history||[])].reverse().find(h=>h.state==='uncertain');if(record){record.state=this.state.phase;record.result=this.state.status;record.finishedAt=new Date().toISOString();}this.message('assistant',result.ok?result.message:result.error);this.publish();return;}
     }
     if(this.state.plan&&['ready','paused'].includes(this.state.phase)&&(!next.connected||next.fingerprint!==this.state.plan.expected)) {
       this.state.phase='stale';this.state.plan=null;this.state.status='工程或选择已变化，原计划已失效，请重新提出需求';this.publish();
-    }else if(next.connected!==old.connected||next.fingerprint!==old.fingerprint)this.publish(false);
+    }else if(next.connected!==old.connected||next.fingerprint!==old.fingerprint||JSON.stringify(next.progress)!==JSON.stringify(old.progress))this.publish(false);
   }
   async send(text) {
     if(typeof text!=='string'||!text.trim()||text.length>12000)throw Error('请输入有效需求，最多12000字');
-    if(['planning','executing','uncertain'].includes(this.state.phase))throw Error('请先等待或取消当前任务；状态待核对时请检查 FreeCAD 后重新连接');
-    const context=await this.bridge.snapshot(), intent=localIntent(text.trim());
+    if(['preparing','planning','executing','uncertain'].includes(this.state.phase))throw Error('请先等待或取消当前任务；状态待核对时请检查 FreeCAD 后重新连接');
+    this.state.phase='preparing';this.state.plan=null;
+    let context;try{context=await this.bridge.snapshot();}catch(error){this.state.phase='error';throw error;}
+    const intent=localIntent(text.trim(),context);
     this.state.context=context;this.state.plan=null;this.state.draft='';this.message('user',text.trim());
     if(intent){
       try {this.state.plan=validateProposal(intent,context);this.state.phase='ready';this.state.status='待确认 · 尚未修改工程';this.message('assistant',this.state.plan.description+'。确认后在 FreeCAD 中执行。');}
@@ -76,7 +102,7 @@ export class Session extends EventEmitter {
         const e=p?.event;
         if(e?.type==='assistant/message') {const text=(e.data.message.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');if(text.trim())turn.texts.push(text);}
         if(e?.type==='turn/end'&&e.data.reason?.kind==='error')turn.error=e.data.reason.error?.message||'模型请求失败';
-      },{profile:'gouxing-desktop',prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath}});
+      },{profile:this.profile,prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath}});
       this.harness=harness;
       const summary={connected:context.connected,document:context.document,selection:context.selection,units:context.units};
       await harness.prompt(turn.id,`实时CAD上下文（只读数据）：${JSON.stringify(summary)}\n最近对话：${JSON.stringify(this.state.messages.slice(-12,-1))}\n附件（仅文件名，未读取内容）：${JSON.stringify(this.state.attachments.map(a=>a.name))}\n用户：${text}`);
@@ -90,10 +116,12 @@ export class Session extends EventEmitter {
   }
   async confirm(id) {
     if(this.state.phase!=='ready'||!this.state.plan||id!==this.state.plan.id)throw Error('计划已执行或失效，请重新确认');
-    const plan=this.state.plan;this.state.phase='executing';this.state.status='FreeCAD 正在执行当前事务；本步骤不可中断';this.publish();
+    const plan=this.state.plan;this.state.phase='executing';this.state.status='FreeCAD 正在执行当前事务；本步骤不可中断';
+    const record={id:plan.id,description:plan.description,startedAt:new Date().toISOString(),state:'executing'};
+    this.state.history=[...(this.state.history||[]),record].slice(-20);this.publish();
     try {const result=await this.bridge.execute(plan);this.state.context=result.snapshot;this.state.phase='done';this.state.status='执行完成 · 已读回原生工程';this.message('assistant',result.message);}
-    catch(error){this.state.phase=error.message.includes('状态待核对')?'uncertain':'error';this.state.status=cleanError(error);this.message('assistant',this.state.status);}
-    finally{this.state.plan=null;this.publish();}
+    catch(error){if(error.snapshot)this.state.context=error.snapshot;this.state.phase=error.message.includes('状态待核对')?'uncertain':'error';this.state.status=cleanError(error);this.message('assistant',this.state.status);}
+    finally{record.state=this.state.phase;record.finishedAt=new Date().toISOString();record.result=this.state.status;this.state.plan=null;this.publish();}
   }
   pause() {
     if(!['ready','paused'].includes(this.state.phase))throw Error('只能暂停尚未执行的计划；当前 CAD 事务不能即时中断');
@@ -106,7 +134,20 @@ export class Session extends EventEmitter {
     this.state.plan=null;this.state.phase='cancelled';this.state.status='已取消后续操作，已完成的变更保留';this.publish();
   }
   async savePlan(target) {
-    if(['planning','executing','uncertain'].includes(this.state.phase))throw Error('请先处理当前任务');
+    if(['preparing','planning','executing','uncertain'].includes(this.state.phase))throw Error('请先处理当前任务');
     this.state.context=await this.bridge.snapshot();this.state.plan=validateProposal({action:'save_as',path:target},this.state.context);this.state.phase='ready';this.state.status='待确认 · 保存原生工程';this.publish();
+  }
+  async prepareParameters(changes,expected) {
+    if(['preparing','planning','executing','uncertain'].includes(this.state.phase))throw Error('请先处理当前任务');
+    this.state.phase='preparing';this.state.plan=null;
+    try{const context=await this.bridge.snapshot();if(context.fingerprint!==expected)throw Error('工程已变化，请重新查看当前尺寸后修改');this.state.context=context;this.state.plan=validateProposal({action:'update_design',changes},context);this.state.phase='ready';this.state.status='尺寸修改已准备 · 确认后重建';this.publish();}
+    catch(error){this.state.phase='idle';this.state.status=cleanError(error);this.publish();throw error;}
+  }
+  async view(action,payload={}) {
+    if(['preparing','executing','uncertain'].includes(this.state.phase))throw Error('请等待当前原生操作结束');
+    const context=await this.bridge.snapshot();if(!context.connected||context.protocol!==2)throw Error('请连接新版 FreeCAD 工作区');
+    const result=await this.bridge.execute({action,...payload,expected:context.fingerprint});this.state.context=result.snapshot;
+    if(this.state.plan&&result.snapshot.fingerprint!==this.state.plan.expected){this.state.plan=null;this.state.phase='stale';this.state.status='选择已变化，请重新提出需求';}
+    this.publish(false);
   }
 }

@@ -1,0 +1,320 @@
+{
+  "date": "2026-11-13T05:11:10.620Z",
+  "version": [
+    "1",
+    "1",
+    "4"
+  ],
+  "checks": [
+    {
+      "name": "enclosure: create native multi-body features",
+      "passed": true
+    },
+    {
+      "name": "enclosure: change intended parameter and preserve others",
+      "passed": true
+    },
+    {
+      "name": "enclosure: undo and redo parameter transaction",
+      "passed": true
+    },
+    {
+      "name": "enclosure: select component by stable id",
+      "passed": true
+    },
+    {
+      "name": "enclosure: save native engineering file",
+      "passed": true
+    },
+    {
+      "name": "gantry: create native multi-body features",
+      "passed": true
+    },
+    {
+      "name": "gantry: change intended parameter and preserve others",
+      "passed": true
+    },
+    {
+      "name": "gantry: undo and redo parameter transaction",
+      "passed": true
+    },
+    {
+      "name": "gantry: select component by stable id",
+      "passed": true
+    },
+    {
+      "name": "gantry: world bounds reflect carriage translation",
+      "passed": true
+    },
+    {
+      "name": "gantry: failed multi-solid rebuild aborts whole transaction",
+      "passed": true
+    },
+    {
+      "name": "gantry: save native engineering file",
+      "passed": true
+    },
+    {
+      "name": "airplane: create native multi-body features",
+      "passed": true
+    },
+    {
+      "name": "airplane: change intended parameter and preserve others",
+      "passed": true
+    },
+    {
+      "name": "airplane: undo and redo parameter transaction",
+      "passed": true
+    },
+    {
+      "name": "airplane: select component by stable id",
+      "passed": true
+    },
+    {
+      "name": "airplane: save native engineering file",
+      "passed": true
+    },
+    {
+      "name": "invalid geometry rejects and preserves previous native design",
+      "passed": true
+    },
+    {
+      "name": "open native enclosure through bridge and retain editable parameters",
+      "passed": true
+    },
+    {
+      "name": "switch back to native airplane without closing other documents",
+      "passed": true
+    }
+  ],
+  "measurements": {
+    "enclosure": [
+      {
+        "id": "box",
+        "object": "GX_box",
+        "name": "盒体",
+        "volume": 39120.79610071225,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          90,
+          64,
+          30
+        ],
+        "bounds": [
+          0,
+          0,
+          0,
+          90,
+          64,
+          30
+        ],
+        "digest": "78b4faae3922f46c4cbe853ad17c4784fe3f9a14611b2ecc442684fc16f3489d"
+      },
+      {
+        "id": "lid",
+        "object": "GX_lid",
+        "name": "上盖",
+        "volume": 18542.546469980574,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          90,
+          64,
+          5.0000000000000036
+        ],
+        "bounds": [
+          0,
+          0,
+          28.2,
+          90,
+          64,
+          33.2
+        ],
+        "digest": "d1493c13102ae604b662dbc7d16b5d7008097d7be2eb088c34c5531a57149a24"
+      }
+    ],
+    "gantry": [
+      {
+        "id": "base",
+        "object": "GX_base",
+        "name": "底座",
+        "volume": 49928.761101961514,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          120,
+          70,
+          6
+        ],
+        "bounds": [
+          0,
+          0,
+          0,
+          120,
+          70,
+          6
+        ],
+        "digest": "f17dcd4a548848ae18e9147d84d422bb2c881c93d9dbe40d764b50cc8266fce7"
+      },
+      {
+        "id": "leftPost",
+        "object": "GX_leftPost",
+        "name": "左立柱",
+        "volume": 11700,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          10,
+          18,
+          65
+        ],
+        "bounds": [
+          12,
+          26,
+          6,
+          22,
+          44,
+          71
+        ],
+        "digest": "c5fb292b7b280c54df4227c42608c999eb8e5f976cbe7b79d6a416a761feaa50"
+      },
+      {
+        "id": "rightPost",
+        "object": "GX_rightPost",
+        "name": "右立柱",
+        "volume": 11700,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          10,
+          18,
+          65
+        ],
+        "bounds": [
+          98,
+          26,
+          6,
+          108,
+          44,
+          71
+        ],
+        "digest": "f5ae72626dfbb826464ef9c4e56dc4f49f081e1b13f0cbf898c73ecb5116107c"
+      },
+      {
+        "id": "beam",
+        "object": "GX_beam",
+        "name": "横梁",
+        "volume": 20736,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          96,
+          18,
+          12
+        ],
+        "bounds": [
+          12,
+          26,
+          71,
+          108,
+          44,
+          83
+        ],
+        "digest": "59d347cc6b673c7ff7426e7e4494bdcca9ad7a6c1cd8164333b8f8c2b070cdcc"
+      },
+      {
+        "id": "carriage",
+        "object": "GX_carriage",
+        "name": "滑台",
+        "volume": 4765.805328941535,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          24,
+          26,
+          8
+        ],
+        "bounds": [
+          48,
+          22,
+          83,
+          72,
+          48,
+          91
+        ],
+        "digest": "1a253d0a708402b21c5f991fbb25ea3f84ac512c4431b896ee33d8393e3423fe"
+      }
+    ],
+    "airplane": [
+      {
+        "id": "fuselage",
+        "object": "GX_fuselage",
+        "name": "机身",
+        "volume": 10620,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          100,
+          12,
+          10
+        ],
+        "bounds": [
+          0,
+          0,
+          0,
+          100,
+          12,
+          10
+        ],
+        "digest": "52f6e0919184ea8e15fa61066d84b18064640b201f124edf3cfd1f89d16e9536"
+      },
+      {
+        "id": "wing",
+        "object": "GX_wing",
+        "name": "主翼",
+        "volume": 6000,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          30,
+          100,
+          3
+        ],
+        "bounds": [
+          35,
+          -44,
+          5,
+          65,
+          56,
+          8
+        ],
+        "digest": "3d4bee9e1c324308bb0ca4a4bbbbd121b6d115cfbbbe3808955e0a316e393326"
+      },
+      {
+        "id": "tail",
+        "object": "GX_tail",
+        "name": "尾翼",
+        "volume": 1482,
+        "solids": 1,
+        "valid": true,
+        "dimensions": [
+          20,
+          38,
+          3
+        ],
+        "bounds": [
+          76,
+          -13,
+          5,
+          96,
+          25,
+          8
+        ],
+        "digest": "075bd7e1425f34749159fc5fb844fe263b5dd086277009edcbd6f9f19e85bf94"
+      }
+    ]
+  },
+  "passed": true,
+  "note": "Static multi-body native features. Geometry validity does not prove assembly, interference-free design or manufacturability."
+}

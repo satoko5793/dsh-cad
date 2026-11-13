@@ -15,7 +15,8 @@ export class FreeCADBridge {
     try {const saved=JSON.parse(await readFile(path.join(this.dataDir,'connection.json'),'utf8'));this.directory=saved.directory;}catch(error){if(error.code!=='ENOENT')throw error;}
   }
   async connect(executable) {
-    if (this.launching || (await this.snapshot()).connected) throw Error('FreeCAD 已连接或正在启动');
+    const current=await this.snapshot();
+    if (this.launching || (current.connected&&current.protocol>=2)) throw Error('FreeCAD 已连接或正在启动');
     await access(executable); this.launching = true;
     try {
       this.directory = path.join(this.dataDir, 'freecad', randomUUID());
@@ -24,7 +25,7 @@ export class FreeCADBridge {
       await atomicJson(path.join(this.dataDir,'connection.json'),{directory:this.directory});
       const macro = path.join(this.directory, 'connect.FCMacro');
       const source = path.join(ROOT, 'freecad', 'bridge.py');
-      await writeFile(macro, `exec(compile(open(${JSON.stringify(source.replaceAll('\\','/'))}, encoding='utf-8').read(), 'gouxing-bridge', 'exec'))\n`);
+      await writeFile(macro, `import sys\nsys.path.insert(0, ${JSON.stringify(path.dirname(source).replaceAll('\\','/'))})\nexec(compile(open(${JSON.stringify(source.replaceAll('\\','/'))}, encoding='utf-8').read(), 'gouxing-bridge', 'exec'))\n`);
       this.child = spawn(executable, ['--user-cfg', path.join(this.directory, 'user.cfg'), '--system-cfg', path.join(this.directory, 'system.cfg'), macro], {
         windowsHide:false, detached:true, stdio:'ignore', env:{...process.env, GOUXING_BRIDGE_DIR:this.directory}
       });
@@ -37,7 +38,12 @@ export class FreeCADBridge {
     } finally { this.launching=false; }
   }
   async snapshot() {
-    try {const state=JSON.parse(await readFile(path.join(this.directory,'snapshot.json'),'utf8'));return {...state,connected:Date.now()-state.heartbeat*1000<3000};}
+    try {
+      const state=JSON.parse(await readFile(path.join(this.directory,'snapshot.json'),'utf8'));
+      let progress=null;try{progress=JSON.parse(await readFile(path.join(this.directory,'progress.json'),'utf8'));}catch{}
+      const busy=progress?.active&&Date.now()-progress.heartbeat*1000<5000;
+      return {...state,progress,busy:!!busy,connected:!!busy||Date.now()-state.heartbeat*1000<5000};
+    }
     catch{return {connected:false,document:null,selection:[]};}
   }
   async execute(plan) {
@@ -46,7 +52,7 @@ export class FreeCADBridge {
     await atomicJson(file,{...plan,id,deadline:Date.now()/1000+12});
     const end=Date.now()+20000;
     while(Date.now()<end) {
-      try {const result=JSON.parse(await readFile(path.join(this.directory,'results',`${id}.json`),'utf8'));if(!result.ok)throw Object.assign(Error(result.error),{cadResult:true});return result;}
+      try {const result=JSON.parse(await readFile(path.join(this.directory,'results',`${id}.json`),'utf8'));if(!result.ok)throw Object.assign(Error(result.error),{cadResult:true,snapshot:result.snapshot});return result;}
       catch(error){if(error.cadResult)throw error;if(error.code!=='ENOENT')throw error;}
       await new Promise(r=>setTimeout(r,150));
     }

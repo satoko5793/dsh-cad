@@ -33,14 +33,15 @@ test('one confirmed plan executes once, pause blocks writes, and context changes
 test('restart restores messages, drafts and attachments without replaying pending writes',async t=>{
   const directory=await mkdtemp(path.join(os.tmpdir(),'gouxing-session-'));t.after(()=>rm(directory,{recursive:true,force:true}));
   const bridge={snapshot:async()=>context()};const first=new Session(directory,bridge);await first.load();
-  await first.send('做一个四孔安装板');first.state.draft='保留这段草稿';first.state.attachments=[{id:'example',name:'参考图.png'}];first.publish();await first.saving;
+  await first.send('做一个四孔安装板');first.state.draft='保留这段草稿';first.state.attachments=[{id:'example',name:'参考图.png'}];first.state.history=[{id:'unfinished',state:'executing'}];first.publish();await first.saving;
   const next=new Session(directory,bridge);await next.load();assert.equal(next.state.draft,'保留这段草稿');assert.equal(next.state.messages.length,2);assert.equal(next.state.attachments.length,1);assert.equal(next.state.plan,null);assert.equal(next.state.phase,'idle');
+  assert.equal(next.state.history[0].state,'needs-review');await next.poll();assert.match(next.state.status,/已连接/);
 });
 test('a delayed CAD result resolves uncertainty without replaying a write',async t=>{
   const directory=await mkdtemp(path.join(os.tmpdir(),'gouxing-session-'));t.after(()=>rm(directory,{recursive:true,force:true}));
   let writes=0;
   const bridge={snapshot:async()=>context(),execute:async()=>{writes++;},lateResult:async()=>({ok:true,message:'迟到的执行结果',snapshot:context()})};
-  const session=new Session(directory,bridge);await session.load();session.state.phase='uncertain';
+  const session=new Session(directory,bridge);await session.load();session.state.phase='uncertain';session.state.history=[{id:'late',state:'uncertain'}];
   await assert.rejects(session.send('孔径改成8毫米'));await session.poll();
-  assert.equal(session.state.phase,'done');assert.equal(writes,0);assert.equal(session.state.messages.at(-1).text,'迟到的执行结果');await session.saving;
+  assert.equal(session.state.phase,'done');assert.equal(writes,0);assert.equal(session.state.messages.at(-1).text,'迟到的执行结果');assert.equal(session.state.history[0].state,'done');await session.saving;
 });

@@ -12,6 +12,7 @@ import FreeCADGui as Gui
 import Part
 import Sketcher
 from PySide import QtCore
+import features
 
 
 def atomic_json(filename, value):
@@ -26,6 +27,7 @@ class Bridge:
         self.instance = str(uuid.uuid4())
         self.tokens = {}
         self.last_error = None
+        self.command_id = None
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.tick)
         App.addDocumentObserver(self)
@@ -42,15 +44,16 @@ class Bridge:
         doc = App.ActiveDocument
         selection = [{'document': s.DocumentName, 'object': s.ObjectName,
                       'subelements': list(s.SubElementNames)} for s in Gui.Selection.getSelectionEx()]
-        value = {'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
+        value = {'protocol': 2, 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
         if doc:
             objects = []
             for obj in doc.Objects:
                 item = {'name': obj.Name, 'label': obj.Label, 'type': obj.TypeId}
-                if 'Shape' in obj.PropertiesList:
+                if 'Shape' in obj.PropertiesList and (obj.TypeId == 'PartDesign::Body' or obj.TypeId == 'Part::Feature'):
                     item['shape'] = hashlib.sha256(obj.Shape.exportBrepToString().encode()).hexdigest()
                 if obj.TypeId == 'Sketcher::SketchObject':
                     item['constraints'] = [str(c) for c in obj.Constraints]
+                    item['geometry'] = [str(g) for g in obj.Geometry]
                 for prop in ('Length', 'Placement'):
                     if prop in obj.PropertiesList:
                         item[prop] = str(getattr(obj, prop))
@@ -58,7 +61,16 @@ class Bridge:
             value['document'] = {'name': doc.Name, 'label': doc.Label, 'file': doc.FileName,
                                  'token': self.tokens.setdefault(doc.Name, str(uuid.uuid4())),
                                  'objects': objects, 'owned': self.owned(doc)}
-            if self.owned(doc):
+            if self.schema(doc) == 'gouxing-design-v2':
+                try:
+                    design = features.metadata(doc)
+                    value['document']['design'] = design
+                    value['document']['components'] = [features.shape_summary(doc.getObject(features.name(c))) for c in design['components']]
+                    value['document']['editable'] = features.signatures(doc, design) == doc.getObject('HarnessInfo').NativeSignature
+                except Exception as error:
+                    value['document']['editable'] = False
+                    value['document']['error'] = str(error)
+            elif self.owned(doc):
                 holes = doc.getObject('MountingHoles')
                 value['document']['diameters'] = [holes.getDatum(i).Value for i in (0, 3, 6, 9)]
                 shape = doc.getObject('ThroughHoles').Shape
@@ -70,9 +82,16 @@ class Bridge:
         value['version'] = App.Version()[:3]
         return value
 
-    def owned(self, doc):
+    def schema(self, doc):
         marker = doc.getObject('HarnessInfo')
-        return bool(marker and 'Schema' in marker.PropertiesList and marker.Schema == 'gouxing-plate-v1')
+        return marker.Schema if marker and 'Schema' in marker.PropertiesList else None
+
+    def owned(self, doc):
+        return self.schema(doc) in ('gouxing-plate-v1', 'gouxing-design-v2')
+
+    def progress(self, current, total, label):
+        atomic_json(self.directory / 'progress.json', {'id': self.command_id, 'active': True,
+                    'current': current, 'total': total, 'label': label, 'heartbeat': time.time()})
 
     def validate(self, doc, diameter):
         shape = doc.getObject('ThroughHoles').Shape
@@ -124,12 +143,42 @@ class Bridge:
         if command.get('expected') != before['fingerprint']:
             raise ValueError('工程、选择或设计已变化，请重新提出需求并确认')
         action = command.get('action')
+        if action == 'focus_cad':
+            window = Gui.getMainWindow()
+            if window.isMinimized():
+                window.showNormal()
+            window.raise_()
+            window.activateWindow()
+            return {'message': '已切换到连接的 CAD 工作区。'}
         if action == 'create_plate':
             return self.create_plate()
+        if action == 'create_design':
+            return features.create(command.get('design'), self.progress)
+        if action == 'open_native':
+            target = pathlib.Path(command.get('path', ''))
+            if not target.is_absolute() or target.suffix.lower() != '.fcstd' or not target.is_file():
+                raise ValueError('请选择存在的 FreeCAD 原生工程')
+            doc = App.openDocument(str(target))
+            App.setActiveDocument(doc.Name)
+            Gui.activeDocument().activeView().viewAxonometric()
+            Gui.activeDocument().activeView().fitAll()
+            return {'message': '已打开原生工程「' + doc.Label + '」。原先打开的工程保留。'}
         doc = App.ActiveDocument
         if not doc or not self.owned(doc):
-            raise ValueError('首版仅能修改本应用创建的四孔板；其他工程只读取上下文')
+            raise ValueError('仅能修改本应用创建的工程；其他工程只读取上下文')
+        if action == 'update_design':
+            return features.update(doc, command.get('changes'), self.progress)
+        if action == 'select_component':
+            design = features.metadata(doc)
+            component = next((c for c in (design or {}).get('components', []) if c['id'] == command.get('componentId')), None)
+            if not component:
+                raise ValueError('零件不存在，请重新读取工程')
+            Gui.Selection.clearSelection()
+            Gui.Selection.addSelection(doc.Name, features.name(component))
+            return {'message': '已在 CAD 选中「' + component['name'] + '」。'}
         if action == 'set_diameter':
+            if self.schema(doc) != 'gouxing-plate-v1':
+                raise ValueError('该指令用于旧版四孔板；当前设计请修改对应参数')
             selections = before['selection']
             if (len(selections) != 1 or selections[0]['document'] != doc.Name
                     or selections[0]['object'] not in ('ThroughHoles', 'MountingHoles')
@@ -179,12 +228,23 @@ class Bridge:
                 try:
                     if time.time() > command.get('deadline', 0):
                         raise ValueError('请求已过期，未执行')
+                    self.command_id = command.get('id')
+                    self.progress(0, 1, '核对工程并准备执行')
                     value = {'ok': True, **self.execute(command)}
                 except Exception as error:
                     value = {'ok': False, 'error': str(error)}
+                finally:
+                    atomic_json(self.directory / 'progress.json', {'id': self.command_id, 'active': False, 'heartbeat': time.time()})
                 value['snapshot'] = self.snapshot()
+                # Publish context before acknowledging, so an immediate next command
+                # cannot read the pre-transaction heartbeat/context from disk.
+                atomic_json(self.directory / 'snapshot.json', value['snapshot'])
                 atomic_json(result_file, value)
-            atomic_json(self.directory / 'snapshot.json', self.snapshot())
+            snapshot = self.snapshot()
+            title = 'FreeCAD · 构形工作区 [' + self.instance[:6] + '] · ' + ((snapshot.get('document') or {}).get('label', '无活动工程'))
+            if Gui.getMainWindow().windowTitle() != title:
+                Gui.getMainWindow().setWindowTitle(title)
+            atomic_json(self.directory / 'snapshot.json', snapshot)
         except Exception as error:
             App.Console.PrintError('构形桥接：' + str(error) + '\n')
 

@@ -1,8 +1,10 @@
 # 技术说明与维护约定
 
-本文描述桌面开发版和保留的网页原型。桌面使用 Electron、Node/DSH 与 FreeCAD GUI 常驻 Python 宏；网页继续使用 HTML/CSS/JavaScript、Three.js、Node HTTP 和 CadQuery 2.8 / OpenCascade。
+本文描述桌面开发版和保留的网页原型。桌面使用 Electron、Node/DSH 与 FreeCAD GUI 常驻 Python 宏；网页继续使用 HTML/CSS/JavaScript、Three.js、Node HTTP 和 CadQuery 2.8 / OpenCascade
 
-桌面提供完整工作台与悬浮小窗，通过有限白名单操作 FreeCAD 1.1.4 的原生四孔板。完整目标结构与交互边界见[桌面 Harness 规格](desktop-harness.md)，未验收项见[验证记录](validation.md)。
+
+
+桌面提供完整工作台与悬浮小窗，通过受限特征结构操作FreeCAD原生多零件设计。结构与边界见[原生设计指南](native-designs.md)，完整目标交互见[桌面Harness规格](desktop-harness.md)，未验收项见[验证记录](validation.md)。
 
 ## 桌面实现
 
@@ -10,13 +12,13 @@
 
 `desktop/ui/` 使用同一 DOM 切换完整与紧凑布局，不刷新、不重复提交。主进程 `Session` 是会话与任务的唯一来源，统一持久化消息、草稿、附件索引和任务状态。恢复时清除未完成计划，保留对话与草稿；CAD 上下文重新读取，不当成已恢复执行。
 
-`desktop/session.mjs` 识别少量精确本地命令；其他消息通过已有 DSH 客户端与独立 `gouxing-desktop` profile。`plan-plugin.mjs` 唯一工具 `freecad_propose` 只输出结构化计划，不能调用 CAD，也不能运行任意代码。主进程校验白名单、数值、工程与选择，生成单次计划标识；用户确认后才交给适配器。每轮模型进程结束后释放，最近对话会作为上下文补入；这不是跨轮保持同一个 DSH 子进程。
+`desktop/session.mjs` 识别精确示例指令；其他消息通过DSH与按数据目录隔离的 `gouxing-desktop-<摘要>` profile。唯一工具 `freecad_propose` 只输出计划，不能调用CAD或执行代码。`desktop/design.mjs` 校验尺寸算式、组件与特征，确认前显示参数差异和涉及零件。每轮模型进程结束后释放，最近对话作为上下文补入，不跨轮保持同一个DSH子进程。
 
 `desktop/bridge.mjs` 启动带独立配置的 FreeCAD 实例。宏 `desktop/freecad/bridge.py` 在 GUI 线程每350ms轮询本地 inbox，并写出快照和按请求ID存储的结果。请求先消费后执行，附12秒启动期限；已消费请求不重跑。主进程20秒未收结果会锁住后续写入并等待迟到结果，不自动重试。
 
-写入时重新读取活动文档、文档令牌、对象类型、草图约束、相关属性、实体 BRep 与选择，计算指纹；不匹配便拒绝。快照超过3秒未更新视为断连。方案当前对小型测试工程有效，复杂工程逐次 BRep 摘要的性能仍需验证，不能称为完整 CAD 变更监控。
+写入时重读活动文档、文档令牌、对象类型、草图、相关属性、Body BRep与选择并计算指纹；不匹配便拒绝。普通快照超过5秒未更新且无新执行进度视为断连。快照在确认结果前写入，避免连续任务读到旧上下文。复杂工程摘要性能仍需验证，不能称为完整CAD变更监控。
 
-仅能编辑带本应用标记的固定安装板，孔径通过四个原生直径约束修改，在事务内重建并校验尺寸、单实体和解析体积；失败尝试中止事务。支持撤销/重做最近原生事务，可能包含用户的最近操作，计划明确提示其范围。保存仅另存不存在的 `.FCStd` 路径。附件暂不解析，模型只收到文件名；不同桌面/原型数据不自动迁移。
+`desktop/freecad/features.py` 将配方生成为原生Body/Sketch/Pad/Pocket；参数更新保留对象名，在事务内重建，逐特征和Body核对单实体有效性。配方与稳定编辑签名保存在 `HarnessInfo`，签名不依赖重开可能变化的BRep字节顺序。发现手工编辑便拒绝配方覆盖，未实现自动合并。旧板仍用四个原生直径约束。撤销/重做作用于最近原生事务；保存仅另存新 `.FCStd`，打开保留其他工程。附件暂不解析，桌面与原型数据不自动迁移。
 
 Electron [窗口接口](https://www.electronjs.org/docs/latest/api/browser-window)及[contextBridge](https://www.electronjs.org/docs/latest/api/context-bridge)用于原生行为与隔离；FreeCAD 选择读取参考[官方 API 源码文档](https://freecad.github.io/SourceDoc/d4/dca/classGui_1_1SelectionSingleton.html)。具体通过结论以本仓库测试结果为准。
 
