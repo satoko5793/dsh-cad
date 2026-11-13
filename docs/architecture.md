@@ -14,6 +14,8 @@
 
 `desktop/session.mjs` 识别精确示例指令；其他消息通过DSH与按数据目录隔离的 `gouxing-desktop-<摘要>` profile。唯一工具 `freecad_propose` 只输出计划，不能调用CAD或执行代码。`desktop/design.mjs` 校验尺寸算式、组件与特征，确认前显示参数差异和涉及零件。每轮模型进程结束后释放，最近对话作为上下文补入，不跨轮保持同一个DSH子进程。
 
+`cad-studio/node-runtime.mjs` 选择并探测独立Node：启动器通过 `GOUXING_NODE_EXE` 传递自身Node路径，Harness在子进程启动前检查版本、发行类型以及不存在Electron标识；直接运行Electron时可从PATH查找Node。DSH子进程不再使用Electron的 `process.execPath`，不继承 `ELECTRON_RUN_AS_NODE`。原生插件不兼容错误在对话中显示简短提示，技术原因脱敏写入私有 `model-errors.log`。创建示例允许空或与默认一致的尺寸覆盖；修改已有设计仍要求真实参数变化。
+
 `desktop/bridge.mjs` 启动带独立配置的 FreeCAD 实例。宏 `desktop/freecad/bridge.py` 在 GUI 线程每350ms轮询本地 inbox，并写出快照和按请求ID存储的结果。请求先消费后执行，附12秒启动期限；已消费请求不重跑。主进程20秒未收结果会锁住后续写入并等待迟到结果，不自动重试。
 
 写入时重读活动文档、文档令牌、对象类型、草图、相关属性、Body BRep与选择并计算指纹；不匹配便拒绝。普通快照超过5秒未更新且无新执行进度视为断连。快照在确认结果前写入，避免连续任务读到旧上下文。复杂工程摘要性能仍需验证，不能称为完整CAD变更监控。

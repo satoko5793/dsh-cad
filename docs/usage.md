@@ -14,6 +14,8 @@ npm start
 
 首次点击“连接 FreeCAD”，选择 `FreeCAD.exe`，也可启动前用 `FREECAD_EXE` 指定路径。应用会启动带独立用户配置的实例，不自动接管已打开的其他实例。当前不提供独立安装器；CAD 建模在真实 FreeCAD 窗口中显示。
 
+桌面启动器会把实际的独立 Node.js 路径传给模型服务，DSH不在Electron内置Node环境运行。直接启动Electron而未使用启动器时，可以通过 `GOUXING_NODE_EXE` 指定独立 `node.exe` 的绝对路径（24.9或更新），或确保它位于PATH。出现 `Unsupported/no-context` / `require-builtin` 的旧版错误时，退出助手并通过本机 `start-desktop-local.cmd` 或 `npm start` 重开，再重新发送原话；CAD和对话数据保留。
+
 1. 输入“做一个四孔安装板”，查看默认80×40×5mm、四孔6mm计划，确认执行。
 2. 在 FreeCAD 特征树选中整个 `ThroughHoles` 或 `MountingHoles`，说“孔径改成8毫米，其他不变”，确认后四个孔一起修改。当前不支持单孔或面/边选择的修改。
 3. “撤销”“重做”会准备对应的原生事务计划；“另存原生工程”选择新的 `.FCStd` 路径后确认。首版拒绝覆盖已有文件。

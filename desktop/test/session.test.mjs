@@ -3,9 +3,15 @@ import assert from 'node:assert/strict';
 import { mkdtemp, rm } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
-import { Session, validateProposal, localIntent } from '../session.mjs';
+import { Session, validateProposal, localIntent, modelErrorMessage } from '../session.mjs';
 
 const context=()=>({connected:true,fingerprint:'original',document:{name:'Plate',owned:true},selection:[{document:'Plate',object:'ThroughHoles',subelements:[]}]});
+test('runtime failures show an actionable message without dumping native diagnostics into chat',()=>{
+  const message=modelErrorMessage(Object.assign(new Error('DSH runtime exited (1). Unsupported/no-context at internal-loader:123'),{code:'DSH_RUNTIME_INCOMPATIBLE'}));
+  assert.match(message,/模型服务启动失败/);assert.doesNotMatch(message,/Unsupported|internal-loader/);
+  assert.match(modelErrorMessage(Object.assign(new Error('node path missing'),{code:'DSH_NODE_UNAVAILABLE'})),/启动脚本/);
+  assert.equal(modelErrorMessage(new Error('模型授权失败')),'模型授权失败');
+});
 test('only supported precise offline commands bypass model; dimensions are never silently discarded',()=>{
   assert.equal(localIntent('做一个四孔安装板').action,'create_plate');
   assert.equal(localIntent('孔径改成8毫米，其他不变').diameter,8);

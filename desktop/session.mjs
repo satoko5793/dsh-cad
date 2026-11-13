@@ -1,13 +1,18 @@
 import { EventEmitter } from 'node:events';
 import { randomUUID, createHash } from 'node:crypto';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, appendFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Harness } from '../cad-studio/harness.mjs';
 import { ROOT, atomicJson } from './bridge.mjs';
 import {validateDesign,changeParameters} from './design.mjs';
-import {examples} from './examples.mjs';
+import {instantiateExample} from './examples.mjs';
 
 export const cleanError=error=>String(error.message||error).replace(/sk-[\w-]+/g,'[redacted]').slice(0,1200);
+export function modelErrorMessage(error) {
+  if(error.code==='DSH_NODE_UNAVAILABLE')return '模型服务需要独立 Node.js。请使用桌面启动脚本重新打开助手，或检查 GOUXING_NODE_EXE 配置。';
+  if(['DSH_RUNTIME_INCOMPATIBLE','DSH_RUNTIME_EXITED'].includes(error.code)||/Unsupported\/no-context|DSH runtime exited/.test(error.message||''))return '模型服务启动失败，尚未进入建模。请重新打开助手后重试；详细原因已记录在本机 model-errors.log。';
+  return cleanError(error);
+}
 export function validateProposal(raw, snapshot) {
   if(!snapshot.connected)throw Error('请先连接 FreeCAD，再准备操作');
   if(!['create_plate','create_design','update_design','set_diameter','undo','redo','save_as','open_native'].includes(raw.action))throw Error('不支持这项 CAD 操作');
@@ -16,7 +21,7 @@ export function validateProposal(raw, snapshot) {
   const base={id:randomUUID(),action:raw.action,expected:snapshot.fingerprint};
   if(raw.action==='create_design'){
     let source=raw.design;
-    if(raw.example){if(!Object.hasOwn(examples,raw.example))throw Error('示例不存在');source=raw.changes?changeParameters(examples[raw.example],raw.changes).design:examples[raw.example];}
+    if(raw.example)source=instantiateExample(raw.example,raw.changes);
     const design=validateDesign(source);
     return {...base,design,description:`新建「${design.title}」，${design.components.length}个零件：${design.components.map(c=>c.name).join('、')}`,details:Object.entries(design.parameters).map(([key,p])=>({key,label:p.label,after:p.value,unit:p.unit??'mm'}))};
   }
@@ -111,7 +116,10 @@ export class Session extends EventEmitter {
       let proposal=null;try{proposal=JSON.parse(await readFile(planPath,'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
       if(proposal){const latest=await this.bridge.snapshot();if(!latest.connected||latest.fingerprint!==context.fingerprint)throw Error('思考期间工程或选择已变化，请重新提出需求');this.state.plan=validateProposal(proposal,latest);this.state.phase='ready';this.state.status='待确认 · 尚未修改工程';this.message('assistant',this.state.plan.description+'。确认后执行。');}
       else {this.state.phase='idle';this.state.status='等待下一条需求';this.message('assistant',turn.texts.join('\n\n')||'本轮没有生成操作计划，请补充需求。');}
-    } catch(error){if(!turn.cancelled&&this.turn===turn){this.state.phase='idle';this.state.status='模型未完成请求';this.message('assistant',`本次未操作 CAD：${cleanError(error)}。可先用“做一个四孔安装板”测试本地流程。`);}}
+    } catch(error){if(!turn.cancelled&&this.turn===turn){
+      try{await appendFile(path.join(this.directory,'model-errors.log'),JSON.stringify({time:new Date().toISOString(),code:error.code||null,message:cleanError(error)})+'\n');}catch{}
+      this.state.phase='idle';this.state.status='模型未完成请求';this.message('assistant',`本次未操作 CAD：${modelErrorMessage(error)}`);
+    }}
     finally {if(harness)await harness.close();if(this.harness===harness)this.harness=null;if(this.turn===turn){this.turn=null;this.publish();}}
   }
   async confirm(id) {

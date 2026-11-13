@@ -29,3 +29,14 @@ export const airplane=validateDesign({title:'三零件简化小飞机',parameter
   {id:'tail',name:'尾翼',position:[0,0,'bodyHeight/2'],features:[feature('pad','pad',{kind:'polygon',points:[['length-24','bodyWidth/2-tailSpan/2'],['length-12','bodyWidth/2-tailSpan/2'],['length-4','bodyWidth/2'],['length-12','bodyWidth/2+tailSpan/2'],['length-24','bodyWidth/2+tailSpan/2'],['length-18','bodyWidth/2']]},0,'wingThickness')]}
 ]});
 export const examples={enclosure,gantry,airplane};
+export function instantiateExample(id,changes={}) {
+  if(!Object.hasOwn(examples,id))throw Error('示例不存在');
+  if(!changes||typeof changes!=='object'||Array.isArray(changes))throw Error('示例尺寸应为参数对象');
+  const design=structuredClone(examples[id]);
+  for(const [key,value] of Object.entries(changes)){
+    if(!Object.hasOwn(design.parameters,key))throw Error(`未知参数：${key}`);
+    design.parameters[key].value=value;
+  }
+  // A new model may intentionally use unchanged defaults; only updates require a delta.
+  return validateDesign(design);
+}

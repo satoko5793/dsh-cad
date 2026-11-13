@@ -36,8 +36,12 @@
 
 每个数据目录使用独立 `gouxing-desktop-<摘要>` DSH profile，测试与用户工作区隔离；凭据仍由同一 `DSH_HOME` 管理，不复制到前端或仓库。附件仍只保留副本及文件名。
 
+桌面模型服务使用独立Node.js，通过启动器自动传递路径；不使用Electron内置Node。新建示例时空的尺寸修改项表示采用默认值，不能误当成“没有指定修改参数”。“我想做一个飞机模型”经过真实模型规划，不需要改成固定测试口令。
+
 ## 测试
 
-`npm test` 当前16项：桌面10、原型6。显式设置 `FREECAD_EXE` 后可运行 `node desktop/test/native-check.mjs`（旧板9组）、`node desktop/test/complex-check.mjs`（多零件20组）、`node desktop/test/reopen-check.mjs`（保存重开和手改保护27组）。它们有重叠，不累加为独立能力；原生文件留在私有 `.data/`，测量摘要在 `desktop/validation/`。
+`npm test` 当前21项：桌面15、原型6。显式设置 `FREECAD_EXE` 后可运行 `node desktop/test/native-check.mjs`（旧板9组）、`node desktop/test/complex-check.mjs`（多零件20组）、`node desktop/test/reopen-check.mjs`（保存重开和手改保护27组）。它们有重叠，不累加为独立能力；原生文件留在私有 `.data/`，测量摘要在 `desktop/validation/`。
 
 真实模型验证还需已有DSH登录，运行 `node desktop/test/model-complex-check.mjs`，会请求模型。已通过4轮创建/修改，L支架另核对80×50×45mm外形和双通孔解析体积。普通测试不运行这些GUI或模型检查。手动窗口验收及未覆盖项见[验证记录](validation.md)。
+
+桌面启动路径另用 `node desktop/test/run-electron-harness.mjs` 显式验证：从真实Electron主进程调用独立Node和DSH，执行“我想做一个飞机模型”及翼展修改两轮。它会请求模型并打开隔离CAD，普通Node模型测试不能替代该回归。

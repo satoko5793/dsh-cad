@@ -25,7 +25,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`。当前共16个测试通过：桌面10项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)与[`design.test.mjs`](../desktop/test/design.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`。当前共21个测试通过：桌面15项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；新增独立Node运行时选择、Electron环境变量清理和简洁错误提示，示例创建允许空/重复默认尺寸。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)与[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -50,6 +50,16 @@
 附件只保存副本并展示文件名，模型未理解内容；单会话、有限CAD白名单、无安装器。复杂工程指纹性能、迟到结果、断连和崩溃恢复仍需专项验证；当前不可将开发版称为通用 CAD 自动化或制造交付系统。
 
 ## 原生复杂模型与连续修改实测
+
+### Electron模型启动回归（2026-11-13）
+
+用户实际输入“我想做一个飞机模型”触发 `Unsupported/no-context`。已复现：Electron45.3.1内置Node24.22.2以 `ELECTRON_RUN_AS_NODE` 启动DSH时，原生require-builtin模块不可用。此前4轮复杂模型测试从独立Node启动，没有覆盖这条桌面路径，不能作为该路径已通过的证明。
+
+修复为桌面启动器传递独立Node路径，Harness启动前探测并使用它，拒绝Electron运行时并清除run-as-node变量。首次复测还发现模型返回 `example:airplane, changes:{}` 被误拒绝，已修复为新建示例采用默认值；更新已有模型仍拒绝无变化参数。
+
+新增[`Electron回归记录`](../desktop/validation/electron-runtime-results.json)：真实Electron主进程中调用同一个Session/Harness，DSH实际子进程为独立Node24.22.3；两轮真实请求“我想做一个飞机模型”“机翼展长改成120毫米，其他不变”均规划、确认并执行成功。生成三个有效Body，修改翼展保留机身与尾翼，保存原生飞机工程。回归使用隔离工作区，不覆盖用户数据，不等同于完成UI点击验收。
+
+显式复现命令：设置已有DSH登录配置与 `FREECAD_EXE` 后运行 `node desktop/test/run-electron-harness.mjs`。它会打开测试CAD并请求模型，不随普通 `npm test` 自动执行。桌面运行时错误的技术摘要脱敏保存在私有 `model-errors.log`，对话不再倾倒原生诊断栈。
 
 新增能力与复现步骤见[原生设计指南](native-designs.md)。当前成功证据：
 

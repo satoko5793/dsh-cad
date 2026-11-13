@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-13T05:23:37.178Z",
+  "parent": {
+    "electron": "45.3.1",
+    "node": "24.22.2"
+  },
+  "child": {
+    "node": "24.22.3",
+    "electron": null
+  },
+  "legacyProbe": {
+    "supported": false,
+    "code": "Unsupported/no-context"
+  },
+  "checks": [
+    {
+      "request": "我想做一个飞机模型",
+      "passed": true
+    },
+    {
+      "request": "机翼展长改成120毫米，其他不变。",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "note": "Actual Electron main process invoking Session/Harness, two real model calls and native CAD writes in an isolated workspace. No UI click acceptance implied."
+}

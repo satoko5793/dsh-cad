@@ -29,6 +29,10 @@ test('native plans expose affected parts, preserve explicit sizes and require up
   const current=context(enclosure),plan=validateProposal({action:'update_design',changes:{lidThickness:4}},current);
   assert.deepEqual(plan.affected,['上盖']);assert.deepEqual(plan.changes,{lidThickness:4});
   const created=validateProposal({action:'create_design',example:'enclosure',changes:{length:105,height:36}},current);assert.equal(created.design.parameters.length.value,105);assert.equal(created.design.parameters.height.value,36);
+  assert.equal(validateProposal({action:'create_design',example:'airplane',changes:{}},current).design.components.length,3);
+  assert.equal(validateProposal({action:'create_design',example:'airplane',changes:{span:100}},current).design.parameters.span.value,100);
+  assert.throws(()=>validateProposal({action:'create_design',example:'airplane',changes:[]},current));
+  assert.throws(()=>validateProposal({action:'create_design',example:'airplane',changes:{unknown:1}},current));
   assert.throws(()=>validateProposal({action:'create_design',design:enclosure},{...current,protocol:1}));
   assert.throws(()=>validateProposal({action:'update_design',changes:{lidThickness:4}},{...current,document:{...current.document,editable:false}}));
   assert.equal(localIntent('做一个带盖控制盒').example,'enclosure');assert.equal(localIntent('做一个100毫米控制盒'),null);

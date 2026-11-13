@@ -4,6 +4,7 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import { ROOT } from './build.mjs';
+import {resolveNode,standaloneEnvironment} from './node-runtime.mjs';
 
 export class Harness {
   constructor(onNotification, options={}) {this.options=options;this.onNotification=onNotification; this.pending=new Map(); this.seq=0; this.process=null; this.ready=null; this.initialized=false; this.lastError='';this.provider=process.env.CAD_LLM_PROVIDER||'deepseek-official';this.model=process.env.CAD_LLM_MODEL||'deepseek-flash';}
@@ -12,6 +13,8 @@ export class Harness {
     this.ready=this.boot().catch(error=>{this.ready=null; throw error;}); return this.ready;
   }
   async boot() {
+    const env=standaloneEnvironment({...process.env,...this.options.env});
+    this.runtime=await resolveNode({env,executable:this.options.nodeExecutable});
     const home=process.env.DSH_HOME || path.join(os.homedir(),'.dsh');
     const profileName=this.options.profile||'cad-studio';
     const profile=path.join(home,'profiles',profileName); await mkdir(profile,{recursive:true});
@@ -22,7 +25,7 @@ export class Harness {
     const patch=[{id:'system-prompt',config:{personaPrefix:persona}},{insert:[{id:'cad-studio-tools',name:(this.options.plugin||path.join(ROOT,'cad-plugin.mjs')).replaceAll('\\','/')}]},{id:'tool-plugin-manager',disabled:true}];
     await writeFile(path.join(profile,'cordis.patch.yml'),JSON.stringify(patch,null,2));
     const cli=path.resolve(ROOT,'../node_modules/@deepseek-ai/dsh/lib/bin.js');
-    const child=spawn(process.execPath,[cli,'--profile',profileName],{cwd:ROOT,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,...this.options.env,DSH_HOME:home,...(process.versions.electron?{ELECTRON_RUN_AS_NODE:'1'}:{})}});
+    const child=spawn(this.runtime.executable,[cli,'--profile',profileName],{cwd:ROOT,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...env,DSH_HOME:home}});
     this.process=child; this.lastError='';
     child.stderr.on('data',b=>{this.lastError=(this.lastError+b).slice(-10000);});
     createInterface({input:child.stdout}).on('line',line=>{
@@ -32,7 +35,7 @@ export class Harness {
       else if(frame.method) this.onNotification(frame.method,frame.params);
     });
     const fail=error=>{this.ready=null;this.initialized=false;this.process=null;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(error);}this.pending.clear();};
-    child.on('error',fail); child.on('exit',code=>fail(new Error(`DSH runtime exited (${code}). ${this.lastError.slice(-1500)}`))); child.stdin.on('error',()=>{});
+    child.on('error',fail); child.on('exit',code=>fail(Object.assign(new Error(`DSH runtime exited (${code}). ${this.lastError.slice(-1500)}`),{code:/Unsupported\/no-context|require-builtin/.test(this.lastError)?'DSH_RUNTIME_INCOMPATIBLE':'DSH_RUNTIME_EXITED'}))); child.stdin.on('error',()=>{});
     const info=await this.request('initialize',{cwd:ROOT,provider:this.provider,model:this.model,reasoningEffort:'high',maxTokens:12000},45000);
     this.initialized=true;
     return info;
