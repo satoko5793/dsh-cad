@@ -23,6 +23,8 @@
 
 内置技能：`native-modeling`（原生参数设计）、`visual-review`（看图与数据联合检查）、`fabrication-review`（工艺讨论及验证缺口）。源文件在 `desktop/skills/<id>/SKILL.md`，可编辑，下轮读取。修改后重新打开设置刷新列表。
 
+新增技能和工具优先查已有实现。已审查 FreeCAD AI 的现成技能、FreeCAD MCP 工具与 Jablonkai 的 FreeCAD skill，固定版本、许可证、接口差异及已复用代码见[来源记录](../research/agent-skills-tools/README.md)。当前三个内置文件是本地适配说明，不能当成已接入上游完整技能库。
+
 点击“导入 SKILL.md”将说明复制到私有 `desktop/.data/skills/<name>/SKILL.md`。文件需包含 frontmatter `name`（1–64位小写字母、数字、连字符）、`description`，最多24000字；同名拒绝覆盖。首版只复制此说明文件，不复制依赖文件、不执行附带脚本，也未实现任意 MCP 服务配置。不要把需要脚本或外部工具的技能标记成现已可执行。
 
 ## 让 Agent 看模型
@@ -34,6 +36,8 @@ Agent 可加载视觉技能，读取工程并获取 `current/isometric/front/top
 截图仅针对连接的 FreeCAD 三维视口，不读取其他应用，也不是完整软件面板截图。若需要读取草图编辑对话框、特征属性面板或错误弹窗，当前还需扩展对应观察工具。
 
 图片通过当前 DSH 路由发送给配置的模型。工具查询该模型实际声明的 `inputModalities`；支持 image 才提供 image block，否则告知“仅截图成功，不能声称已看图”。本机 `deepseek-account / deepseek-flash` 已完成真实图像输入测试，但不代表所有提供商都支持。
+
+v1.1.1 复用 FreeCAD MCP 的显示中三维视图判断：表格、工程图等标签在前台时拒绝把后台三维图当成当前画面。看图仍会误判；飞机测试中曾把透视观感误称为“不对称”，增加轮廓坐标核对后，真实模型已撤回该结论。设置对话框的关闭/保存入口也已固定，滚动到底仍可使用。
 
 点击输入框下方“观察”只做本机预览，不自动发起模型请求。要让 Agent 检查，请在对话提出需求。用户附加文件仍只提供文件名，与 CAD 工具截图不同。
 

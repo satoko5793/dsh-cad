@@ -14,6 +14,7 @@ import Part
 import Sketcher
 from PySide import QtCore, QtGui
 import features
+from view_context import get_displayed_3d_view
 
 
 def atomic_json(filename, value):
@@ -151,7 +152,9 @@ class Bridge:
             views = {'isometric': 'viewAxonometric', 'front': 'viewFront', 'top': 'viewTop', 'right': 'viewRight'}
             if view_name not in ('current', *views.keys()):
                 raise ValueError('不支持的观察视角')
-            view = Gui.activeDocument().activeView()
+            view = get_displayed_3d_view()
+            if view is None:
+                raise ValueError('当前前台标签不是三维视图，请先切回模型；不会把后台视口当成当前画面')
             camera = view.getCamera()
             animation = view.isAnimationEnabled()
             observation_id = str(uuid.uuid4())

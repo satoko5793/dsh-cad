@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-13T06:26:35.134Z",
+  "passed": true,
+  "checks": [
+    "visible 3D model accepted",
+    "spreadsheet foreground rejected; hidden 3D view not misreported"
+  ],
+  "source": "neka-nat/freecad-mcp",
+  "commit": "5014bd9d538b8d09e11201e219cfe291ebca7b4e",
+  "note": "Real isolated FreeCAD 1.1.4 GUI; no external MCP server installed or arbitrary-code tool exposed."
+}

@@ -21,6 +21,8 @@
 
 ## Keep it simple
 
+- For skills and tools, the user's preference is existing online implementations first: search and inspect upstream skills/MCP/tools before creating new ones. Record source, pinned revision, license, required tools and actual compatibility; reuse suitable code and retain notices. Keep local protocol/confirmation adaptations explicit. Do not label a downloaded skill as usable when its tools/scripts are unavailable. Reviewed candidates and adopted code: research/agent-skills-tools/README.md.
+
 - Keep single-user local operation as the baseline. Electron and the limited FreeCAD macro adapter are now implemented; extend verified capabilities rather than adding unrelated cloud hosting, accounts or frameworks.
 - Research sources and downloads belong under `research/`; they are reference material, not application dependencies.
 - Distinguish tested behavior from repository claims when reporting research results. Do not resume software evaluation just to tidy this project.

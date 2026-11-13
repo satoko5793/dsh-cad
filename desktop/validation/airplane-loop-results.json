@@ -1,0 +1,209 @@
+{
+  "date": "2026-11-13T06:28:19.361Z",
+  "passed": true,
+  "productionEntry": "desktop/main.mjs",
+  "provider": "deepseek-account",
+  "model": "deepseek-flash",
+  "checks": [
+    {
+      "name": "Agent inspected real aircraft images without modifying CAD",
+      "passed": true
+    },
+    {
+      "name": "Production compact/full switch preserves live turn, reading position, draft and renderer focus",
+      "passed": true
+    },
+    {
+      "name": "Model proposes concrete parameter changes; CAD unchanged before confirmation",
+      "passed": true,
+      "changes": {
+        "length": 140,
+        "bodyWidth": 10,
+        "bodyHeight": 12,
+        "span": 130,
+        "wingThickness": 2,
+        "tailSpan": 50
+      }
+    },
+    {
+      "name": "Confirmed UI plan modifies the same native document, preserves unspecified parameters and valid solids",
+      "passed": true
+    },
+    {
+      "name": "Agent recaptures modified CAD and reports remaining limitations",
+      "passed": true
+    },
+    {
+      "name": "Real text/reasoning/tool cards appear in production UI",
+      "passed": true
+    }
+  ],
+  "turns": [
+    {
+      "request": "请看看这个飞机模型，获取等轴测和俯视图。它哪里看起来不像飞机？先检查，别修改。",
+      "textVersions": 22,
+      "reasoningVersions": 212,
+      "toolRunning": true,
+      "toolReturned": true,
+      "switchedDuringRun": true,
+      "scrollHeld": true,
+      "draftHeld": true,
+      "focusHeld": true,
+      "phase": "idle",
+      "tools": [
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "request": "按你刚看到的问题改一版，让它更像飞机。保持同一个工程，先优化能修改的尺寸和比例；做不到的结构改动直接说明，不要新建工程代替修改。",
+      "textVersions": 11,
+      "reasoningVersions": 304,
+      "toolRunning": false,
+      "toolReturned": true,
+      "switchedDuringRun": false,
+      "scrollHeld": false,
+      "draftHeld": false,
+      "focusHeld": false,
+      "phase": "ready",
+      "tools": [
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_inspect",
+          "state": "done"
+        },
+        {
+          "name": "freecad_propose",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "request": "现在再看一遍等轴测和俯视图，对照第一轮的检查描述，哪些外观问题改善了，哪些还没解决？区分看图结论和数据依据，先别继续修改。",
+      "textVersions": 22,
+      "reasoningVersions": 280,
+      "toolRunning": true,
+      "toolReturned": true,
+      "switchedDuringRun": false,
+      "scrollHeld": false,
+      "draftHeld": false,
+      "focusHeld": false,
+      "phase": "idle",
+      "tools": [
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_inspect",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        }
+      ]
+    },
+    {
+      "request": "请重新检查当前飞机的主翼、尾翼是否左右对称。透视图可能看错，请加载视觉检查技能，结合实际截图、轮廓坐标和中心线核对后给出结论；纠正前面对对称性的误判，先别修改。",
+      "textVersions": 23,
+      "reasoningVersions": 212,
+      "toolRunning": true,
+      "toolReturned": true,
+      "switchedDuringRun": true,
+      "scrollHeld": true,
+      "draftHeld": true,
+      "focusHeld": true,
+      "phase": "idle",
+      "tools": [
+        {
+          "name": "skill_read",
+          "state": "done"
+        },
+        {
+          "name": "freecad_inspect",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        },
+        {
+          "name": "freecad_capture",
+          "state": "done"
+        }
+      ]
+    }
+  ],
+  "parameters": {
+    "before": {
+      "length": 100,
+      "bodyWidth": 12,
+      "bodyHeight": 10,
+      "span": 100,
+      "wingThickness": 3,
+      "tailSpan": 38
+    },
+    "after": {
+      "length": 140,
+      "bodyWidth": 10,
+      "bodyHeight": 12,
+      "span": 130,
+      "wingThickness": 2,
+      "tailSpan": 50
+    }
+  },
+  "sameDocument": true,
+  "componentsBefore": 3,
+  "componentsAfter": 3,
+  "allFinalComponentsValid": true,
+  "coordinateAudit": {
+    "wing": true,
+    "tail": true
+  },
+  "correctiveReview": [
+    {
+      "name": "Model rechecks real images and coordinates against deterministic symmetric planforms",
+      "passed": true
+    }
+  ],
+  "layout": [
+    {
+      "name": "Production compact layout retains readable chat with the actual CAD preview",
+      "passed": true,
+      "chatHeight": 135,
+      "viewportHeight": 591
+    },
+    {
+      "name": "Settings close/save stay visible after compact scrolling",
+      "passed": true
+    },
+    {
+      "name": "Six-parameter plan can be inspected/cancelled without modifying CAD",
+      "passed": true
+    }
+  ],
+  "limitations": [
+    "Parameter changes only; vertical stabilizer, rounded fuselage and airfoil remain unsupported.",
+    "A visual symmetry misjudgment was corrected using coordinates; image interpretation alone is not geometry validation.",
+    "Renderer integration checks and application render captures do not constitute full OS focus, shortcut or multi-monitor acceptance.",
+    "Complete external MCP servers and external skill execution are not integrated."
+  ]
+}

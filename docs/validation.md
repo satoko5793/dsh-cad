@@ -42,6 +42,18 @@
 
 ## 桌面与 FreeCAD 常驻桥接实测
 
+### 飞机：看图发现问题→同工程修改→重新观察
+
+2026-11-13 使用实际 `desktop/main.mjs`、真实 DSH 和独立 FreeCAD 工程完成三轮对话，非替身 IPC：先获取等轴测/俯视图找问题，再提出参数计划，点击确认后更新原工程，最后再次获取图片复查。六个参数分别改为 length=140、bodyWidth=10、bodyHeight=12、span=130、wingThickness=2、tailSpan=50；确认前指纹不变，执行后仍为同一文档令牌和三个有效单实体。保存前后原生文件，私有数据未导出为公开样例。
+
+实际改善是更修长的机身、更薄的翼面及更大的主尾翼间距；缺少垂尾、圆滑机头和翼型等结构问题仍未解决，当前参数工具无法补齐。Agent 曾将透视观感误说成不对称，独立坐标镜像检查确认主翼/尾翼平面轮廓对称；第四轮加载补充后的视觉核对说明，模型读取坐标和新截图后明确纠正。不能把首次看图意见当成几何事实。
+
+四轮真实文字版本数为22、11、22、23，reasoning版本数为212、304、280、212（采样观察计数，不是token数/性能指标）。截图工具执行中及返回状态可见；第二轮快速读取/提案在采样时已结束，不声称看到每个工具的瞬时执行态。第一、四轮生成中切换完整/小窗，草稿、renderer输入焦点、历史阅读位置保持；后续自己的应用渲染截图检查确认预览展开后小窗对话仍有135 CSS px，设置滚动后关闭/保存可见，六参数计划可查看/取消。系统级焦点、所有全局快捷键与多屏没有完整验收。
+
+复现：设置 FREECAD_EXE、DSH_HOME 和模型路由后运行 `node desktop/test/run-airplane-loop.mjs`。单独的模型对称性复查或布局复查使用 `GOUXING_SYMMETRY_ONLY=1` / `GOUXING_LAYOUT_ONLY=1` 并通过 `GOUXING_REVIEW_DIR` 指向已存在的隔离 airplane-loop 目录；布局复查不请求模型、不执行修改。汇总证据：[`airplane-loop-results.json`](../desktop/validation/airplane-loop-results.json)。
+
+v1.1.1 活动视图判断复用外部 FreeCAD MCP 的 MIT 实现，单独真实GUI测试验证三维标签接受/表格标签拒绝，见 [`view-context-results.json`](../desktop/validation/view-context-results.json)；完整上游MCP server未安装。来源版本与许可见[复用记录](../research/agent-skills-tools/README.md)。
+
 ### v1.1.0 流式交互与视觉检查
 
 `node desktop/test/run-agent-live.mjs` 在实际 Electron 主进程启动独立 Node/DSH，使用独立原生飞机工程。证据：[`agent-experience-results.json`](../desktop/validation/agent-experience-results.json)。五种视角均生成非纯色图片，核对相机恢复与工程指纹不变；真实模型调用 skill_read、inspect、capture，接收等轴测和俯视图，描述实际三色组件并区分视觉观察、几何和未验证工艺。实测文字/思考/工具更新次数为280/272/276，这些是状态发布次数，不是token数或性能指标。模型仍可能误判细节，例如后掠角和装配风险，需要工程验证。

@@ -124,7 +124,7 @@ function renderSettings(){
   for(const t of config.toolCatalog)row($('tool-settings'),t.id,t.name,t.description,config.tools.includes(t.id),'tool');
   for(const s of config.skills)row($('skill-settings'),s.id,s.name+' · '+s.source,s.description,s.enabled,'skill',s.file);
 }
-$('settings').onclick=async()=>{await call('agent-config-refresh');renderSettings();$('settings-feedback').textContent='';$('settings-dialog').showModal();};
+$('settings').onclick=async()=>{await call('agent-config-refresh');renderSettings();$('settings-feedback').textContent='';$('settings-dialog').showModal();$('settings-dialog').scrollTop=0;};
 $('settings-close').onclick=()=>$('settings-dialog').close();
 $('skill-import').onclick=async()=>{const result=await call('skill-import');if(result?.ok){renderSettings();$('settings-feedback').textContent='技能列表已更新';}else $('settings-feedback').textContent=$('error').textContent;};
 $('settings-form').onsubmit=async event=>{event.preventDefault();const tools=[...$('tool-settings').querySelectorAll('input:checked')].map(n=>n.dataset.tool),disabledSkills=[...$('skill-settings').querySelectorAll('input:not(:checked)')].map(n=>n.dataset.skill);const result=await call('agent-config',{tools,disabledSkills});$('settings-feedback').textContent=result?.ok?'已保存，下一轮对话生效':$('error').textContent;};

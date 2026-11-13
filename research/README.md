@@ -1,6 +1,6 @@
 # CAD 方案调研
 
-这是参考资料区，不是日常启动应用的入口。先了解各方案的思路，暂不继续安装或扩展。
+这是参考资料区，不是日常启动应用的入口。历史方案评估保持原记录。新增 skill/tool 优先复用的源码审查与实际采用范围见 [CAD skills 与 tools 来源](agent-skills-tools/README.md)。
 
 返回[文档中心](../docs/README.md)。当前产品方向见[产品目标](../docs/product.md)，近期优先级见[实施路线](../docs/roadmap.md)；下文保留历史调研及证据。
 
