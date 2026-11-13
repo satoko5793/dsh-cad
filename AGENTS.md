@@ -11,7 +11,7 @@
 
 - Help ordinary users describe ideas in everyday language and progress to physical objects that can be fabricated and assembled.
 - The desktop product has a full Harness workspace and a compact floating chat window for use alongside CAD. They share conversation, draft, files, CAD context and task state. See `docs/desktop-harness.md` for focus, selection, pause/cancel and user/agent coordination requirements.
-- First select one CAD and version, then validate reading the active document/selection, creating and editing native features, saving/reopening native files, and undo/recovery. SolidWorks and Fusion are candidates, not implemented integrations. The first CAD and desktop framework remain undecided.
+- FreeCAD 1.1.4 is the first selected CAD. Standalone native macro/script probes passed (research/freecad-native): headless 24 checks, GUI 26 checks including active document/selection. A persistent Harness adapter, user-selection event monitoring and the desktop framework remain to be implemented. SolidWorks and Fusion remain later candidates, not implemented integrations.
 - After the native CAD loop and desktop interaction, pursue a printable, assemblable electronics enclosure with requirements, supports/connections, per-part files, parts list, assembly instructions, physical prototype and feedback-driven revision.
 - Keep planned desktop/CAD capabilities distinct from prototype evidence. Static multi-solid geometry and successful exports alone do not prove native CAD integration, manufacturability or assembly.
 

@@ -2,7 +2,7 @@
 
 本文描述当前验证原型的实现：原生 HTML/CSS/JavaScript 与 Three.js 前端，Node.js HTTP 服务，DeepSeek Harness Agent，以及 CadQuery 2.8 / OpenCascade 建模进程。它尚未操作专业 CAD 软件。
 
-目标产品采用桌面 Harness，提供完整工作台与悬浮小窗，通过适配器操作实际 CAD 工程。目标结构与交互边界见[桌面 Harness 规格](desktop-harness.md)，接入顺序见[实施路线](roadmap.md)。框架及首个 CAD 尚待确定，本文的网页与文件结构不代表未来桌面架构已经完成。
+目标产品采用桌面 Harness，提供完整工作台与悬浮小窗，通过适配器操作实际 CAD 工程。目标结构与交互边界见[桌面 Harness 规格](desktop-harness.md)，接入顺序见[实施路线](roadmap.md)。首个 CAD 为 FreeCAD 1.1.4，独立宏/脚本已验证原生操作，常驻适配器和桌面框架尚未实现；本文的网页结构不代表未来桌面架构已经完成。
 
 ## 代码入口
 

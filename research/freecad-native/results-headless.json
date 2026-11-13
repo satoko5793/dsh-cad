@@ -1,0 +1,167 @@
+{
+  "gui": false,
+  "version": [
+    "1",
+    "1",
+    "4",
+    "20260928 (Git shallow)",
+    "Unknown",
+    "2026/09/28 13:46:34",
+    "(HEAD detached at 4fd3bf320)",
+    "4fd3bf320d9566a27e60069fc8387448aaa3a094"
+  ],
+  "checks": [
+    {
+      "name": "native sketch pad pocket tree",
+      "passed": true
+    },
+    {
+      "name": "hole sketch fully constrained",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 6",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 8",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 6",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 8",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 8",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "native constraints survive reopen",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 10",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    },
+    {
+      "name": "valid solid at diameter 8",
+      "passed": true
+    },
+    {
+      "name": "plate dimensions preserved",
+      "passed": true
+    },
+    {
+      "name": "four holes analytic volume",
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "objects": [
+    {
+      "name": "PlateBody",
+      "type": "PartDesign::Body"
+    },
+    {
+      "name": "Origin",
+      "type": "App::Origin"
+    },
+    {
+      "name": "X_Axis",
+      "type": "App::Line"
+    },
+    {
+      "name": "Y_Axis",
+      "type": "App::Line"
+    },
+    {
+      "name": "Z_Axis",
+      "type": "App::Line"
+    },
+    {
+      "name": "XY_Plane",
+      "type": "App::Plane"
+    },
+    {
+      "name": "XZ_Plane",
+      "type": "App::Plane"
+    },
+    {
+      "name": "YZ_Plane",
+      "type": "App::Plane"
+    },
+    {
+      "name": "Origin001",
+      "type": "App::Point"
+    },
+    {
+      "name": "BaseSketch",
+      "type": "Sketcher::SketchObject"
+    },
+    {
+      "name": "BasePad",
+      "type": "PartDesign::Pad"
+    },
+    {
+      "name": "MountingHoles",
+      "type": "Sketcher::SketchObject"
+    },
+    {
+      "name": "ThroughHoles",
+      "type": "PartDesign::Pocket"
+    }
+  ],
+  "file": "E:\\dsh\\freecad-native-validation-20261113\\headless\\plate-8mm.FCStd"
+}
