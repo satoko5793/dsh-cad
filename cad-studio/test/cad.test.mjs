@@ -64,4 +64,29 @@ test('parameter preview is non-destructive, cancel restores the original, save c
   await assert.rejects(()=>discardPreview(projectId,'../revisions'),/Invalid preview ID/);
   assert.equal((await loadProject(projectId)).revisions.length,2);
 });
+test('named modules survive preview/save; moving one preserves the other measured modules',async()=>{
+  const projectId=randomUUID();
+  await saveProject({id:projectId,title:'模块测试',messages:[],revisions:[]});
+  const source=`base=cq.Workplane('XY').box(params['base_length'],30,4).translate((0,0,2))
+rail=cq.Workplane('XY').box(30,4,4).translate((0,0,8))
+carriage=cq.Workplane('XY').box(10,10,3).translate((params['carriage_x'],0,14))
+components={'底座':base,'导轨':rail,'滑台':carriage}
+`;
+  const parameters={base_length:40,carriage_x:0};
+  const base=await buildModel({projectId,source,parameters});
+  assert.equal(base.geometry.solids,3);
+  assert.deepEqual(base.geometry.components.map(c=>c.name),['底座','导轨','滑台']);
+  assert.equal(base.geometry.volume,40*30*4+30*4*4+10*10*3);
+  const preview=await previewModel({projectId,baseRevisionId:base.id,parameters:{...parameters,carriage_x:10}});
+  assert.deepEqual(preview.geometry.components.slice(0,2),base.geometry.components.slice(0,2));
+  assert.deepEqual(preview.geometry.components[2].bounds,[5,-5,12.5,15,5,15.5]);
+  assert.equal((await loadProject(projectId)).revisions.length,1);
+  const saved=await commitPreview(projectId,preview.id);
+  assert.deepEqual(saved.geometry.components,preview.geometry.components);
+  assert.equal((await loadProject(projectId)).revisions.length,2);
+  await assert.rejects(()=>buildModel({projectId,source:"components={'坏模块':cq.Workplane('XY')}",parameters:{}}),/Empty component/);
+  await assert.rejects(()=>buildModel({projectId,source:"components={}",parameters:{}}),/1–24/);
+  assert.equal((await loadProject(projectId)).revisions.length,2);
+});
+
 test.after(async()=>{await rm(temp,{recursive:true,force:true});});

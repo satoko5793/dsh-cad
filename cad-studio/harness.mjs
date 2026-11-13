@@ -6,7 +6,7 @@ import os from 'node:os';
 import { ROOT } from './build.mjs';
 
 export class Harness {
-  constructor(onNotification) {this.onNotification=onNotification; this.pending=new Map(); this.seq=0; this.process=null; this.ready=null; this.lastError='';}
+  constructor(onNotification) {this.onNotification=onNotification; this.pending=new Map(); this.seq=0; this.process=null; this.ready=null; this.initialized=false; this.lastError='';this.provider=process.env.CAD_LLM_PROVIDER||'deepseek-official';this.model=process.env.CAD_LLM_MODEL||'deepseek-flash';}
   async start() {
     if(this.ready) return this.ready;
     this.ready=this.boot().catch(error=>{this.ready=null; throw error;}); return this.ready;
@@ -30,9 +30,10 @@ export class Harness {
       else if(frame.method && frame.id!==undefined){child.stdin.write(JSON.stringify({jsonrpc:'2.0',id:frame.id,result:frame.method==='approval/request'?{outcome:'rejected'}:{cancelled:true}})+'\n');}
       else if(frame.method) this.onNotification(frame.method,frame.params);
     });
-    const fail=error=>{this.ready=null;this.process=null;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(error);}this.pending.clear();};
+    const fail=error=>{this.ready=null;this.initialized=false;this.process=null;for(const p of this.pending.values()){clearTimeout(p.timer);p.reject(error);}this.pending.clear();};
     child.on('error',fail); child.on('exit',code=>fail(new Error(`DSH runtime exited (${code}). ${this.lastError.slice(-1500)}`))); child.stdin.on('error',()=>{});
-    const info=await this.request('initialize',{cwd:ROOT,provider:'deepseek-official',model:'deepseek-flash',reasoningEffort:'high',maxTokens:12000},45000);
+    const info=await this.request('initialize',{cwd:ROOT,provider:this.provider,model:this.model,reasoningEffort:'high',maxTokens:12000},45000);
+    this.initialized=true;
     return info;
   }
   request(method,params,timeout=600000) {

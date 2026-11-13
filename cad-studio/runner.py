@@ -11,6 +11,28 @@ import traceback
 import cadquery as cq
 
 
+def as_shape(model):
+    if isinstance(model, cq.Workplane):
+        shapes = model.vals()
+        if not shapes:
+            raise ValueError('Empty component')
+        return cq.Compound.makeCompound(shapes) if len(shapes) > 1 else model.val()
+    if isinstance(model, cq.Shape):
+        return model
+    raise ValueError('Script must assign a cq.Workplane or cq.Shape to result/components')
+
+
+def checked_measurements(shape):
+    if not shape.isValid() or not shape.Solids() or not math.isfinite(shape.Volume()) or shape.Volume() <= 0:
+        raise ValueError('Result must contain valid, non-empty CAD solids')
+    b = shape.BoundingBox()
+    size = [b.xlen, b.ylen, b.zlen]
+    bounds = [b.xmin, b.ymin, b.zmin, b.xmax, b.ymax, b.zmax]
+    if not all(math.isfinite(x) and 0 < x <= 100000 for x in size) or not all(math.isfinite(x) for x in bounds):
+        raise ValueError('Invalid model dimensions (allowed: 0–100000 mm)')
+    return {'size': [round(x, 4) for x in size], 'bounds': [round(x, 4) for x in bounds], 'volume': round(shape.Volume(), 4), 'solids': len(shape.Solids()), 'valid': True}
+
+
 def run(payload):
     source = payload['source']
     tree = ast.parse(source, filename='model.py')
@@ -46,20 +68,23 @@ def run(payload):
     scope = {'__builtins__': allowed, 'cq': cq, 'math': math, 'params': payload['parameters']}
     with contextlib.redirect_stdout(io.StringIO()):
         exec(compile(tree, 'model.py', 'exec'), scope)
-    model = scope.get('result')
-    if isinstance(model, cq.Workplane):
-        shapes = model.vals()
-        shape = cq.Compound.makeCompound(shapes) if len(shapes) > 1 else model.val()
-    elif isinstance(model, cq.Shape):
-        shape = model
+    components = scope.get('components')
+    measured_components = []
+    if components is not None:
+        if not isinstance(components, dict) or not 1 <= len(components) <= 24:
+            raise ValueError('components must be a dictionary of 1–24 named CAD modules')
+        shapes = []
+        for name, model in components.items():
+            if not isinstance(name, str) or not name.strip() or len(name) > 40:
+                raise ValueError('Component names must contain 1–40 characters')
+            component_shape = as_shape(model)
+            measured_components.append({'name': name, **checked_measurements(component_shape)})
+            shapes.append(component_shape)
+        # Export exactly the measured modules; never silently fuse separate parts.
+        shape = cq.Compound.makeCompound(shapes)
     else:
-        raise ValueError('Script must assign a cq.Workplane or cq.Shape to result')
-    if not shape.isValid() or not shape.Solids() or shape.Volume() <= 0:
-        raise ValueError('Result must contain valid, non-empty CAD solids')
-    bounds = shape.BoundingBox()
-    size = [bounds.xlen, bounds.ylen, bounds.zlen]
-    if not all(math.isfinite(x) and 0 < x <= 100000 for x in size):
-        raise ValueError('Invalid model dimensions (allowed: 0–100000 mm)')
+        shape = as_shape(scope.get('result'))
+    measured = checked_measurements(shape)
     output = pathlib.Path(payload['output'])
     with contextlib.redirect_stdout(io.StringIO()):
         cq.exporters.export(shape, str(output / 'model.step'))
@@ -69,7 +94,7 @@ def run(payload):
         if face.geomType() == 'CYLINDER':
             surface = face._geomAdaptor().Cylinder()
             cylinders.append({'diameter': round(surface.Radius() * 2, 4), 'center': [round(v, 4) for v in face.Center().toTuple()], 'axis': [round(v, 4) for v in (surface.Axis().Direction().X(), surface.Axis().Direction().Y(), surface.Axis().Direction().Z())]})
-    return {'geometry': {'size': [round(x, 4) for x in size], 'volume': round(shape.Volume(), 4), 'area': round(shape.Area(), 4), 'solids': len(shape.Solids()), 'faces': len(shape.Faces()), 'cylindricalSurfaces': cylinders[:100], 'valid': True, 'units': 'mm'}, 'source': source}
+    return {'geometry': {**measured, 'area': round(shape.Area(), 4), 'faces': len(shape.Faces()), 'components': measured_components, 'cylindricalSurfaces': cylinders[:100], 'units': 'mm'}, 'source': source}
 
 
 if __name__ == '__main__':

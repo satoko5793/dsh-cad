@@ -40,13 +40,18 @@ function renderDetails(){const revision=pendingPreview||selectedRevision;const f
   if(pendingPreview){const specs=parameterSpecs(selectedRevision.parameters,selectedRevision.parameterSpec);$('previewChanges').textContent=changes(pendingPreview.parameters).map(([key,value])=>`${specs[key].label}：${selectedRevision.parameters[key]} → ${value} ${specs[key].unit}`).join('；');}
   $('modelInfo').hidden=!revision;$('emptyState').hidden=!!revision;
   $('geometryDetails').hidden=!revision;
+  const components=revision?.geometry.components||[];
+  $('componentPanel').hidden=!components.length;
+  $('componentHeading').textContent=`模型模块 · ${components.length} 个`;
+  $('componentList').replaceChildren();
+  for(const component of components){const item=document.createElement('li');item.textContent=`${component.name} · ${component.size.join(' × ')} mm · ${component.solids} 个实体`;$('componentList').append(item);}
   if(revision){const g=revision.geometry;$('geometryMeasurements').textContent=`外形：${g.size.join(' × ')} mm\n体积：${g.volume} mm³\n表面积：${g.area} mm²\n`+(g.cylindricalSurfaces||[]).map((s,i)=>`圆柱面 ${i+1}：Ø${s.diameter}，中心 (${s.center.join(', ')}) mm`).join('\n');}
   if(revision){$('modelName').textContent=revision.title;$('modelSize').textContent=revision.geometry.size.map(v=>Number(v.toFixed(2))).join(' × ')+' mm';$('geometrySummary').textContent=`${pendingPreview?'预览已通过几何检查':'模型已保存'} · ${(revision.geometry.volume/1000).toFixed(2)} cm³`;}else $('geometrySummary').textContent='等待第一个设计';
   syncControls();
 }
 function fileUrl(revision,file){return `/api/projects/${project.id}/revisions/${revision.id}/${file}`;}
 async function selectRevision(revision){selectedRevision=revision;pendingPreview=null;renderDetails();await showModel(revision?fileUrl(revision,'model.stl'):null);}
-async function openProject(id){project=await api(`/api/projects/${id}`);localStorage.setItem('cad-studio-project',id);renderMessages();await selectRevision(project.revisions.find(r=>r.id===project.activeRevision)||project.revisions.at(-1)||null);await renderProjectList();}
+async function openProject(id){project=await api(`/api/projects/${id}`);localStorage.setItem('cad-studio-project',id);const url=new URL(location.href);url.searchParams.set('project',id);history.replaceState(null,'',url);renderMessages();await selectRevision(project.revisions.find(r=>r.id===project.activeRevision)||project.revisions.at(-1)||null);await renderProjectList();}
 async function newProject(){if(isBusy)return;const p=await api('/api/projects',{method:'POST',body:'{}'});await openProject(p.id);$('prompt').focus();}
 $('newProject').onclick=()=>newProject().catch(e=>toast(e.message));
 document.querySelectorAll('[data-prompt]').forEach(button=>button.onclick=()=>{$('prompt').value=button.dataset.prompt;$('prompt').focus();});
@@ -57,7 +62,7 @@ $('chatForm').onsubmit=async event=>{event.preventDefault();const text=$('prompt
   try{const {jobId}=await api(`/api/projects/${pid}/chat`,{method:'POST',body:JSON.stringify({text,revisionId:selectedRevision?.id})});stream=new EventSource(`/api/jobs/${jobId}/events`);
     stream.addEventListener('status',e=>{$('jobStatusText').textContent=JSON.parse(e.data).text;});
     stream.addEventListener('assistant',e=>addMessage('assistant',JSON.parse(e.data).text));
-    stream.addEventListener('done',async e=>{stream.close();stream=null;project=JSON.parse(e.data).project;setBusy(false);renderMessages();await selectRevision(project.revisions.find(r=>r.id===project.activeRevision)||selectedRevision);await renderProjectList();});
+    stream.addEventListener('done',async e=>{stream.close();stream=null;project=JSON.parse(e.data).project;$('chatConnection').textContent='已连接';setBusy(false);renderMessages();await selectRevision(project.revisions.find(r=>r.id===project.activeRevision)||selectedRevision);await renderProjectList();});
     stream.addEventListener('error',async e=>{if(!stream)return;stream.close();stream=null;const message=e.data?JSON.parse(e.data).message:'连接中断。任务可能仍在执行，请稍后重新打开项目查看。';setBusy(false);toast(message);try{await openProject(pid);}catch{};});
   }catch(error){setBusy(false);toast(error.message);await openProject(pid);}
 };
@@ -85,4 +90,5 @@ async function showModel(url){const gen=++loadGeneration;if(!renderer)return;if(
 $('resetView').onclick=fit;
 function setWire(value){wire=value;$('wireView').classList.toggle('active',wire);$('solidView').classList.toggle('active',!wire);if(mesh)mesh.material.wireframe=wire;if(edges)edges.visible=!wire;}
 $('solidView').onclick=()=>setWire(false);$('wireView').onclick=()=>setWire(true);
-try{const health=await api('/api/health');$('engineStatus').textContent=health.cad?'● CAD 引擎就绪':'◌ CAD 引擎安装中';const list=await renderProjectList(),saved=localStorage.getItem('cad-studio-project');if(saved&&list.some(p=>p.id===saved))await openProject(saved);else if(list.length)await openProject(list[0].id);else await newProject();}catch(error){toast(error.message);$('engineStatus').textContent='服务连接失败';}
+window.addEventListener('focus',()=>{if(!isBusy)renderProjectList().catch(error=>toast(error.message));});
+try{const health=await api('/api/health');$('engineStatus').textContent=health.cad?'● CAD 引擎就绪':'◌ CAD 引擎安装中';if(health.harness)$('chatConnection').textContent='已连接';const list=await renderProjectList(),linked=new URL(location.href).searchParams.get('project'),saved=localStorage.getItem('cad-studio-project'),preferred=list.some(p=>p.id===linked)?linked:saved;if(preferred&&list.some(p=>p.id===preferred))await openProject(preferred);else if(list.length)await openProject(list[0].id);else await newProject();}catch(error){toast(error.message);$('engineStatus').textContent='服务连接失败';}

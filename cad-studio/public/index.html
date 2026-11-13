@@ -29,7 +29,7 @@
           <button data-prompt="生成一个顶部敞开的电子外壳，外形 80×50×30 mm，壁厚和底厚都是 3 mm，不需要盖子。">▣ 电子外壳 <span>↗</span></button>
         </div>
         <div class="quick-edits" id="quickEdits" hidden><button type="button" id="editDimensions">调整尺寸</button><button type="button" data-edit="请给这个零件合适的外边缘添加 1 mm 圆角，保持其他尺寸和孔位不变。">加圆角</button><button type="button" data-edit="请用简单的话说明这个零件的尺寸和孔位，只使用实际测量的数据。">查看尺寸说明</button></div>
-        <form id="chatForm" class="composer"><label for="prompt" class="sr-only">描述零件或修改需求</label><textarea id="prompt" rows="3" placeholder="例如：做一个长 80、宽 40、厚 5 mm 的安装板…"></textarea><div class="composer-footer"><span><i class="online-dot"></i> DeepSeek API <small>已配置</small></span><button id="send" type="submit" aria-label="发送设计需求">↑</button></div></form>
+        <form id="chatForm" class="composer"><label for="prompt" class="sr-only">描述零件或修改需求</label><textarea id="prompt" rows="3" placeholder="例如：做一个长 80、宽 40、厚 5 mm 的安装板…"></textarea><div class="composer-footer"><span><i class="online-dot"></i> DeepSeek <small id="chatConnection">首次对话时连接</small></span><button id="send" type="submit" aria-label="发送设计需求">↑</button></div></form>
         <div class="composer-note">尺寸默认使用毫米 · AI 建模结果请核对后使用</div>
       </section>
       <section class="model-area" aria-label="三维模型工作区">
@@ -38,6 +38,7 @@
         <div class="preview-review" id="previewReview" hidden><div><strong>修改预览 · 尚未保存</strong><p id="previewChanges"></p></div><div class="preview-actions"><button id="cancelPreview" type="button">取消修改</button><button id="savePreview" type="button">保存这个版本</button></div></div>
         <div class="model-footer"><span><i class="online-dot"></i> <span id="geometrySummary">等待第一个设计</span></span><div class="export-group"><button id="downloadStep" disabled title="用于 CAD 软件中继续设计">↓ STEP</button><button id="downloadStl" disabled title="用于切片或 3D 打印">↓ STL</button></div></div>
         <p class="export-hint">STEP：在 CAD 软件中继续设计 <span>·</span> STL：切片与 3D 打印</p>
+        <details id="componentPanel" class="component-panel" hidden open><summary id="componentHeading">模型模块</summary><p class="muted">静态组合 · 尚未验证装配配合与运动</p><ul id="componentList"></ul></details>
         <div class="details-grid">
           <section class="parameters"><div class="detail-heading"><h2>调整尺寸</h2><button id="rebuild" disabled>预览修改 ↗</button></div><div class="parameter-note-row"><p class="parameter-note" id="parameterNote">先生成零件，再调整这里的尺寸。</p><button type="button" id="resetParameters" hidden>重置</button></div><div id="parameterFields" class="parameter-fields"><p class="muted">生成后，可直接调整尺寸并预览。</p></div><div class="parameter-error" id="parameterError" role="alert"></div><details id="geometryDetails" hidden><summary>更多：测量数据与建模源码</summary><div id="geometryMeasurements"></div><button id="downloadSource" disabled type="button">下载建模源码</button></details></section>
           <section class="versions"><div class="detail-heading"><h2>版本记录</h2><span id="versionCount">0 个版本</span></div><div id="versionList"><p class="muted">每次成功建模都会保存一个版本。</p></div></section>
