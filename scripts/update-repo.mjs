@@ -12,10 +12,11 @@ run('git',['fetch','origin']);
 const remoteMain=run('git',['rev-parse','--verify','refs/remotes/origin/main'],{capture:true,allowFailure:true});
 if(remoteMain&&run('git',['merge-base','--is-ancestor','origin/main','HEAD'],{allowFailure:true})!==0)throw new Error('远端有尚未合并的更改，请先处理；不会强制推送。');
 run(process.execPath,['--test','cad-studio/test/cad.test.mjs','cad-studio/test/parameters.test.mjs','cad-studio/test/plugin.test.mjs','cad-studio/test/viewer-math.test.mjs']);
+run(process.execPath,['--test','desktop/test/session.test.mjs']);
 run(process.execPath,['scripts/export-samples.mjs']);
 const python=process.env.CAD_PYTHON||path.join(root,'cad-studio/.venv/Scripts/python.exe');
 run(python,['samples/verify-complex.py']);
-run('git',['add','--','AGENTS.md','README.md','.gitignore','.gitattributes','package.json','package-lock.json','start.cmd','start-harness.cmd','docs','cad-studio','scripts','samples','research']);
+run('git',['add','--','AGENTS.md','README.md','.gitignore','.gitattributes','package.json','package-lock.json','start.cmd','start-web.cmd','start-harness.cmd','docs','cad-studio','desktop','scripts','samples','research']);
 const files=run('git',['diff','--cached','--name-only','--diff-filter=ACMR','-z'],{capture:true}).split('\0').filter(Boolean);
 for(const file of files){
   if(/(?:^|\/)(?:node_modules|\.venv|\.data|\.qa|\.dsh)(?:\/|$)|(?:^|\/)\.env(?:\.|$)|credentials\.json$/i.test(file))throw new Error(`不应发布的文件已暂存：${file}`);

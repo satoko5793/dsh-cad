@@ -1,8 +1,30 @@
 # 使用指南
 
-本文仅用于现有网页与 CadQuery 验证原型，当前主要运行环境为 Windows。目标桌面 Harness、悬浮小窗与专业 CAD 接入尚未提供，交互规格见[桌面 Harness](desktop-harness.md)，能力边界见[验证记录](validation.md)。下文的 `npm start` 启动网页原型，不会连接或修改 SolidWorks、Fusion 工程。
+当前主要运行环境为 Windows。默认入口 `npm start` 为 Electron 桌面 Harness；保留的网页与 CadQuery 原型改用 `npm run start:web`。桌面接入 FreeCAD 1.1.4，尚不连接 SolidWorks/Fusion。能力边界见[验证记录](validation.md)。
 
-## 首次安装
+## 桌面开发版启动
+
+准备 Node.js 24.9或更新版本，以及已安装或完整解压的 FreeCAD。仓库根目录执行：
+
+```powershell
+npm ci
+npm run desktop:runtime
+npm start
+```
+
+首次点击“连接 FreeCAD”，选择 `FreeCAD.exe`，也可启动前用 `FREECAD_EXE` 指定路径。应用会启动带独立用户配置的实例，不自动接管已打开的其他实例。当前不提供独立安装器；CAD 建模在真实 FreeCAD 窗口中显示。
+
+1. 输入“做一个四孔安装板”，查看默认80×40×5mm、四孔6mm计划，确认执行。
+2. 在 FreeCAD 特征树选中整个 `ThroughHoles` 或 `MountingHoles`，说“孔径改成8毫米，其他不变”，确认后四个孔一起修改。当前不支持单孔或面/边选择的修改。
+3. “撤销”“重做”会准备对应的原生事务计划；“另存原生工程”选择新的 `.FCStd` 路径后确认。首版拒绝覆盖已有文件。
+4. 右上角缩为小窗/展开。可拖动标题栏、调整窗口边缘、切换置顶；`Ctrl+Alt+Space` 呼出/收起，`Ctrl+Alt+M` 切换形态。收起不会取消任务。
+5. 选择或设计发生变化时旧计划失效，请重新发起需求。暂停只阻止尚未执行的操作；当前原生事务不能即时中断。超时后先检查 CAD，应用不会自动重发。
+
+以上常用、精确指令走本地规则，不请求大模型；其他表达和讨论使用 DSH。特殊尺寸要求不会被悄悄替换为默认安装板，首版不支持的操作会说明限制。
+
+`desktop/.data/` 保留会话、草稿、附件副本、窗口设置和桥接记录。附件暂不解析，模型只获得文件名。关闭助手会要求确认，FreeCAD 保持打开，请自行保存未保存工程；再次启动恢复对话、重新读取连接，但不会重发未完成计划。原型的 `cad-studio/.data/` 保持独立，请分别备份。
+
+## 同时准备网页原型
 
 准备 Git、Node.js 24.9或更新版本、Python 3.13，并确保 `node`、`npm` 和 `py -3.13` 在终端可用。在准备保存项目的位置执行：
 
@@ -37,7 +59,7 @@ npm run setup
 
 ```powershell
 $env:CAD_LLM_PROVIDER = 'deepseek-account'
-npm start
+npm run start:web
 ```
 
 已有登录在其他 DSH 目录时，需要同时设置 `DSH_HOME`。应用使用专用 `cad-studio` profile，保留原版 web profile。上述变量只选择已有路由，不会自动配置第三方网关或验证密钥。
@@ -46,19 +68,22 @@ CAD 引擎就绪不代表模型服务已连接。启动检测不会发起生成�
 
 ## 日常启动
 
-在仓库根目录运行 `npm start`，或双击 `start.cmd`，打开 `http://127.0.0.1:3090`。已有工作台运行时会复用该服务。通过终端启动时应保持该终端打开。
+桌面：`npm start` 或 `start.cmd`。网页原型：`npm run start:web` 或 `start-web.cmd`，打开 `http://127.0.0.1:3090`，已有网页服务会复用。通过终端启动时应保持终端打开。
 
 | 命令 | 用途 |
 |---|---|
-| `npm start` | 启动构形 CAD 并打开网页 |
-| `npm start -- --no-open` | 启动工作台，不自动打开浏览器 |
+| `npm start` | 启动桌面 Harness |
+| `npm run start:web` | 启动保留的网页原型 |
+| `npm run start:web -- --no-open` | 启动网页服务，不打开浏览器 |
 | `npm run status` | 检查服务是否运行，不创建项目或请求模型 |
 | `npm run harness` | 原版 DSH 界面，默认端口3080，以终端地址为准 |
 | `npm run samples:import` | 导入明确选中的4个公开示例，保留已有同ID项目 |
 
 Node 路径未加入 PATH 时，可在启动终端临时加入安装目录，或用包含实际 Node 路径的本地启动脚本。机器专用路径与凭据目录不提交到仓库。
 
-## 生成和修改
+本次测试机器的专用桌面启动器为 `E:\dsh\start-desktop-local.cmd`，复用已有 `DSH_HOME` 和 `deepseek-account` 登录；该机器配置不提交仓库。通用启动的模型变量仍按上表配置，桌面使用独立 `gouxing-desktop` profile，不修改原型及原版 web profile。
+
+## 网页原型：生成和修改
 
 1. 新建零件，描述用途、形状和已知尺寸；也可以选择现有示例。
 2. 生成后旋转、平移或缩放模型，查看尺寸与版本。默认长度单位是毫米。

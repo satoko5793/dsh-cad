@@ -1,6 +1,6 @@
 # FreeCAD 原生工程最小验证
 
-2026-11-13在 Windows、FreeCAD 1.1.4（Python 3.11便携包）中实测。首个 CAD 验证对象已选定为 FreeCAD，当前采用内置 Python/宏验证，尚无常驻 Harness 适配器。
+2026-11-13在 Windows、FreeCAD 1.1.4（Python 3.11便携包）中完成的独立脚本实测。本文保留首轮原生操作证据；后续桌面常驻宏与 DSH 接入见[当前验证记录](../../docs/validation.md)。
 
 ## 已验证
 
@@ -33,6 +33,6 @@ GUI验证在独立用户配置下启动 FreeCAD，并执行调用同一脚本的
 
 ## 后续缺口
 
-本次使用确定性脚本，没有通过大模型自主操作或连续的桌面会话；尚未验证用户选择事件监听、过期对象与文档切换保护、跨任务取消恢复、装配、制造和实物。下一步按[实施路线](../../docs/roadmap.md)将已验证操作接入 Harness，而非把宏测试当作桌面产品完成。
+本次独立探针使用确定性脚本，不证明大模型自主操作或连续桌面会话。后续开发版另有常驻宏、过期写入拒绝及模型规划证据，不能把后续功能归入本探针的检查项；手动协作、装配、制造和实物仍需按[实施路线](../../docs/roadmap.md)继续验收。
 
 参考官方[Python脚本基础](https://github.com/FreeCAD/FreeCAD-documentation/blob/main/wiki/FreeCAD_Scripting_Basics.md)、[Python控制台](https://github.com/FreeCAD/FreeCAD-documentation/blob/main/wiki/Python_console.md)和[启动配置](https://github.com/FreeCAD/FreeCAD-documentation/blob/main/wiki/Start_up_and_Configuration.md)。这些文档支持选择验证路径，具体通过结论以本次运行记录为准。

@@ -6,22 +6,23 @@ import os from 'node:os';
 import { ROOT } from './build.mjs';
 
 export class Harness {
-  constructor(onNotification) {this.onNotification=onNotification; this.pending=new Map(); this.seq=0; this.process=null; this.ready=null; this.initialized=false; this.lastError='';this.provider=process.env.CAD_LLM_PROVIDER||'deepseek-official';this.model=process.env.CAD_LLM_MODEL||'deepseek-flash';}
+  constructor(onNotification, options={}) {this.options=options;this.onNotification=onNotification; this.pending=new Map(); this.seq=0; this.process=null; this.ready=null; this.initialized=false; this.lastError='';this.provider=process.env.CAD_LLM_PROVIDER||'deepseek-official';this.model=process.env.CAD_LLM_MODEL||'deepseek-flash';}
   async start() {
     if(this.ready) return this.ready;
     this.ready=this.boot().catch(error=>{this.ready=null; throw error;}); return this.ready;
   }
   async boot() {
     const home=process.env.DSH_HOME || path.join(os.homedir(),'.dsh');
-    const profile=path.join(home,'profiles','cad-studio'); await mkdir(profile,{recursive:true});
+    const profileName=this.options.profile||'cad-studio';
+    const profile=path.join(home,'profiles',profileName); await mkdir(profile,{recursive:true});
     await writeFile(path.join(profile,'package.json'),JSON.stringify({name:'cad-studio-profile',private:true,dsh:{profile:{bundles:['@deepseek-ai/dsh-base','@deepseek-ai/dsh-sdk-app']}}},null,2));
     await writeFile(path.join(profile,'cordis.yml'),'[]\n');
     // Dedicated profile: existing web profile and its API credentials are preserved.
-    const persona=await readFile(path.join(ROOT,'prompt.txt'),'utf8');
-    const patch=[{id:'system-prompt',config:{personaPrefix:persona}},{insert:[{id:'cad-studio-tools',name:path.join(ROOT,'cad-plugin.mjs').replaceAll('\\','/')}]},{id:'tool-plugin-manager',disabled:true}];
+    const persona=await readFile(this.options.prompt||path.join(ROOT,'prompt.txt'),'utf8');
+    const patch=[{id:'system-prompt',config:{personaPrefix:persona}},{insert:[{id:'cad-studio-tools',name:(this.options.plugin||path.join(ROOT,'cad-plugin.mjs')).replaceAll('\\','/')}]},{id:'tool-plugin-manager',disabled:true}];
     await writeFile(path.join(profile,'cordis.patch.yml'),JSON.stringify(patch,null,2));
     const cli=path.resolve(ROOT,'../node_modules/@deepseek-ai/dsh/lib/bin.js');
-    const child=spawn(process.execPath,[cli,'--profile','cad-studio'],{cwd:ROOT,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,DSH_HOME:home}});
+    const child=spawn(process.execPath,[cli,'--profile',profileName],{cwd:ROOT,windowsHide:true,stdio:['pipe','pipe','pipe'],env:{...process.env,...this.options.env,DSH_HOME:home,...(process.versions.electron?{ELECTRON_RUN_AS_NODE:'1'}:{})}});
     this.process=child; this.lastError='';
     child.stderr.on('data',b=>{this.lastError=(this.lastError+b).slice(-10000);});
     createInterface({input:child.stdout}).on('line',line=>{

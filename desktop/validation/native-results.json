@@ -1,0 +1,64 @@
+{
+  "date": "2026-11-13T04:30:16.369Z",
+  "version": [
+    "1",
+    "1",
+    "4"
+  ],
+  "passed": true,
+  "checks": [
+    {
+      "name": "connect persistent GUI bridge",
+      "passed": true
+    },
+    {
+      "name": "create native plate and read selection",
+      "passed": true
+    },
+    {
+      "name": "edit four native hole constraints",
+      "passed": true
+    },
+    {
+      "name": "reject stale write at actual CAD boundary",
+      "passed": true
+    },
+    {
+      "name": "undo native transaction",
+      "passed": true
+    },
+    {
+      "name": "redo native transaction",
+      "passed": true
+    },
+    {
+      "name": "save native file to new path",
+      "passed": true
+    },
+    {
+      "name": "reject overwriting an existing native file",
+      "passed": true
+    },
+    {
+      "name": "reject unsupported operation and invalid diameter",
+      "passed": true
+    }
+  ],
+  "geometry": {
+    "valid": true,
+    "solids": 1,
+    "volume": 14994.690350851264,
+    "dimensions": [
+      80,
+      40,
+      5
+    ]
+  },
+  "diameters": [
+    8,
+    8,
+    8,
+    8
+  ],
+  "note": "Dedicated FreeCAD instance. Reopen was tested separately in research/freecad-native; this check verifies the persistent bridge."
+}

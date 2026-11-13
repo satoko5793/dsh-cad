@@ -2,8 +2,8 @@
 
 ## Scope and entry points
 
-- This workspace contains 构形 CAD. The target product is a desktop conversational Harness that operates professional CAD software; the current runnable implementation is a web/CadQuery prototype built on DeepSeek Harness.
-- The current prototype is `cad-studio/`. Root `start.cmd` and `npm start` launch it at 127.0.0.1:3090; this does not launch the target desktop product or connect to SolidWorks/Fusion.
+- This workspace contains 构形 CAD, a desktop conversational Harness development app with a limited persistent FreeCAD adapter, plus the preserved web/CadQuery prototype.
+- `desktop/` is the default entry: root `start.cmd` and `npm start` launch Electron. `start-web.cmd` / `npm run start:web` retain `cad-studio/` at 127.0.0.1:3090. Neither integrates SolidWorks/Fusion.
 - `start-harness.cmd` and `npm run harness` retain access to the original DSH web app.
 - Read root `README.md`, then `docs/README.md` for the documentation index. Product direction belongs in `docs/product.md`, staged work and acceptance in `docs/roadmap.md`, implementation in `docs/architecture.md`, and evidence in `docs/validation.md`.
 
@@ -11,19 +11,21 @@
 
 - Help ordinary users describe ideas in everyday language and progress to physical objects that can be fabricated and assembled.
 - The desktop product has a full Harness workspace and a compact floating chat window for use alongside CAD. They share conversation, draft, files, CAD context and task state. See `docs/desktop-harness.md` for focus, selection, pause/cancel and user/agent coordination requirements.
-- FreeCAD 1.1.4 is the first selected CAD. Standalone native macro/script probes passed (research/freecad-native): headless 24 checks, GUI 26 checks including active document/selection. A persistent Harness adapter, user-selection event monitoring and the desktop framework remain to be implemented. SolidWorks and Fusion remain later candidates, not implemented integrations.
+- FreeCAD 1.1.4 is the first CAD. `desktop/freecad/bridge.py` runs a GUI-thread timer, publishes active document/selection and processes whitelisted commands. Supported writes: create the fixed 80x40x5 four-hole plate, edit all four diameters, undo/redo and save to a new FCStd path. Other documents are read-only; no arbitrary Python or single-face editing. A fingerprint is checked again at the actual write boundary.
+- Electron full/compact layouts share one window and Session. DSH can discuss and propose plans through a dedicated gouxing-desktop profile; only the main process can confirm a single write. Native bridge and real model planning tests passed; full manual interaction, multi-screen, focus, disconnect recovery and packaged installation remain incomplete. Evidence: desktop/validation and docs/validation.md. Preserve the older standalone probe evidence in research/freecad-native.
 - After the native CAD loop and desktop interaction, pursue a printable, assemblable electronics enclosure with requirements, supports/connections, per-part files, parts list, assembly instructions, physical prototype and feedback-driven revision.
 - Keep planned desktop/CAD capabilities distinct from prototype evidence. Static multi-solid geometry and successful exports alone do not prove native CAD integration, manufacturability or assembly.
 
 ## Keep it simple
 
-- Keep single-user local operation as the baseline. Professional CAD integration and a desktop shell are the agreed direction; this change records specifications only. Framework selection and integration implementation are future tasks. Do not add unrelated cloud hosting, accounts or frameworks.
+- Keep single-user local operation as the baseline. Electron and the limited FreeCAD macro adapter are now implemented; extend verified capabilities rather than adding unrelated cloud hosting, accounts or frameworks.
 - Research sources and downloads belong under `research/`; they are reference material, not application dependencies.
 - Distinguish tested behavior from repository claims when reporting research results. Do not resume software evaluation just to tidy this project.
 
 ## Preserve user data
 
 - Preserve `cad-studio/.data/`, which stores designs, chats and revisions.
+- Preserve `desktop/.data/`, which stores the desktop conversation, drafts, attachments, settings and bridge journals. Neither private data tree is published. Closing the assistant must not kill FreeCAD or discard its unsaved work.
 - Credentials are managed by DSH. Do not print them, embed them in frontend code, or copy them into repository documentation or tests.
 - Preserve the user's DSH web profile. Use a separate profile for experimental integrations.
 - Avoid moving directories that existing profiles reference, particularly `vendor/` and installed plugin checkouts.
@@ -36,7 +38,7 @@
 
 ## Verification
 
-- Root `npm test` runs the application tests in `cad-studio/test/`, including non-destructive previews and parameter validation.
+- Root `npm test` runs desktop Session tests and the application tests in `cad-studio/test/`. `npm run test:desktop` runs desktop unit tests only. Explicit native integration: set FREECAD_EXE and run `node desktop/test/native-check.mjs` (opens an isolated FreeCAD test instance). Do not run native GUI or paid model tests for documentation-only updates.
 - Root `npm run status` checks the existing application without opening a browser or creating a project.
 - For documentation-only changes, verify paths and commands instead of rerunning CAD generation or paid model requests.
 - Keep detailed project documentation under `docs/`. Preserve sample and research evidence paths, and link to their indexes rather than duplicating their assets.

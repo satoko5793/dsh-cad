@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>构形 · CAD 助手</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script>
+</head>
+<body>
+  <header class="titlebar"><div class="brand"><span class="brand-mark">构</span><strong>构形</strong><span class="edition">CAD 助手 · 开发版</span></div><div class="window-controls"><button id="pin" hidden>置顶</button><button id="toggle">缩为小窗</button><button id="minimize" aria-label="收起到任务栏">—</button><button id="close" aria-label="退出应用">×</button></div></header>
+  <div class="workspace">
+    <nav class="sidebar" aria-label="会话与工程"><div class="section-label">工作空间</div><div class="session-current"><span class="session-dot"></span><div><strong>我的 CAD 会话</strong><small>对话和草稿自动保存在本机</small></div></div><div class="sidebar-section"><div class="section-label">连接的软件</div><div class="software"><span class="software-logo">F</span><div><strong>FreeCAD</strong><small id="sidebar-connection">尚未连接</small></div></div><button class="button secondary full" id="connect">连接 FreeCAD</button></div><div class="sidebar-bottom"><p>让想法成为实物</p><span>当前支持原生四孔安装板</span></div></nav>
+    <main class="conversation">
+      <div class="conversation-heading"><div><h1>把想法说出来</h1><p>在对话里讨论，在 CAD 中完成。</p></div><span class="local-badge">本机工作空间</span></div>
+      <section id="messages" class="messages" aria-label="对话记录" aria-live="polite"></section>
+      <section class="task-area">
+        <div id="error" class="error" role="alert" hidden></div>
+        <div class="context-bar"><span id="connection-dot" class="connection-dot"></span><div><strong id="context-document">尚未连接 CAD</strong><span id="context-selection">选择对象会显示在这里</span></div><button id="compact-connect" class="text-button">连接</button></div>
+        <div id="plan" class="plan" hidden><div class="plan-label">本次操作</div><p id="plan-description"></p><div class="plan-actions"><button class="button primary" id="confirm">确认执行</button><button class="button secondary" id="pause">暂停</button><button class="text-button" id="cancel">取消</button></div></div>
+        <div class="composer"><label class="accessible" for="draft">描述你的想法或修改需求</label><textarea id="draft" rows="2" maxlength="12000" placeholder="描述想法，或先在 CAD 中选中想修改的对象…"></textarea><div id="attachments" class="attachments"></div><div class="composer-toolbar"><div class="composer-tools"><button class="icon-button" id="attach" aria-label="附加参考文件">＋</button><span id="model-name" class="model-name">Harness</span></div><button class="send-button" id="send" aria-label="发送消息">发送 ↑</button></div></div>
+        <div class="input-hint"><span>Enter 发送 · Shift + Enter 换行</span><span id="shortcut">Ctrl + Alt + Space 呼出</span></div>
+      </section>
+    </main>
+    <aside class="inspector"><div class="section-label">工程上下文</div><h2 id="inspector-title">等待连接</h2><dl><dt>软件</dt><dd id="cad-version">FreeCAD</dd><dt>活动文档</dt><dd id="document-file">—</dd><dt>当前选择</dt><dd id="selection-detail">未选择对象</dd><dt>原生孔径</dt><dd id="diameters">—</dd></dl><button id="save" class="button secondary full" disabled>另存原生工程</button><div class="inspector-divider"></div><div class="section-label">操作过程</div><ol><li>读取实际工程和选择</li><li>准备操作，等待确认</li><li>核对上下文后执行</li><li>读回尺寸与几何结果</li></ol><div class="scope-note">首版可创建固定尺寸的四孔板，并修改四孔直径、撤销、重做和另存。其他工程暂时只读取上下文。</div></aside>
+  </div>
+  <footer class="statusbar"><span id="status" role="status">正在恢复会话…</span><button id="cancel-running" class="text-button" hidden>取消思考</button><span class="status-right">工程由 FreeCAD 承载</span></footer>
+</body>
+</html>

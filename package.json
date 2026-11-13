@@ -7,10 +7,13 @@
     "samples:import": "node scripts/import-samples.mjs",
     "samples:export": "node scripts/export-samples.mjs",
     "repo:update": "node scripts/update-repo.mjs",
-    "start": "node scripts/start-cad.mjs",
+    "start": "node scripts/start-desktop.mjs",
+    "start:web": "node scripts/start-cad.mjs",
+    "desktop:runtime": "node node_modules/electron/install.js",
     "harness": "dsh web",
     "status": "node scripts/start-cad.mjs --check",
-    "test": "npm --prefix cad-studio test",
+    "test": "node --test desktop/test/*.test.mjs && npm --prefix cad-studio test",
+    "test:desktop": "node --test desktop/test/*.test.mjs",
     "start:headless": "dsh web --no-open",
     "dsh": "dsh"
   },
@@ -21,5 +24,8 @@
   "dependencies": {
     "@deepseek-ai/dsh": "0.2.2-rc.1"
   },
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "electron": "45.3.1"
+  }
 }

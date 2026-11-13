@@ -1,10 +1,26 @@
 # 技术说明与维护约定
 
-本文描述当前验证原型的实现：原生 HTML/CSS/JavaScript 与 Three.js 前端，Node.js HTTP 服务，DeepSeek Harness Agent，以及 CadQuery 2.8 / OpenCascade 建模进程。它尚未操作专业 CAD 软件。
+本文描述桌面开发版和保留的网页原型。桌面使用 Electron、Node/DSH 与 FreeCAD GUI 常驻 Python 宏；网页继续使用 HTML/CSS/JavaScript、Three.js、Node HTTP 和 CadQuery 2.8 / OpenCascade。
 
-目标产品采用桌面 Harness，提供完整工作台与悬浮小窗，通过适配器操作实际 CAD 工程。目标结构与交互边界见[桌面 Harness 规格](desktop-harness.md)，接入顺序见[实施路线](roadmap.md)。首个 CAD 为 FreeCAD 1.1.4，独立宏/脚本已验证原生操作，常驻适配器和桌面框架尚未实现；本文的网页结构不代表未来桌面架构已经完成。
+桌面提供完整工作台与悬浮小窗，通过有限白名单操作 FreeCAD 1.1.4 的原生四孔板。完整目标结构与交互边界见[桌面 Harness 规格](desktop-harness.md)，未验收项见[验证记录](validation.md)。
 
-## 代码入口
+## 桌面实现
+
+`scripts/start-desktop.mjs` 启动 Electron 45.3.1；`desktop/main.mjs` 管理唯一 BrowserWindow、快捷键、原生文件对话框和 IPC。`desktop/preload.cjs` 只暴露固定操作，renderer 使用 contextIsolation、sandbox，禁用 Node 集成、外部导航和新窗口；本地页面有 CSP，不直接访问凭据、文件系统或网络。
+
+`desktop/ui/` 使用同一 DOM 切换完整与紧凑布局，不刷新、不重复提交。主进程 `Session` 是会话与任务的唯一来源，统一持久化消息、草稿、附件索引和任务状态。恢复时清除未完成计划，保留对话与草稿；CAD 上下文重新读取，不当成已恢复执行。
+
+`desktop/session.mjs` 识别少量精确本地命令；其他消息通过已有 DSH 客户端与独立 `gouxing-desktop` profile。`plan-plugin.mjs` 唯一工具 `freecad_propose` 只输出结构化计划，不能调用 CAD，也不能运行任意代码。主进程校验白名单、数值、工程与选择，生成单次计划标识；用户确认后才交给适配器。每轮模型进程结束后释放，最近对话会作为上下文补入；这不是跨轮保持同一个 DSH 子进程。
+
+`desktop/bridge.mjs` 启动带独立配置的 FreeCAD 实例。宏 `desktop/freecad/bridge.py` 在 GUI 线程每350ms轮询本地 inbox，并写出快照和按请求ID存储的结果。请求先消费后执行，附12秒启动期限；已消费请求不重跑。主进程20秒未收结果会锁住后续写入并等待迟到结果，不自动重试。
+
+写入时重新读取活动文档、文档令牌、对象类型、草图约束、相关属性、实体 BRep 与选择，计算指纹；不匹配便拒绝。快照超过3秒未更新视为断连。方案当前对小型测试工程有效，复杂工程逐次 BRep 摘要的性能仍需验证，不能称为完整 CAD 变更监控。
+
+仅能编辑带本应用标记的固定安装板，孔径通过四个原生直径约束修改，在事务内重建并校验尺寸、单实体和解析体积；失败尝试中止事务。支持撤销/重做最近原生事务，可能包含用户的最近操作，计划明确提示其范围。保存仅另存不存在的 `.FCStd` 路径。附件暂不解析，模型只收到文件名；不同桌面/原型数据不自动迁移。
+
+Electron [窗口接口](https://www.electronjs.org/docs/latest/api/browser-window)及[contextBridge](https://www.electronjs.org/docs/latest/api/context-bridge)用于原生行为与隔离；FreeCAD 选择读取参考[官方 API 源码文档](https://freecad.github.io/SourceDoc/d4/dca/classGui_1_1SelectionSingleton.html)。具体通过结论以本仓库测试结果为准。
+
+## 保留网页原型的代码入口
 
 | 文件或目录 | 作用 |
 |---|---|
