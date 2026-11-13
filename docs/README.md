@@ -18,6 +18,7 @@
 10. [连接与单窗口使用](cad-connection.md)：自动配置组件、原窗口升级、工程续改和测试约定。
 11. [保留的网页原型](prototype.md)：原来的 CadQuery 方案、组件预览、参数与版本数据。
 12. [变更记录](changelog.md)：版本变更与验证索引。
+13. [交付与使用体验](release-readiness.md)：下一阶段的 Windows 内测版、安装/首次使用、项目续接、稳定性及放行条件（规划）。
 
 ## 资料归属
 
@@ -26,6 +27,7 @@
 | `docs/product.md` | 产品目标和体验原则 | 产品定位的主文档 |
 | `docs/desktop-harness.md` | 桌面形态与交互规格 | 区分开发版实现、实测与剩余验收项 |
 | `docs/roadmap.md` | 阶段范围和完成条件 | 规划不写成已实现能力 |
+| `docs/release-readiness.md` | 普通用户交付与稳定使用的近期规格 | 区分当前开发版、待实现能力、待决事项与放行证据 |
 | `docs/usage.md` | 操作步骤与配置 | 与启动脚本和真实界面一致 |
 | `docs/architecture.md` | 技术和数据约定 | 与源码一致 |
 | `docs/development.md` | 代码归属、测试与提交规则 | 桌面主线、原型及共享层的开发入口 |

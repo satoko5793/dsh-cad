@@ -5,6 +5,7 @@
 - 构形 CAD is a desktop conversational Harness operating professional CAD. FreeCAD is integrated; SolidWorks/Fusion are future adapters. Full/compact modes share one window, Session and task. Everyday creative models and fabrication/assembly remain product goals; physical production is unverified.
 - Root `npm start` / `start.cmd` launch Electron. `npm run start:web` / `start-web.cmd` preserve the original web/CadQuery prototype at 127.0.0.1:3090. `npm run harness` / `start-harness.cmd` retain the original DSH web entry.
 - Read `README.md`, `docs/README.md`, `docs/development.md`, then the relevant feature document. Evidence and limits belong in `docs/validation.md`; never present plans or model claims as verified behavior.
+- The next agreed focus is independent use by ordinary Windows users: packaging/runtime/data migration → onboarding → project recovery/errors → overall interaction and update acceptance. Requirements and unresolved delivery/model-service decisions are in `docs/release-readiness.md`. The user requested documenting/pushing this plan first and implementing later; do not infer that installers, onboarding, tray, hosted accounts or data migration are already implemented.
 
 ## Code ownership and compatibility
 

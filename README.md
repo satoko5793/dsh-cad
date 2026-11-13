@@ -45,3 +45,5 @@ npm run start:web         # 原来的网页原型，127.0.0.1:3090
 原型继续支持“对话 → CadQuery → 组件预览/版本修改 → STEP/STL”，四个已选示例可用 `npm run samples:import` 导入，详见[保留的原型说明](docs/prototype.md)。桌面与原型数据不自动互转。
 
 完整导航见[文档中心](docs/README.md)，开发入口与提交方法见[开发指南](docs/development.md)，产品目标与下一步见[产品文档](docs/product.md)和[实施路线](docs/roadmap.md)。
+
+下一阶段聚焦[面向普通用户的交付与使用体验](docs/release-readiness.md)：安装包、首次使用、项目恢复及稳定性验收。本轮仅记录规划，当前仍是源码开发版。
