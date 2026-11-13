@@ -8,6 +8,8 @@
 |---|---|
 | [`scripts/start-cad.mjs`](../scripts/start-cad.mjs) | 检查现有服务、启动应用、可选打开浏览器 |
 | [`cad-studio/public/`](../cad-studio/public/) | 聊天、STL预览、模块列表、参数与版本界面 |
+| [`cad-studio/public/viewer.js`](../cad-studio/public/viewer.js) | 独立组件网格、射线拾取、边缘高亮、隔离和分离视图 |
+| [`cad-studio/public/viewer-math.js`](../cad-studio/public/viewer-math.js) | 组件配色与只影响显示的分离位移 |
 | [`cad-studio/server.mjs`](../cad-studio/server.mjs) | 项目API、任务状态、SSE事件流与下载 |
 | [`cad-studio/harness.mjs`](../cad-studio/harness.mjs) | DSH子进程、JSON-RPC、路由与会话请求 |
 | [`cad-studio/prompt.txt`](../cad-studio/prompt.txt) | 需求理解、口语修改、参数化和回复约定 |
@@ -34,6 +36,16 @@
 
 下载的Python源码包含参数和导出语句，多模块时按 `components` 重新组合，保持与worker导出来源一致。
 
+## 组件视图与修改上下文
+
+worker除整体STEP/STL外，还输出 `viewer.json` 与按序号命名的 `component-<序号>.stl`。前端独立加载每个组件，使用Three.js射线拾取真实网格，不以包围盒推断面片归属。模型悬停与组件列表联动，点击保持选择；边缘和表面高亮、只看选中、分离位移都不写回设计数据。
+
+保存版本和预览分别通过 `/api/projects/<项目ID>/revisions/<版本ID>/viewer`、`/api/projects/<项目ID>/previews/<预览ID>/viewer` 提供组件清单；网格路径为同级 `components/<序号>.stl`。接口验证版本归属、预览有效期和组件序号。
+
+旧版本缺少组件网格时，在该版本目录的 `.viewer/` 中用原脚本与参数重建显示缓存；同版本并发请求复用生成任务，不追加版本。缓存校验组件名称、尺寸和体积与保存测量一致。保存参数预览时同时复制已有组件视图文件。
+
+对话可提交 `componentName`。服务端校验它属于选中版本，保存到用户消息并补入模型上下文；前端切换项目或版本会清除选择。该上下文用于指代理解，模型修改结果仍需检查，不构成对所有后续生成的行为保证。
+
 ## 数据与版本
 
 默认目录为 `cad-studio/.data/<项目ID>/`，可用 `CAD_DATA_DIR` 切换到独立数据目录。
@@ -41,8 +53,9 @@
 | 位置 | 内容 |
 |---|---|
 | `project.json` | 聊天、版本索引、当前版本及项目时间 |
-| `revisions/<版本ID>/` | `revision.json`、`model.py`、`parameters.json`、STEP和STL |
+| `revisions/<版本ID>/` | `revision.json`、`model.py`、`parameters.json`、STEP/STL，以及可选组件视图文件 |
 | `previews/<预览ID>/` | 临时模型、预览元数据及原始版本关系 |
+| `revisions/<版本ID>/.viewer/` | 旧版本可重建的组件显示缓存，非新增设计版本 |
 
 项目JSON通过临时文件和重命名写入；它不是数据库事务系统。版本成功后追加，预览不直接修改原版本，30分钟后过期；过期并不代表文件已被后台自动清理。备份与迁移说明见[使用指南](usage.md)。
 

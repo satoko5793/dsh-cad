@@ -89,6 +89,9 @@ def run(payload):
     with contextlib.redirect_stdout(io.StringIO()):
         cq.exporters.export(shape, str(output / 'model.step'))
         cq.exporters.export(shape, str(output / 'model.stl'), tolerance=0.05, angularTolerance=0.1)
+        for i, component_shape in enumerate(shapes if components is not None else []):
+            cq.exporters.export(component_shape, str(output / f'component-{i}.stl'), tolerance=0.05, angularTolerance=0.1)
+    (output / 'viewer.json').write_text(json.dumps({'components': measured_components}), encoding='utf-8')
     cylinders = []
     for face in shape.Faces():
         if face.geomType() == 'CYLINDER':

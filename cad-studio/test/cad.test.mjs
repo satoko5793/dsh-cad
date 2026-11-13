@@ -7,7 +7,7 @@ import {randomUUID} from 'node:crypto';
 
 const temp=await mkdtemp(path.join(os.tmpdir(),'cad-studio-test-'));
 process.env.CAD_DATA_DIR=temp;
-const {saveProject,loadProject,buildModel,projectDir,previewModel,loadPreview,previewDir,commitPreview,discardPreview}=await import('../build.mjs');
+const {saveProject,loadProject,buildModel,projectDir,previewModel,loadPreview,previewDir,commitPreview,discardPreview,loadViewer}=await import('../build.mjs');
 const id=randomUUID();
 const source=`length=params['length']
 width=params['width']
@@ -77,12 +77,34 @@ components={'底座':base,'导轨':rail,'滑台':carriage}
   assert.equal(base.geometry.solids,3);
   assert.deepEqual(base.geometry.components.map(c=>c.name),['底座','导轨','滑台']);
   assert.equal(base.geometry.volume,40*30*4+30*4*4+10*10*3);
+  const initialViewer=await loadViewer({projectId,revisionId:base.id});
+  assert.deepEqual(initialViewer.components.map(c=>c.name),['底座','导轨','滑台']);
+  async function meshBounds(directory,index){
+    const stl=await readFile(path.join(directory,`component-${index}.stl`)),triangles=stl.readUInt32LE(80);
+    assert.equal(stl.length,84+50*triangles);
+    const lower=[Infinity,Infinity,Infinity],upper=[-Infinity,-Infinity,-Infinity];
+    for(let i=0;i<triangles;i++)for(let vertex=0;vertex<3;vertex++)for(let axis=0;axis<3;axis++){
+      const value=stl.readFloatLE(84+i*50+12+vertex*12+axis*4);lower[axis]=Math.min(lower[axis],value);upper[axis]=Math.max(upper[axis],value);
+    }
+    return [...lower,...upper];
+  }
+  for(let i=0;i<3;i++)assert.deepEqual(await meshBounds(initialViewer.directory,i),base.geometry.components[i].bounds);
+  const originalProject=await readFile(path.join(projectDir(projectId),'project.json'),'utf8');
+  // Simulate a pre-viewer revision. Rebuilding display assets must not alter saved data.
+  for(const file of ['viewer.json','component-0.stl','component-1.stl','component-2.stl'])await rm(path.join(initialViewer.directory,file));
+  const [legacy,concurrent]=await Promise.all([loadViewer({projectId,revisionId:base.id}),loadViewer({projectId,revisionId:base.id})]);
+  assert.equal(legacy.directory,concurrent.directory);assert.equal(path.basename(legacy.directory),'.viewer');
+  assert.equal(await readFile(path.join(projectDir(projectId),'project.json'),'utf8'),originalProject);
+  for(let i=0;i<3;i++)assert.deepEqual(await meshBounds(legacy.directory,i),base.geometry.components[i].bounds);
   const preview=await previewModel({projectId,baseRevisionId:base.id,parameters:{...parameters,carriage_x:10}});
   assert.deepEqual(preview.geometry.components.slice(0,2),base.geometry.components.slice(0,2));
   assert.deepEqual(preview.geometry.components[2].bounds,[5,-5,12.5,15,5,15.5]);
   assert.equal((await loadProject(projectId)).revisions.length,1);
   const saved=await commitPreview(projectId,preview.id);
   assert.deepEqual(saved.geometry.components,preview.geometry.components);
+  const savedViewer=await loadViewer({projectId,revisionId:saved.id});
+  assert.notEqual(path.basename(savedViewer.directory),'.viewer');
+  assert.deepEqual(await meshBounds(savedViewer.directory,2),[5,-5,12.5,15,5,15.5]);
   assert.equal((await loadProject(projectId)).revisions.length,2);
   await assert.rejects(()=>buildModel({projectId,source:"components={'坏模块':cq.Workplane('XY')}",parameters:{}}),/Empty component/);
   await assert.rejects(()=>buildModel({projectId,source:"components={}",parameters:{}}),/1–24/);

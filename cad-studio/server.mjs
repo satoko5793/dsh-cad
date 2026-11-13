@@ -2,7 +2,7 @@ import http from 'node:http';
 import path from 'node:path';
 import { readFile, readdir, access } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
-import { ROOT, DATA, projectDir, loadProject, saveProject, buildModel, validId, previewModel, loadPreview, previewDir, commitPreview, discardPreview } from './build.mjs';
+import { ROOT, DATA, projectDir, loadProject, saveProject, buildModel, validId, previewModel, loadPreview, previewDir, commitPreview, discardPreview, loadViewer } from './build.mjs';
 import { Harness } from './harness.mjs';
 
 const PORT=Number(process.env.PORT || 3090), HOST='127.0.0.1';
@@ -25,12 +25,13 @@ function json(res,status,data){res.writeHead(status,{'Content-Type':'application
 async function body(req){let text='';for await(const chunk of req){text+=chunk;if(text.length>100000)throw new Error('Request too large');}return JSON.parse(text || '{}');}
 function safeError(error){return String(error.message || error).replace(/sk-[A-Za-z0-9_-]+/g,'[redacted]').slice(0,1800);}
 async function createProject(title='未命名零件') {const p={id:randomUUID(),title,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),messages:[],revisions:[],activeRevision:null};await saveProject(p);return p;}
-async function runChat(job,text,revisionId){
+async function runChat(job,text,revisionId,componentName){
   try {
     emit(job,'status',{text:'正在理解零件需求…'});
-    const p=await loadProject(job.projectId);p.messages.push({role:'user',text,createdAt:new Date().toISOString()});await saveProject(p);
+    const p=await loadProject(job.projectId);p.messages.push({role:'user',text,...(componentName?{componentName}:{}),createdAt:new Date().toISOString()});await saveProject(p);
     const revision=p.revisions.find(r=>r.id===revisionId) || p.revisions.find(r=>r.id===p.activeRevision);
     let context=`应用项目 ID: ${p.id}。cad_build 必须使用这个 projectId。\n回复默认使用普通中文，两三句即可。用户要求“简单说说”时最多三句话，不列清单、不复述所有尺寸；明确要求详细信息时才展开。\n`;
+    if(componentName)context+=`用户在三维视图中明确选中了组件「${componentName}」。本次“这个零件”“这里”等指代优先指向它；保留未要求修改的其他组件。\n`;
     if(revision){const source=await readFile(path.join(projectDir(p.id),'revisions',revision.id,'model.py'),'utf8');context+=`当前选中版本（后续修改基于此版本）：\n参数：${JSON.stringify(revision.parameters)}\n建模脚本：\n${source}\n`;}
     if(job.newSession && p.messages.length>1)context+=`最近对话：${JSON.stringify(p.messages.slice(-9,-1))}\n`;
     await harness.prompt(job.sessionId,`${context}\n用户本次需求：\n${text}`);
@@ -57,6 +58,15 @@ const server=http.createServer(async(req,res)=>{
       if(parts[1]==='projects' && validId(parts[2])) {
         const id=parts[2];
         if(parts.length===3 && req.method==='GET')return json(res,200,await loadProject(id));
+        if(['revisions','previews'].includes(parts[3])&&validId(parts[4])&&req.method==='GET'&&(parts[5]==='viewer'||parts[5]==='components')){
+          if(parts[5]==='viewer'&&parts.length!==6)return json(res,404,{error:'接口不存在'});
+          const match=parts[5]==='components'&&parts.length===7?/^(0|[1-9]\d*)\.stl$/.exec(parts[6]):null;
+          if(parts[5]==='components'&&!match)return json(res,404,{error:'组件不存在'});
+          const viewer=await loadViewer({projectId:id,...(parts[3]==='previews'?{previewId:parts[4]}:{revisionId:parts[4]})});
+          if(parts[5]==='viewer')return json(res,200,{components:viewer.components.map((c,i)=>({...c,url:`/api/projects/${id}/${parts[3]}/${parts[4]}/components/${i}.stl`}))});
+          const index=Number(match[1]);if(index>=viewer.components.length)return json(res,404,{error:'组件不存在'});
+          const data=await readFile(path.join(viewer.directory,`component-${index}.stl`));res.writeHead(200,{'Content-Type':'model/stl','Cache-Control':'no-store'});return res.end(data);
+        }
         if(parts[3]==='preview' && req.method==='POST'){
           if(busy.has(id))return json(res,409,{error:'当前项目仍在生成，请稍候。'});
           const b=await body(req);busy.add(id);
@@ -82,8 +92,10 @@ const server=http.createServer(async(req,res)=>{
         if(parts[3]==='chat' && req.method==='POST'){
           if(busy.has(id))return json(res,409,{error:'当前项目仍在生成，请稍候。'});
           const b=await body(req);if(typeof b.text!=='string'||!b.text.trim()||b.text.length>12000)return json(res,400,{error:'请输入有效的零件需求（最多 12000 字）。'});
-          await loadProject(id);const newSession=!sessions.has(id);if(newSession)sessions.set(id,randomUUID());
-          const job={id:randomUUID(),projectId:id,sessionId:sessions.get(id),newSession,texts:[],events:[],clients:new Set(),done:false};jobs.set(job.id,job);busy.add(id);json(res,202,{jobId:job.id});void runChat(job,b.text.trim(),b.revisionId);return;
+          const p=await loadProject(id),revision=p.revisions.find(r=>r.id===b.revisionId)||p.revisions.find(r=>r.id===p.activeRevision);
+          if(b.componentName!==undefined&&(typeof b.componentName!=='string'||!revision?.geometry.components?.some(c=>c.name===b.componentName)))return json(res,400,{error:'选中的组件不属于当前版本，请重新选择。'});
+          const newSession=!sessions.has(id);if(newSession)sessions.set(id,randomUUID());
+          const job={id:randomUUID(),projectId:id,sessionId:sessions.get(id),newSession,texts:[],events:[],clients:new Set(),done:false};jobs.set(job.id,job);busy.add(id);json(res,202,{jobId:job.id});void runChat(job,b.text.trim(),b.revisionId,b.componentName);return;
         }
         if(parts[3]==='rebuild' && req.method==='POST'){
           if(busy.has(id))return json(res,409,{error:'当前项目仍在生成，请稍候。'});

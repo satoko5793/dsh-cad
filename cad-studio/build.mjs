@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdir, readFile, writeFile, rename, copyFile, rm } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, rename, copyFile, rm, access } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { randomUUID } from 'node:crypto';
@@ -90,6 +90,11 @@ export async function commitPreview(projectId,previewId) {
   const id=`${Date.now()}-${randomUUID().slice(0,8)}`,dir=path.join(projectDir(projectId),'revisions',id);
   await mkdir(dir,{recursive:true});
   for(const file of ['model.py','parameters.json','model.step','model.stl'])await copyFile(path.join(previewDir(projectId,previewId),file),path.join(dir,file));
+  try{
+    const viewer=JSON.parse(await readFile(path.join(previewDir(projectId,previewId),'viewer.json'),'utf8'));
+    for(let i=0;i<viewer.components.length;i++)await copyFile(path.join(previewDir(projectId,previewId),`component-${i}.stl`),path.join(dir,`component-${i}.stl`));
+    await copyFile(path.join(previewDir(projectId,previewId),'viewer.json'),path.join(dir,'viewer.json'));
+  }catch(error){if(error.code!=='ENOENT')throw error;}
   const {baseRevisionId,...fields}=preview;
   const revision={...fields,id,previewId,basedOn:baseRevisionId,createdAt:new Date().toISOString()};
   await writeFile(path.join(dir,'revision.json'),JSON.stringify(revision,null,2));
@@ -98,4 +103,38 @@ export async function commitPreview(projectId,previewId) {
 export async function discardPreview(projectId,previewId) {
   // The checked absolute path is limited to this project's generated previews.
   await rm(previewDir(projectId,previewId),{recursive:true,force:true});
+}
+
+const viewerJobs=new Map();
+export async function loadViewer({projectId,revisionId,previewId}) {
+  let dir,metadata;
+  if(previewId){metadata=await loadPreview(projectId,previewId);dir=previewDir(projectId,previewId);}
+  else{
+    const project=await loadProject(projectId);
+    metadata=project.revisions.find(r=>r.id===revisionId);
+    if(!metadata)throw Object.assign(new Error('版本不存在'),{code:'ENOENT'});
+    dir=path.join(projectDir(projectId),'revisions',metadata.id);
+  }
+  if(!metadata.geometry.components?.length)return {components:[],directory:dir};
+  if(viewerJobs.has(dir))return viewerJobs.get(dir);
+  async function readAssets(directory){
+    const viewer=JSON.parse(await readFile(path.join(directory,'viewer.json'),'utf8'));
+    if(!Array.isArray(viewer.components)||viewer.components.length!==metadata.geometry.components.length||viewer.components.some((c,i)=>c.name!==metadata.geometry.components[i].name))throw new Error('组件视图与模型版本不一致');
+    for(const [i,c] of viewer.components.entries()){
+      const expected=metadata.geometry.components[i];
+      if(c.size.some((v,axis)=>Math.abs(v-expected.size[axis])>.001)||Math.abs(c.volume-expected.volume)>Math.max(.01,Math.abs(expected.volume)*1e-7))throw new Error('组件视图与保存的几何测量不一致');
+    }
+    await Promise.all(viewer.components.map((_,i)=>access(path.join(directory,`component-${i}.stl`))));
+    return {...viewer,directory};
+  }
+  try{return await readAssets(dir);}catch(error){if(error.code!=='ENOENT')throw error;}
+  const cache=path.join(dir,'.viewer');
+  try{return await readAssets(cache);}catch(error){if(error.code!=='ENOENT')throw error;}
+  // Legacy revisions are rebuilt into an isolated display cache, never a new saved version.
+  if(!viewerJobs.has(dir))viewerJobs.set(dir,(async()=>{
+    const source=await readFile(path.join(dir,'model.py'),'utf8');
+    await runWorker(cache,source,metadata.parameters);
+    return readAssets(cache);
+  })().finally(()=>viewerJobs.delete(dir)));
+  return viewerJobs.get(dir);
 }

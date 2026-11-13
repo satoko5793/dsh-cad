@@ -11,7 +11,7 @@ if(run('git',['branch','--show-current'],{capture:true})!=='main')throw new Erro
 run('git',['fetch','origin']);
 const remoteMain=run('git',['rev-parse','--verify','refs/remotes/origin/main'],{capture:true,allowFailure:true});
 if(remoteMain&&run('git',['merge-base','--is-ancestor','origin/main','HEAD'],{allowFailure:true})!==0)throw new Error('远端有尚未合并的更改，请先处理；不会强制推送。');
-run(process.execPath,['--test','cad-studio/test/cad.test.mjs','cad-studio/test/parameters.test.mjs','cad-studio/test/plugin.test.mjs']);
+run(process.execPath,['--test','cad-studio/test/cad.test.mjs','cad-studio/test/parameters.test.mjs','cad-studio/test/plugin.test.mjs','cad-studio/test/viewer-math.test.mjs']);
 run(process.execPath,['scripts/export-samples.mjs']);
 const python=process.env.CAD_PYTHON||path.join(root,'cad-studio/.venv/Scripts/python.exe');
 run(python,['samples/verify-complex.py']);
