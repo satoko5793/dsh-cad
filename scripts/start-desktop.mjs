@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {resolveNode,standaloneEnvironment} from '../cad-studio/node-runtime.mjs';
+import {resolveNode,standaloneEnvironment} from '../shared/node-runtime.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const require=createRequire(import.meta.url);
 let executable;

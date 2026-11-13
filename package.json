@@ -1,7 +1,7 @@
 {
-  "name": "dsh",
-  "version": "1.2.0",
-  "description": "构形 CAD：基于 DeepSeek Harness 的本地对话式 CAD 工作台",
+  "name": "gouxing-cad",
+  "version": "1.2.1",
+  "description": "构形 CAD：操作专业 CAD 的桌面对话 Harness 助手",
   "scripts": {
     "setup": "node scripts/setup-cad.mjs",
     "samples:import": "node scripts/import-samples.mjs",
@@ -12,10 +12,13 @@
     "desktop:runtime": "node node_modules/electron/install.js",
     "harness": "dsh web",
     "status": "node scripts/start-cad.mjs --check",
-    "test": "node --test desktop/test/*.test.mjs && npm --prefix cad-studio test",
-    "test:desktop": "node --test desktop/test/*.test.mjs",
+    "test": "node scripts/test.mjs",
+    "test:desktop": "node scripts/test.mjs desktop",
     "start:headless": "dsh web --no-open",
-    "dsh": "dsh"
+    "dsh": "dsh",
+    "test:prototype": "node scripts/test.mjs prototype",
+    "test:runtime": "node desktop/test/run-runtime-layer.mjs",
+    "test:shell": "node desktop/test/run-shell.mjs"
   },
   "keywords": [],
   "author": "",

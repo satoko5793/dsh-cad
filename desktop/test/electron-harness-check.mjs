@@ -8,7 +8,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {FreeCADBridge,ROOT,atomicJson} from '../bridge.mjs';
 import {Session} from '../session.mjs';
-import {resolveNode,standaloneEnvironment} from '../../cad-studio/node-runtime.mjs';
+import {resolveNode,standaloneEnvironment} from '../../shared/node-runtime.mjs';
 
 const directory=path.join(ROOT,'.data','electron-regression',randomUUID());
 app.setPath('userData',path.join(directory,'electron'));

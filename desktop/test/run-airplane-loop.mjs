@@ -5,7 +5,7 @@ import {randomUUID} from 'node:crypto';
 import path from 'node:path';
 import {FreeCADBridge,ROOT} from '../bridge.mjs';
 import {Session} from '../session.mjs';
-import {resolveNode,standaloneEnvironment} from '../../cad-studio/node-runtime.mjs';
+import {resolveNode,standaloneEnvironment} from '../../shared/node-runtime.mjs';
 const reuse=process.env.GOUXING_SYMMETRY_ONLY==='1'||process.env.GOUXING_LAYOUT_ONLY==='1';
 process.env.GOUXING_CAD_WORKSPACE ||= path.join(ROOT,'.data','cad-workspace');
 const directory=reuse?process.env.GOUXING_REVIEW_DIR:path.join(ROOT,'.data','airplane-loop',randomUUID());

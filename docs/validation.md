@@ -28,7 +28,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`。当前共35个测试通过：桌面29项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；新增流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)及[`agent.test.mjs`](../desktop/test/agent.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`，自动发现两端的普通测试。当前共38个测试通过：桌面32项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新；新增分层导入边界、稳定入口兼容及共享运行时显式路径检查。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)、[`agent.test.mjs`](../desktop/test/agent.test.mjs)及[`layers.test.mjs`](../desktop/test/layers.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -41,6 +41,12 @@
 测试使用独立临时数据目录，不通过真实大模型生成。源码见 [`cad-studio/test/`](../cad-studio/test/)。
 
 ## 桌面与 FreeCAD 常驻桥接实测
+
+### v1.2.1：分层后的启动与运行时
+
+目录整理后，使用实际 Electron 45.3.1 父进程和 Node 24.22.3 的 DSH 完成一次只读真实模型回归。桌面 Session 直接加载共享 Harness，工作目录为 desktop，稳定的工具插件入口仍能加载；实际调用 `skill_read` 和 `freecad_inspect` 完成技能与 CAD 上下文读取，无待确认计划或执行记录。没有启动 CAD、修改工程或切换相机。摘要：[`runtime-layer-results.json`](../desktop/validation/runtime-layer-results.json)，复现为 `npm run test:runtime`（需有效模型配置，会产生模型用量）。
+
+`npm run test:shell` 另用隔离数据目录和隐藏窗口加载实际 `desktop/main.mjs` → `shell/main.mjs`、preload、IPC 及 UI 文件，验证版本、草稿和完整/紧凑状态切换。测试禁用自身快捷键注册，不显示窗口、不请求模型、不发出 CAD 操作。源码：[`shell-check.mjs`](../desktop/test/shell-check.mjs)。这说明整理后的入口可启动，不代表当前用户已打开的旧 Electron 进程自动加载了新代码，也不新增系统级焦点或 CAD 几何验收结论。
 
 ### v1.2.0：66项现成原生接口
 

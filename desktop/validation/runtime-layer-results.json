@@ -1,0 +1,14 @@
+{
+  "date": "2026-11-13T09:07:42.006Z",
+  "passed": true,
+  "electron": "45.3.1",
+  "node": "24.22.3",
+  "cwd": "desktop",
+  "checks": [
+    "actual standalone DSH process from Electron",
+    "desktop-owned cwd and stable plugin entry load after extraction",
+    "enabled skills and existing CAD context read through the reorganized modules",
+    "no plan, confirmation, CAD launch or model write"
+  ],
+  "note": "Read-only real model regression. CAD may be used concurrently by the user; no geometry/focus acceptance implied."
+}

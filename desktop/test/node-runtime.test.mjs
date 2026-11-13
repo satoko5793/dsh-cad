@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveNode,standaloneEnvironment} from '../../cad-studio/node-runtime.mjs';
+import {resolveNode,standaloneEnvironment} from '../../shared/node-runtime.mjs';
 
 test('DSH child environment removes Electron run-as-node flags and preserves model settings',()=>{
   const env=standaloneEnvironment({ELECTRON_RUN_AS_NODE:'1',electron_run_as_node:'1',DSH_HOME:'test-profile-home',CAD_LLM_PROVIDER:'test-provider'});

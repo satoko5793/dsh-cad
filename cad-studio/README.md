@@ -1,12 +1,16 @@
-# 构形 CAD 应用
+# 保留的网页 / CadQuery 原型
 
-项目文档已统一到根目录的 [`docs/`](../docs/README.md)，本文件保留为应用目录入口。
+原来的产品思路和实现继续保留：用户通过对话生成参数化 CadQuery 模型，在网页中查看多组件、悬停高亮/分离，调整参数、比较版本并下载 STEP/STL/Python。它不操作桌面 FreeCAD。
 
-本目录是保留的网页与 CadQuery 验证原型。桌面开发版在 `desktop/`，完整工作台、悬浮小窗和有限 FreeCAD 操作见[交互规格](../docs/desktop-harness.md)。
+当前产品主线是 [`desktop/`](../desktop/README.md) 的桌面 Harness + 专业 CAD。两端只共用 [`shared/`](../shared/README.md) 的 DSH 传输与独立 Node 检测，原型默认路径、数据及功能保留。
 
-- [安装、启动、使用与备份](../docs/usage.md)
-- [代码结构、建模流程与数据约定](../docs/architecture.md)
-- [测试、实测证据与能力限制](../docs/validation.md)
-- [产品目标](../docs/product.md)与[下一阶段路线](../docs/roadmap.md)
+在仓库根目录运行 `npm run start:web`，或双击 `start-web.cmd`，访问 `http://127.0.0.1:3090`。原型依赖及 Python 环境见[使用指南](../docs/usage.md)。`npm run samples:import` 导入四个已选公开项目，已有同 ID 项目保留。
 
-网页原型在仓库根目录运行 `npm run start:web`，或双击根目录 `start-web.cmd`。地址为 `http://127.0.0.1:3090`；项目文件在本目录 `.data/`，删除或迁移程序前请备份。默认 `npm start` 已改为桌面应用。
+可以先说“做一个四孔安装板”，再说“孔径改成8毫米，其他不变”；多模块模型可选中组件后继续对话。原型设计与版本保存在本目录 `.data/`，不自动转换为桌面原生工程；删除或迁移程序前先备份。
+
+![带筋电机支架原型预览](../samples/previews/ribbed-bracket.jpg)
+
+- [原型代码、数据和运行边界](../docs/prototype.md)
+- [验证记录与能力限制](../docs/validation.md)
+- [开发与提交约定](../docs/development.md)
+- [产品目标与长期制作方向](../docs/product.md)

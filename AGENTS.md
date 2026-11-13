@@ -1,53 +1,41 @@
 # Project working notes
 
-## Scope and entry points
+## Product and entry points
 
-- This workspace contains 构形 CAD, a desktop conversational Harness development app with a limited persistent FreeCAD adapter, plus the preserved web/CadQuery prototype.
-- `desktop/` is the default entry: root `start.cmd` and `npm start` launch Electron. `start-web.cmd` / `npm run start:web` retain `cad-studio/` at 127.0.0.1:3090. Neither integrates SolidWorks/Fusion.
-- `start-harness.cmd` and `npm run harness` retain access to the original DSH web app.
-- Read root `README.md`, then `docs/README.md` for the documentation index. Product direction belongs in `docs/product.md`, staged work and acceptance in `docs/roadmap.md`, implementation in `docs/architecture.md`, and evidence in `docs/validation.md`.
+- 构形 CAD is a desktop conversational Harness operating professional CAD. FreeCAD is integrated; SolidWorks/Fusion are future adapters. Full/compact modes share one window, Session and task. Everyday creative models and fabrication/assembly remain product goals; physical production is unverified.
+- Root `npm start` / `start.cmd` launch Electron. `npm run start:web` / `start-web.cmd` preserve the original web/CadQuery prototype at 127.0.0.1:3090. `npm run harness` / `start-harness.cmd` retain the original DSH web entry.
+- Read `README.md`, `docs/README.md`, `docs/development.md`, then the relevant feature document. Evidence and limits belong in `docs/validation.md`; never present plans or model claims as verified behavior.
 
-## Product direction
+## Code ownership and compatibility
 
-- Help ordinary users describe ideas in everyday language and progress to physical objects that can be fabricated and assembled.
-- The desktop product has a full Harness workspace and a compact floating chat window for use alongside CAD. They share conversation, draft, files, CAD context and task state. See `docs/desktop-harness.md` for focus, selection, pause/cancel and user/agent coordination requirements.
-- FreeCAD 1.1.4 is the first CAD. The legacy recipe path uses `desktop/design.mjs` and `desktop/freecad/features.py` for native Sketch/Pad/Pocket, rectangles/circles/polygons, arithmetic references, placement and parameter updates. Its parameter-only editing restrictions do not apply to the v1.2.0 native API path described below. Legacy plates, undo/redo and FCStd save/open remain supported. Unknown documents are read-only; no arbitrary model-authored code or assembly solver. See docs/native-designs.md and docs/native-interfaces.md.
-- Full/compact layouts share one window and Session. DSH proposes plans via a per-data-directory gouxing-desktop-<hash> profile; confirmation alone triggers native writes. Signature checks protect manual native edits, including across save/reopen. Evidence: 21 ordinary tests, native old-plate 9 groups, multi-body 20 groups, reopen 27 groups, 4 standalone model turns and 2 Electron-parent model turns (overlapping, not additive capabilities). UI selection and parameter planning passed; complete small-window visuals, focus, multi-screen and packaged installation remain incomplete. Preserve earlier research/freecad-native evidence.
-- DSH must run in standalone Node, never Electron's run-as-node mode: its native require-builtin addon fails there. scripts/start-desktop.mjs passes GOUXING_NODE_EXE; cad-studio/node-runtime.mjs verifies/resolves it and strips ELECTRON_RUN_AS_NODE. Desktop model changes need the explicit Electron regression (desktop/test/run-electron-harness.mjs); ordinary Node-only model tests cannot validate the desktop launch path. New example creation accepts empty or default-valued overrides; existing-model updates still require a real delta.
-- v1.1.0 streams actual DSH assistant frames and tool events, preserves reading position, and exposes four configurable tools plus on-demand SKILL.md files. Agent screenshots use native CAD saveImage, restore the temporary camera and only deliver images to a declared image-capable route. See docs/agent-tools.md. Visual changes need desktop/test/run-agent-live.mjs (real model) and/or desktop/test/renderer-check.mjs (renderer fixture, no model). Agent image interpretation is evidence, not proof of manufacturing/assembly. Current ordinary test count is 26 (20 desktop + 6 prototype); historical counts above describe earlier evidence.
-- v1.0.1 shows the package version in the native window title and full UI. Existing Electron processes retain old modules; launching again only focuses the existing instance. Do not claim a fix is active merely because files changed or isolated tests passed. Verify the actual user window/runtime; preserve chat, drafts, active tasks and CAD when restarting. Never force-kill CAD to update the assistant.
-- v1.1.1 requires the native displayed_view capability for screenshots; old v1.1.0 macro instances require an explicit connection upgrade. Do not treat an assistant restart as a macro reload. Current ordinary test count is 27 (21 desktop + 6 prototype).
-- After the native CAD loop and desktop interaction, pursue a printable, assemblable electronics enclosure with requirements, supports/connections, per-part files, parts list, assembly instructions, physical prototype and feedback-driven revision.
-- v1.2.0 extends the legacy recipe path with 66 typed native APIs adopted from MIT seansackowitz/mcp-freecad at 685341437f26f2a62e0122cdb893d09ae30b5034. The earlier parameter-only/no-feature-insertion restrictions describe recipes, not this native path. See docs/native-interfaces.md. All 66 have actual FreeCAD 1.1.4 positive execution evidence, including loft/revolve/sweep, boolean/fillet/chamfer/patterns, sketch constraints, expressions/sheets and exchange files. native_upstream retains MIT notices, pinned hashes and documented adapter patches; no arbitrary Python executor or network RPC server is copied. Writes queue until reviewed, target one managed document, run in a native transaction and validate geometry; exports are separate/no-overwrite. Foreign documents remain read-only. Existing recipes explicitly convert to native editing on first confirmed native change. skill_read can load manifest-listed Markdown/JSON references. Native instances require native_interfaces capability (older macros need upgrade); do not confuse assistant restart with macro reload. Current ordinary count: 35 (29 desktop + 6 prototype). New checks: native-interfaces-check.mjs, run-native-model.mjs. Preserve private model runs.
-- Keep planned desktop/CAD capabilities distinct from prototype evidence. Static multi-solid geometry and successful exports alone do not prove native CAD integration, manufacturability or assembly.
+- `desktop/shell/`: Electron lifecycle, windows, IPC. `desktop/ui/` + `preload.cjs`: isolated renderer and fixed IPC surface.
+- `desktop/application/`: Session, plans, errors. `desktop/agent/`: tools, config/skills, stream protocol. `desktop/domain/`: pure recipe/parameter/example/intent rules.
+- `desktop/cad/freecad/`: Node adapter, connector, typed contracts. `desktop/freecad/`: GUI-thread Python bridge, transactions, context and adopted upstream handlers. `desktop/freecad-addon/`: automatic user Mod connection component.
+- `desktop/infrastructure/`: paths and atomic storage. `shared/`: generic DSH transport and standalone Node selection. Shared code must not import applications; domain must not import environment code; desktop production code must not depend on `cad-studio/`.
+- Root desktop `.mjs` entries are compatibility shims. Implement features in layers, not shims. Preserve installed/profile paths: root `main.mjs`, `plan-plugin.mjs`, `prompt.txt`, `skills/`, `native-catalog.json`, `freecad/`, `freecad-addon/`. Do not move configured vendor/plugin directories.
+- DSH requires standalone Node, never Electron run-as-node. `scripts/start-desktop.mjs` passes `GOUXING_NODE_EXE`; `shared/node-runtime.mjs` probes it and removes `ELECTRON_RUN_AS_NODE`. Shared Harness requires explicit absolute cwd/prompt/plugin. Desktop uses desktop cwd; prototype wrapper preserves prototype defaults/profile.
 
-## Keep it simple
+## CAD behavior and external implementations
 
-- For skills and tools, the user's preference is existing online implementations first: search and inspect upstream skills/MCP/tools before creating new ones. Record source, pinned revision, license, required tools and actual compatibility; reuse suitable code and retain notices. Keep local protocol/confirmation adaptations explicit. Do not label a downloaded skill as usable when its tools/scripts are unavailable. Reviewed candidates and adopted code: research/agent-skills-tools/README.md.
+- Writes require a reviewed plan, current-document fingerprint and native transaction. Preserve manual-edit protection, timeout/uncertain-state locks and geometry checks. Foreign documents remain read-only. Legacy recipe restrictions differ from native interfaces; see `docs/native-designs.md` and `docs/native-interfaces.md`.
+- Native interfaces adopt MIT seansackowitz/mcp-freecad at 685341437f26f2a62e0122cdb893d09ae30b5034. Retain notices, pinned hashes and documented adapter changes; do not add arbitrary model-authored Python execution.
+- For skills/tools, search and inspect existing implementations first, as the user requested. Record license, revision, dependencies and tested compatibility. Downloaded instructions are not usable integrations if their tools/scripts are absent. Sources: `research/agent-skills-tools/README.md`.
+- Show actual stream/tool events only. Native viewport screenshots preserve camera state and go only to an image-capable route. Visual model judgments are evidence, not manufacturing/assembly proof. See `docs/agent-tools.md`.
 
-- Keep single-user local operation as the baseline. Electron and the limited FreeCAD macro adapter are now implemented; extend verified capabilities rather than adding unrelated cloud hosting, accounts or frameworks.
-- Research sources and downloads belong under `research/`; they are reference material, not application dependencies.
-- Distinguish tested behavior from repository claims when reporting research results. Do not resume software evaluation just to tidy this project.
+## Protect the user's session
 
-## Preserve user data
+- Preserve `desktop/.data/` and `cad-studio/.data/`, including conversations, drafts, attachments, settings, designs, journals and revisions. These are private independent stores, not published or automatically migrated.
+- DSH owns credentials; never print/copy them into code, renderer, docs, tests or reports. Preserve the user's DSH web profile; use separate experimental profiles.
+- One CAD and the current related document are the normal workflow. Reuse `desktop/.data/cad-workspace/`; do not create new CAD windows/documents on retries or tests. The connector installs app-owned Mod/GouxingConnect files and uses FreeCAD single-instance mode. Supported upgrades reload in the same CAD process. Initial pre-component CAD may need one save/reopen; ordinary users do not run macros/Python. See `docs/cad-connection.md`.
+- Do not force-close/restart CAD or change the user's camera/model to verify unrelated work. Assistant exit preserves CAD and unsaved work. Existing Electron processes retain loaded modules; do not claim new code is active in the user's window without observing a normal restart.
 
-- Preserve `cad-studio/.data/`, which stores designs, chats and revisions.
-- Preserve `desktop/.data/`, which stores the desktop conversation, drafts, attachments, settings and bridge journals. Neither private data tree is published. Closing the assistant must not kill FreeCAD or discard its unsaved work.
-- Credentials are managed by DSH. Do not print them, embed them in frontend code, or copy them into repository documentation or tests.
-- Preserve the user's DSH web profile. Use a separate profile for experimental integrations.
-- Avoid moving directories that existing profiles reference, particularly `vendor/` and installed plugin checkouts.
+## Tests and publishing
 
-## Repository updates
-
-- The user requested publishing this project and keeping it updated at https://github.com/satoko5793/dsh-cad.
-- After completing requested project changes, update the relevant documentation and selected demonstration results, then commit and push to this repository. Report the commit and any push failure honestly. Never force-push or overwrite remote changes.
-- `npm run samples:export` exports only the four explicitly selected sample projects in `samples/projects.json`. Do not publish the entire private `.data/` directory or DSH credentials. Newly created user projects require explicit selection before export.
-
-## Verification
-
-- Root `npm test` runs desktop Session tests and the application tests in `cad-studio/test/`. `npm run test:desktop` runs desktop unit tests only. Explicit native integration: set FREECAD_EXE and run `node desktop/test/native-check.mjs` (opens an isolated FreeCAD test instance). Do not run native GUI or paid model tests for documentation-only updates.
-- Root `npm run status` checks the existing application without opening a browser or creating a project.
-- For documentation-only changes, verify paths and commands instead of rerunning CAD generation or paid model requests.
-- Keep detailed project documentation under `docs/`. Preserve sample and research evidence paths, and link to their indexes rather than duplicating their assets.
-
-- v1.2.0 connection lifecycle: desktop/cad-connector.mjs probes FreeCADCmd user data, installs only application-owned Mod/GouxingConnect startup files, and uses FreeCAD --single-instance with normal user preferences. Users do not run macros or Python. First attachment to an already running pre-component CAD may require one save/reopen; supported upgrades use reload_bridge in the same process. Shared canonical workspace is desktop/.data/cad-workspace. Do not start fresh GUI processes on every test/retry. Daily native/model test entries reuse the shared workspace; historical isolated reopen/view-context probes require GOUXING_ALLOW_ISOLATED_CAD=1 and disable auto connection. Preserve the active user project, avoid leaving test windows/tabs, and report actual startup/reload evidence in connector-results.json and lifecycle-results.json. Main user workflow: one CAD, current related document, explicit new document only for new independent work. See docs/cad-connection.md.
+- `npm test` discovers desktop and prototype `*.test.mjs`; `npm run test:desktop` / `test:prototype` select groups. These do not call a paid model or launch CAD. Prototype tests need their Python environment.
+- Runtime/Harness/Node changes need explicit `npm run test:runtime`: real Electron → standalone Node → DSH, skill/context reads only, no CAD launch/write or UI window. It requires configured model access and incurs model usage. Do not run it for docs-only edits.
+- `npm run test:shell` loads the actual entry, preload, IPC and UI in a hidden window with isolated data and disabled shortcut registration; no model or CAD operation. It does not replace system-focus/multi-screen acceptance.
+- Other explicit integration entries and limits are in `docs/validation.md`. Daily native tests reuse the shared CAD workspace; historical isolated probes require `GOUXING_ALLOW_ISOLATED_CAD=1` and disabled auto connection. Do not leave test windows/tabs. UI fixture: `desktop/test/renderer-check.mjs` under Electron (no model/CAD).
+- For docs-only edits verify links, commands, paths and facts. `npm run status` checks the web prototype only.
+- The user authorized publishing updates to https://github.com/satoko5793/dsh-cad. Complete requested changes, update relevant docs/selected safe evidence, commit and push; report commit and failures honestly. Never force-push or overwrite remote changes.
+- `npm run repo:update -- "message"` runs ordinary tests and staged safety checks, commits and pushes. `--export-samples` explicitly refreshes selected prototype samples; default updates do not rebuild them. Review staged and unstaged changes first; the command stages development directories including `shared/`.
+- Only the four projects in `samples/projects.json` may be exported. New user models, including private airplane/turbine work, need explicit selection before publication. Never publish complete `.data/`, credentials, environments or dependencies.

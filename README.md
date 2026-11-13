@@ -1,51 +1,47 @@
 # 构形 CAD
 
-**让普通人用简单的话，把想法做成可以加工、组装和使用的实物。**
+**用简单的话，在专业 CAD 中把想法做出来，并逐步推进加工和组装。**
 
-目标产品是**操作专业 CAD 软件的桌面 Harness 助手**：通常使用完整对话工作台，也能缩为悬浮小窗，方便用户在 SolidWorks、Fusion 等软件中工作时随时交流和发出操作指令。两种形态共享对话、工程上下文和任务状态。
+构形是桌面 CAD 助手：完整对话 Harness 可以缩成悬浮小窗，用户一边使用 CAD，一边让 Agent 读取工程、观察视口、创建零件和继续修改。两种形态共享对话、草稿、连接和任务状态。
 
-当前提供 Electron 桌面 Harness 开发版，含完整工作台、悬浮小窗和 FreeCAD 常驻宏。支持原生多零件的矩形/圆/多边形草图、拉伸/切除、参数关联和连续修改；已实测控制盒、小龙门架、简化飞机和模型组合的L支架。新增零件定位、尺寸编辑、变更确认、进度和操作记录。尚无独立安装包，附件暂不解析，实物加工组装仍未验证。原有网页与 CadQuery 原型保留。
+目前接入 **FreeCAD 1.1.4**，已有流式文字/模型提供的思考、工具记录、技能配置、视觉观察和确认后执行的原生建模流程。采用现成 MIT 实现接入 66 项类型化 CAD 接口，覆盖草图、放样、旋转、扫掠、布尔、圆角、阵列、参数表及交换文件；连续飞机建模与同工程修改已有实测。来源和边界见[原生接口](docs/native-interfaces.md)，证据见[验证记录](docs/validation.md)。
 
-v1.2.0 接入现成MIT实现的66项FreeCAD原生接口：放样、旋转、扫掠、圆角、布尔、阵列、草图/特征修改、参数表和交换文件。Agent 可直接组合接口准备复杂模型或局部修改，技能按需读取上游参考资料，确认后执行。范围、来源与实测见[原生接口](docs/native-interfaces.md)。实际流式文字、模型提供的思考、工具卡片和视觉观察继续保留，见[Agent 能力配置](docs/agent-tools.md)。
+SolidWorks / Fusion 是后续适配方向，目前尚未接入。当前是开发版，尚无独立安装包；复杂造型的成功率、自由曲面、外来工程编辑和人机协作仍需继续完善，实际加工和组装尚未验证。
 
-## 项目文档
+## 使用
 
-统一入口：[文档中心](docs/README.md)。
+先按[使用指南](docs/usage.md)配置 Node、依赖与模型服务，然后在仓库根目录运行：
 
-| 想了解什么 | 文档 |
+```powershell
+npm start
+```
+
+也可双击 `start.cmd`。点击“连接 FreeCAD”，助手自动配置组件并复用同一个 CAD；找不到安装位置时选择 `FreeCAD.exe`。新用户不用运行宏或 Python，已有旧 CAD 的首次连接例外见[连接说明](docs/cad-connection.md)。
+
+可以说“我想做一个飞机模型”，检查计划后确认，再继续说“给它加两个涡轮”或指明某个零件的修改。具体效果取决于模型和几何条件，执行后需要查看结果。右上角切换小窗，`Ctrl+Alt+Space` 呼出/收起，`Ctrl+Alt+M` 切换形态。工具、技能和看图能力见[Agent 配置](docs/agent-tools.md)。
+
+## 项目结构
+
+| 位置 | 用途 |
 |---|---|
-| 为什么做、为谁做、最终交付什么 | [产品目标](docs/product.md) |
-| 完整工作台、小窗、选中对象与人机协作 | [桌面 Harness 交互规格](docs/desktop-harness.md) |
-| 多零件原生建模、连续修改与能力边界 | [原生设计指南](docs/native-designs.md) |
-| 当前缺什么、下一步先做什么、怎样验收 | [实施路线](docs/roadmap.md) |
-| 安装、启动、模型配置、使用与备份 | [使用指南](docs/usage.md) |
-| 代码结构、建模流程、模块与数据约定 | [技术说明](docs/architecture.md) |
-| 已经测过什么、证据在哪里、还有哪些限制 | [验证记录](docs/validation.md) |
-| 公开模型、STEP/STL 和原始检查结果 | [示例目录](samples/README.md) |
-| 其他 CAD 项目的参考与试用结论 | [调研记录](research/README.md) |
+| [`desktop/`](desktop/README.md) | 主应用：窗口/UI、会话、Agent、规则、CAD 适配器和 Python 执行器分层 |
+| [`shared/`](shared/README.md) | 两端共用的 DSH 进程、JSON-RPC 和独立 Node 运行时 |
+| [`cad-studio/`](cad-studio/README.md) | 保留原有网页 + CadQuery 思路、实现、预览和版本管理 |
+| [`docs/`](docs/README.md) | 产品、使用、架构、开发和验收文档 |
+| `scripts/` | 安装、启动、测试、示例和仓库维护 |
+| [`samples/`](samples/README.md)、[`research/`](research/README.md) | 明确选中的公开示例、上游来源与研究证据 |
 
-## 运行桌面应用
+桌面端不依赖原型实现；稳定入口和已安装组件路径继续保留。用户对话、附件、工程及桥接数据仍在各自 `.data/` 中，不提交到仓库。
 
-安装依赖后，双击start.cmd或运行npm start。点“连接FreeCAD”，助手自动配置连接组件并复用同一CAD；找不到安装位置时才选择FreeCAD.exe。用户不用运行宏或Python。首次已有旧CAD未加载组件时，可能需保存后重开一次。见[连接说明](docs/cad-connection.md)和[使用指南](docs/usage.md)。
+## 开发与原型
 
-可以先说“做一个带盖控制盒”，再说“盖子加厚1毫米，盒身别动”；也可试“小龙门架”和“简化飞机”。右侧零件与尺寸可直接选择、编辑，再确认计划。旧四孔板仍支持。右上角切换小窗；`Ctrl+Alt+Space` 呼出/收起，`Ctrl+Alt+M` 切换形态。旧连接需按提示升级，原CAD实例保留。详见[原生设计指南](docs/native-designs.md)。
+```powershell
+npm test                  # 桌面 + 网页原型的普通测试
+npm run test:desktop      # 桌面/共享模块
+npm run test:prototype    # 原型，需要 CadQuery Python 环境
+npm run start:web         # 原来的网页原型，127.0.0.1:3090
+```
 
-## 运行保留的验证原型
+原型继续支持“对话 → CadQuery → 组件预览/版本修改 → STEP/STL”，四个已选示例可用 `npm run samples:import` 导入，详见[保留的原型说明](docs/prototype.md)。桌面与原型数据不自动互转。
 
-双击 `start-web.cmd` 或运行 `npm run start:web`，打开 [本地工作台](http://127.0.0.1:3090)。网页仍使用 CadQuery，不连接桌面 FreeCAD 实例。
-
-可以从“做一个四孔安装板”开始，再说“孔径改成8毫米，其他不变”。多模块模型也可以说“底座厚一点”“滑台往右挪10毫米”。缺省改变量会在回复中说明。
-
-仓库包含4个公开示例、8个保存版本；运行 `npm run samples:import` 导入，已有同ID项目会保留。后续多模块测试项目保存在测试机器本地，未加入公开导出清单。
-
-![带筋电机支架实测预览](samples/previews/ribbed-bracket.jpg)
-
-## 下一阶段
-
-继续完善桌面人机协作验收、附件理解、多会话、已有工程的安全编辑和更丰富的原生 CAD 操作；随后用可实际打印和组装的控制盒完成制作验证。范围和完成条件见[实施路线](docs/roadmap.md)。
-
-几何有效、文件能导出，只是当前检查的一部分；它们不能替代加工、配合和实际使用验证。
-
-## 开发与维护
-
-桌面代码在 `desktop/`，会话、附件和桥接记录位于 `desktop/.data/`；原型在 `cad-studio/`，旧设计仍保存在 `cad-studio/.data/`。两者数据不自动互转，均不提交到公开仓库。见[技术说明](docs/architecture.md)和[桌面 Harness 交互规格](docs/desktop-harness.md)。
+完整导航见[文档中心](docs/README.md)，开发入口与提交方法见[开发指南](docs/development.md)，产品目标与下一步见[产品文档](docs/product.md)和[实施路线](docs/roadmap.md)。
