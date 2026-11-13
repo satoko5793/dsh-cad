@@ -5,6 +5,7 @@ import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { FreeCADBridge, ROOT, atomicJson } from './bridge.mjs';
 import { Session, cleanError } from './session.mjs';
+import {configView,saveConfig,importSkill} from './agent-config.mjs';
 
 const data=process.env.GOUXING_DATA_DIR||path.join(ROOT,'.data');
 app.setName('构形');app.setPath('userData',path.join(data,'electron'));
@@ -15,6 +16,7 @@ async function start(){
   await mkdir(data,{recursive:true});
   const bridge=new FreeCADBridge(data);await bridge.restore();
   const session=new Session(data,bridge);await session.load();await session.poll();
+  let agentConfig=await configView(data);
   let preferences={small:false,pinned:true,full:{width:1120,height:800},compact:{width:390,height:590},freecad:''};
   try{preferences={...preferences,...JSON.parse(await readFile(path.join(data,'window.json'),'utf8'))};}catch(error){if(error.code!=='ENOENT')throw error;}
   let exiting=false,changing=false,closeDialog=false;
@@ -27,7 +29,7 @@ async function start(){
   window.webContents.on('will-navigate',(event,url)=>{if(url!==entry)event.preventDefault();});
   window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   window.setAlwaysOnTop(preferences.small&&preferences.pinned);
-  const snapshot=()=>({...session.state,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
+  const snapshot=()=>({...session.state,agentConfig,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
   const broadcast=()=>{if(!window.isDestroyed())window.webContents.send('harness:state',snapshot());};
   const persistPreferences=()=>atomicJson(path.join(data,'window.json'),preferences).catch(error=>{session.state.status=`窗口设置保存失败：${cleanError(error)}`;broadcast();});
   session.on('change',broadcast);session.on('storageError',error=>{session.state.status=`会话保存失败：${cleanError(error)}`;broadcast();});
@@ -44,6 +46,20 @@ async function start(){
     try{
       switch(method){
         case 'state':return snapshot();
+        case 'agent-config':{
+          if(['preparing','planning','executing','uncertain'].includes(session.state.phase))throw Error('请先完成或取消当前任务，再调整能力');
+          await saveConfig(data,payload);agentConfig=await configView(data);broadcast();break;
+        }
+        case 'agent-config-refresh':agentConfig=await configView(data);broadcast();break;
+        case 'skill-import':{
+          if(['preparing','planning','executing','uncertain'].includes(session.state.phase))throw Error('请先完成或取消当前任务');
+          const selected=await dialog.showOpenDialog(window,{title:'导入技能 SKILL.md（仅加载说明，不执行附带脚本）',properties:['openFile'],filters:[{name:'技能说明',extensions:['md']}]});
+          if(!selected.canceled){await importSkill(data,selected.filePaths[0]);agentConfig=await configView(data);broadcast();}break;
+        }
+        case 'capture':{
+          if(['preparing','planning','executing','uncertain'].includes(session.state.phase))throw Error('请先等待当前任务结束');
+          const image=await bridge.capture('current'),{data:bytes,...observation}=image;session.state.observation={...observation,dataUrl:`data:image/png;base64,${bytes}`,source:'user'};broadcast();break;
+        }
         case 'draft':if(typeof payload!=='string'||payload.length>12000)throw Error('草稿最多12000字');session.state.draft=payload;session.publish();break;
         case 'send':await session.send(payload);break;
         case 'confirm':await session.confirm(payload);break;
@@ -57,7 +73,7 @@ async function start(){
         case 'minimize':window.minimize();break;
         case 'close':window.close();break;
         case 'connect':{
-          const current=await bridge.snapshot();if(current.connected&&current.protocol===2)break;
+          const current=await bridge.snapshot();if(current.connected&&current.protocol===2&&current.capabilities?.includes('capture_view'))break;
           let executable=process.env.FREECAD_EXE||preferences.freecad;
           if(executable){try{await access(executable);}catch{executable='';}}
           if(!executable){const selected=await dialog.showOpenDialog(window,{title:'选择 FreeCAD.exe',properties:['openFile'],filters:[{name:'FreeCAD',extensions:['exe']}]});if(selected.canceled)break;executable=selected.filePaths[0];}

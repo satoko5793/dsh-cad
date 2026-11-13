@@ -4,6 +4,7 @@ import json
 import math
 import os
 import pathlib
+import re
 import time
 import uuid
 
@@ -11,7 +12,7 @@ import FreeCAD as App
 import FreeCADGui as Gui
 import Part
 import Sketcher
-from PySide import QtCore
+from PySide import QtCore, QtGui
 import features
 
 
@@ -44,7 +45,7 @@ class Bridge:
         doc = App.ActiveDocument
         selection = [{'document': s.DocumentName, 'object': s.ObjectName,
                       'subelements': list(s.SubElementNames)} for s in Gui.Selection.getSelectionEx()]
-        value = {'protocol': 2, 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
+        value = {'protocol': 2, 'capabilities': ['capture_view'], 'pid': os.getpid(), 'instance': self.instance, 'document': None, 'selection': selection, 'units': 'mm'}
         if doc:
             objects = []
             for obj in doc.Objects:
@@ -143,6 +144,52 @@ class Bridge:
         if command.get('expected') != before['fingerprint']:
             raise ValueError('工程、选择或设计已变化，请重新提出需求并确认')
         action = command.get('action')
+        if action == 'capture_view':
+            if not App.ActiveDocument or not Gui.activeDocument():
+                raise ValueError('没有活动工程，无法截取模型视口')
+            view_name = command.get('view', 'current')
+            views = {'isometric': 'viewAxonometric', 'front': 'viewFront', 'top': 'viewTop', 'right': 'viewRight'}
+            if view_name not in ('current', *views.keys()):
+                raise ValueError('不支持的观察视角')
+            view = Gui.activeDocument().activeView()
+            camera = view.getCamera()
+            animation = view.isAnimationEnabled()
+            observation_id = str(uuid.uuid4())
+            destination = self.directory / 'observations'
+            destination.mkdir(exist_ok=True)
+            filename = destination / (observation_id + '.png')
+            try:
+                # Standard view commands animate by default; an immediate fit/save
+                # can otherwise capture an intermediate empty frame.
+                view.setAnimationEnabled(False)
+                if view_name != 'current':
+                    getattr(view, views[view_name])()
+                    view.fitAll()
+                view.redraw()
+                Gui.updateGui()
+                view.saveImage(str(filename), 1200, 900, 'Current')
+                if not filename.is_file() or filename.stat().st_size < 100:
+                    raise ValueError('CAD 视口没有返回有效图片')
+                sample = QtGui.QImage(str(filename)).scaled(48, 36)
+                colors = set(sample.pixel(x, y) for x in range(sample.width()) for y in range(sample.height()))
+                if len(colors) < 2:
+                    raise ValueError('CAD 返回了近似空白视口，请检查零件是否可见后重试；不能据此评价模型')
+                observation = {'id': observation_id, 'view': view_name, 'time': time.time(),
+                    'document': App.ActiveDocument.Label, 'fingerprint': before['fingerprint'],
+                    'camera': view.getCamera(), 'sampledColors': len(colors), 'visible': [o.Name for o in App.ActiveDocument.Objects if o.ViewObject and o.ViewObject.Visibility]}
+            finally:
+                view.setCamera(camera)
+                view.setAnimationEnabled(animation)
+                view.redraw()
+                Gui.updateGui()
+            restored = view.getCamera()
+            atomic_json(destination / (observation_id + '.json'), {'beforeCamera': camera, 'afterCamera': restored, 'observation': observation})
+            numbers = lambda text: [float(n) for n in re.findall(r'[-+]?(?:\d*\.\d+|\d+)(?:[eE][-+]?\d+)?', text)]
+            original_values, restored_values = numbers(camera), numbers(restored)
+            observation['cameraRestored'] = len(original_values) == len(restored_values) and all(math.isclose(a, b, rel_tol=1e-5, abs_tol=1e-4) for a, b in zip(original_values, restored_values))
+            if not observation['cameraRestored']:
+                raise ValueError('无法核对 CAD 原视角恢复，请检查工作区')
+            return {'message': '已读取 CAD 视口，原观察视角已保留。', 'observation': observation}
         if action == 'focus_cad':
             window = Gui.getMainWindow()
             if window.isMinimized():

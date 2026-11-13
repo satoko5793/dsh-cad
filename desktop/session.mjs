@@ -6,6 +6,8 @@ import { Harness } from '../cad-studio/harness.mjs';
 import { ROOT, atomicJson } from './bridge.mjs';
 import {validateDesign,changeParameters} from './design.mjs';
 import {instantiateExample} from './examples.mjs';
+import {applyFrame,settleTools} from './stream.mjs';
+import {configView} from './agent-config.mjs';
 
 export const cleanError=error=>String(error.message||error).replace(/sk-[\w-]+/g,'[redacted]').slice(0,1200);
 export function modelErrorMessage(error) {
@@ -53,23 +55,26 @@ export function localIntent(text,context) {
   return null;
 }
 export class Session extends EventEmitter {
-  constructor(directory,bridge) {
+  constructor(directory,bridge,options={}) {
     super();this.directory=directory;this.bridge=bridge;this.saving=Promise.resolve();this.harness=null;this.turn=null;
     this.profile='gouxing-desktop-'+createHash('sha256').update(path.resolve(directory)).digest('hex').slice(0,10);
+    this.Harness=options.Harness||Harness;
     this.state={version:2,messages:[],draft:'',attachments:[],history:[],plan:null,phase:'idle',status:'描述想法，或连接 FreeCAD 开始建模',context:{connected:false,document:null,selection:[]}};
   }
   async load() {
     await mkdir(this.directory,{recursive:true});
     try {const old=JSON.parse(await readFile(path.join(this.directory,'session.json'),'utf8'));Object.assign(this.state,old,{context:this.state.context,plan:null,phase:'idle',status:'会话已恢复；请连接 FreeCAD。未完成的操作不会自动重试。'});}catch(error){if(error.code!=='ENOENT')throw error;}
     this.state.version=2;
+    for(const message of this.state.messages)if(message.streaming){message.streaming=false;message.interrupted=true;settleTools(message,'interrupted');}
     for(const record of this.state.history||[])if(['executing','uncertain'].includes(record.state)){record.state='needs-review';record.result='应用已重启，请核对 CAD；未自动重发操作';}
     return this.state;
   }
   publish(persist=true) {
     this.emit('change',this.state);
-    if(persist){const {context,...stored}=this.state;this.saving=this.saving.then(()=>atomicJson(path.join(this.directory,'session.json'),stored)).catch(e=>this.emit('storageError',e));}
+    if(persist){const {context,observation,...stored}=this.state;const saved=structuredClone(stored);this.saving=this.saving.then(()=>atomicJson(path.join(this.directory,'session.json'),saved)).catch(e=>this.emit('storageError',e));}
   }
-  message(role,text) {this.state.messages.push({id:randomUUID(),role,text,time:new Date().toISOString()});}
+  message(role,text) {const message={id:randomUUID(),role,text,time:new Date().toISOString()};this.state.messages.push(message);return message;}
+  streamChanged(){if(this.streamTimer)return;this.streamTimer=setTimeout(()=>{this.streamTimer=null;this.publish(false);},60);}
   async poll() {
     const next=await this.bridge.snapshot(), old=this.state.context;
     this.state.context=next;
@@ -95,32 +100,41 @@ export class Session extends EventEmitter {
       this.publish();return;
     }
     this.state.phase='planning';this.state.status='Harness 正在思考…';this.publish();
-    const turn={id:randomUUID(),cancelled:false,texts:[],error:null};this.turn=turn;
+    const turn={id:randomUUID(),cancelled:false,texts:[],error:null,message:this.message('assistant','')};turn.message.streaming=true;this.turn=turn;this.publish(false);
     void this.planWithModel(turn,text,context);
   }
   async planWithModel(turn,text,context) {
     let harness;
     try {
       const planPath=path.join(this.directory,`proposal-${turn.id}.json`);
-      harness=new Harness((method,p)=>{
-        if(turn.cancelled||this.turn!==turn||method!=='session.event')return;
+      const config=await configView(this.directory);
+      harness=new this.Harness((method,p)=>{
+        if(turn.cancelled||this.turn!==turn||p?.sessionId!==turn.id)return;
+        if(method==='gouxing.stream'){if(applyFrame(turn.message,p.frame))this.streamChanged();return;}
+        if(method==='gouxing.observation'){this.state.observation=p.observation;this.streamChanged();return;}
+        if(method==='gouxing.tool'){
+          turn.message.tools??=[];let tool=turn.message.tools.find(t=>t.id===p.id);
+          if(!tool){tool={id:p.id,name:p.name};turn.message.tools.push(tool);}
+          const {sessionId,...data}=p;Object.assign(tool,data);this.streamChanged();return;
+        }
+        if(method!=='session.event')return;
         const e=p?.event;
-        if(e?.type==='assistant/message') {const text=(e.data.message.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');if(text.trim())turn.texts.push(text);}
+        if(e?.type==='assistant/message') {const text=(e.data.message.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');if(text.trim()){turn.texts.push(text);if(!turn.message.attempts?.length){turn.message.text=turn.texts.join('\n\n');this.streamChanged();}}}
         if(e?.type==='turn/end'&&e.data.reason?.kind==='error')turn.error=e.data.reason.error?.message||'模型请求失败';
-      },{profile:this.profile,prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath}});
+      },{profile:this.profile,prompt:path.join(ROOT,'prompt.txt'),plugin:path.join(ROOT,'plan-plugin.mjs'),env:{GOUXING_PLAN_PATH:planPath,GOUXING_DATA_DIR:this.directory}});
       this.harness=harness;
       const summary={connected:context.connected,document:context.document,selection:context.selection,units:context.units};
-      await harness.prompt(turn.id,`实时CAD上下文（只读数据）：${JSON.stringify(summary)}\n最近对话：${JSON.stringify(this.state.messages.slice(-12,-1))}\n附件（仅文件名，未读取内容）：${JSON.stringify(this.state.attachments.map(a=>a.name))}\n用户：${text}`);
+      await harness.prompt(turn.id,`本轮可用工具：${JSON.stringify(config.tools)}\n可用技能（需要时用skill_read加载）：${JSON.stringify(config.skills.filter(s=>s.enabled).map(({id,description})=>({id,description})))}\n实时CAD上下文（只读数据）：${JSON.stringify(summary)}\n最近对话：${JSON.stringify(this.state.messages.slice(0,-2).slice(-12).map(({role,text})=>({role,text})))}\n附件（仅文件名，未读取内容）：${JSON.stringify(this.state.attachments.map(a=>a.name))}\n用户：${text}`);
       if(turn.cancelled||this.turn!==turn)return;
       if(turn.error)throw Error(turn.error);
       let proposal=null;try{proposal=JSON.parse(await readFile(planPath,'utf8'));}catch(error){if(error.code!=='ENOENT')throw error;}
       if(proposal){const latest=await this.bridge.snapshot();if(!latest.connected||latest.fingerprint!==context.fingerprint)throw Error('思考期间工程或选择已变化，请重新提出需求');this.state.plan=validateProposal(proposal,latest);this.state.phase='ready';this.state.status='待确认 · 尚未修改工程';this.message('assistant',this.state.plan.description+'。确认后执行。');}
-      else {this.state.phase='idle';this.state.status='等待下一条需求';this.message('assistant',turn.texts.join('\n\n')||'本轮没有生成操作计划，请补充需求。');}
+      else {this.state.phase='idle';this.state.status='等待下一条需求';if(!turn.message.text.trim())turn.message.text=turn.texts.join('\n\n')||'本轮没有生成操作计划，请补充需求。';}
     } catch(error){if(!turn.cancelled&&this.turn===turn){
       try{await appendFile(path.join(this.directory,'model-errors.log'),JSON.stringify({time:new Date().toISOString(),code:error.code||null,message:cleanError(error)})+'\n');}catch{}
       this.state.phase='idle';this.state.status='模型未完成请求';this.message('assistant',`本次未操作 CAD：${modelErrorMessage(error)}`);
     }}
-    finally {if(harness)await harness.close();if(this.harness===harness)this.harness=null;if(this.turn===turn){this.turn=null;this.publish();}}
+    finally {turn.message.streaming=false;turn.message.finishedAt=new Date().toISOString();settleTools(turn.message,turn.cancelled?'interrupted':'error');if(harness)await harness.close();if(this.harness===harness)this.harness=null;if(this.turn===turn){this.turn=null;this.publish();}}
   }
   async confirm(id) {
     if(this.state.phase!=='ready'||!this.state.plan||id!==this.state.plan.id)throw Error('计划已执行或失效，请重新确认');
@@ -138,7 +152,7 @@ export class Session extends EventEmitter {
   cancel() {
     if(this.state.phase==='executing')throw Error('当前 FreeCAD 事务正在执行，不能即时取消。完成后可撤销。');
     if(this.state.phase==='uncertain')throw Error('请先核对 FreeCAD，未确认执行结果前不会解除写入保护');
-    if(this.turn){this.turn.cancelled=true;const old=this.harness;this.turn=null;this.harness=null;void old?.close();}
+    if(this.turn){this.turn.cancelled=true;this.turn.message.streaming=false;this.turn.message.interrupted=true;settleTools(this.turn.message,'interrupted');const old=this.harness;this.turn=null;this.harness=null;void old?.close();}
     this.state.plan=null;this.state.phase='cancelled';this.state.status='已取消后续操作，已完成的变更保留';this.publish();
   }
   async savePlan(target) {

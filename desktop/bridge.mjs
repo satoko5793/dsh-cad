@@ -16,7 +16,7 @@ export class FreeCADBridge {
   }
   async connect(executable) {
     const current=await this.snapshot();
-    if (this.launching || (current.connected&&current.protocol>=2)) throw Error('FreeCAD 已连接或正在启动');
+    if (this.launching || (current.connected&&current.protocol>=2&&current.capabilities?.includes('capture_view'))) throw Error('FreeCAD 已连接或正在启动');
     await access(executable); this.launching = true;
     try {
       this.directory = path.join(this.dataDir, 'freecad', randomUUID());
@@ -62,5 +62,15 @@ export class FreeCADBridge {
   async lateResult() {
     if(!this.uncertainId)return null;
     try {const result=JSON.parse(await readFile(path.join(this.directory,'results',`${this.uncertainId}.json`),'utf8'));this.uncertainId=null;return result;}catch(error){if(error.code==='ENOENT')return null;throw error;}
+  }
+  async capture(view='current') {
+    const context=await this.snapshot();
+    if(!context.capabilities?.includes('capture_view'))throw Error('当前 CAD 连接尚无视觉工具，请点击升级连接；原工程保持打开');
+    const result=await this.execute({action:'capture_view',view,expected:context.fingerprint});
+    const observation=result.observation;
+    if(!/^[a-f0-9-]{36}$/.test(observation?.id||''))throw Error('无效的 CAD 截图标识');
+    const bytes=await readFile(path.join(this.directory,'observations',observation.id+'.png'));
+    if(bytes.length>8000000||bytes.subarray(0,8).toString('hex')!=='89504e470d0a1a0a')throw Error('CAD 截图无效或过大');
+    return {...observation,data:bytes.toString('base64'),mimeType:'image/png'};
   }
 }

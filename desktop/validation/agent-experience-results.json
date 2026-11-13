@@ -1,0 +1,57 @@
+{
+  "date": "2026-11-13T05:56:26.012Z",
+  "electron": "45.3.1",
+  "checks": [
+    {
+      "name": "native screenshot and camera restoration do not change CAD fingerprint",
+      "passed": true
+    },
+    {
+      "name": "renderer follows latest and preserves history reading position",
+      "passed": true
+    },
+    {
+      "name": "real Electron → DSH live text/reasoning/tools → native multiview images → model response",
+      "passed": true
+    },
+    {
+      "name": "settings dialog loads actual tool and skill configuration",
+      "passed": true
+    }
+  ],
+  "stats": {
+    "textUpdates": 280,
+    "reasoningUpdates": 272,
+    "toolUpdates": 276
+  },
+  "captures": [
+    {
+      "view": "isometric",
+      "sampledColors": 14,
+      "cameraRestored": true
+    },
+    {
+      "view": "front",
+      "sampledColors": 8,
+      "cameraRestored": true
+    },
+    {
+      "view": "top",
+      "sampledColors": 5,
+      "cameraRestored": true
+    },
+    {
+      "view": "right",
+      "sampledColors": 8,
+      "cameraRestored": true
+    },
+    {
+      "view": "current",
+      "sampledColors": 14,
+      "cameraRestored": true
+    }
+  ],
+  "images": 2,
+  "passed": true,
+  "note": "Isolated native airplane; real model image route. No physical fabrication/assembly test."
+}

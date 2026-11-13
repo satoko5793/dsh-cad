@@ -1,11 +1,11 @@
 {
-  "date": "2026-11-13T05:23:37.178Z",
+  "date": "2026-11-13T05:58:27.491Z",
   "parent": {
     "electron": "45.3.1",
     "node": "24.22.2"
   },
   "child": {
-    "node": "24.22.3",
+    "node": "24.22.1",
     "electron": null
   },
   "legacyProbe": {

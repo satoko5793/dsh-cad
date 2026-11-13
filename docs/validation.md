@@ -14,6 +14,9 @@
 | SolidWorks / Fusion 工程连接与原生编辑 | 未接入 | FreeCAD 通过不代表这两款软件也已支持 |
 | CAD 用户手动操作与助手协作 | 轮询、定位与手改保护已测 | 点击列表选择上盖已从GUI操作并读回；原生编辑不被旧配方覆盖。自动合并、手动切换文档/断连/退出需继续验收 |
 | 对话生成、口语修改 | 本机真实调用已验证 | 多模块案例共9轮对话，不代表所有需求均能成功 |
+| 流式文字、模型思考、工具卡片 | 真实 Electron/DSH 已验证 | 实测280次含文字的状态更新，reasoning与工具均在结束前出现；只展示实际提供内容 |
+| 技能、工具启停与技能导入 | 已实现并测试 | 四种工具白名单、内置/本机 SKILL.md、设置保存；未接任意 MCP 或技能脚本执行 |
+| Agent 视觉观察 | 原生多视角与真实模型看图已测 | 五种视角非空并恢复相机；真实模型接收等轴测/俯视两图；仍可能误判，不替代工程/实物验证 |
 | 尺寸预览、取消、保存 | 自动测试及案例验证 | 不改变原版本，预览需在有效期内提交 |
 | 静态多模块、名称与测量 | worker与回归测试通过 | 不含装配约束、运动和自动干涉检查 |
 | STEP/STL/源码下载 | 自动测试及独立重建通过 | 不是完整的加工与装配资料包 |
@@ -25,7 +28,7 @@
 
 ## 应用自动测试
 
-仓库根目录运行 `npm test`。当前共21个测试通过：桌面15项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；新增独立Node运行时选择、Electron环境变量清理和简洁错误提示，示例创建允许空/重复默认尺寸。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)与[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)。原型测试覆盖：
+仓库根目录运行 `npm test`。当前共26个测试通过：桌面20项、网页原型6项。桌面覆盖精确指令、尺寸算式拒绝代码/无效值、结构数量与ID校验、参数保留和影响范围、旧协议及手改拒绝、并发请求、暂停/重复确认、过期计划、重启恢复和迟到结果；独立Node选择、Electron环境清理、简洁错误、示例默认尺寸；新增流式增量/去重/放弃尝试、滚动意图、配置持久化与技能导入、实际插件工具限制、取消后迟到事件不再更新。源码见 [`session.test.mjs`](../desktop/test/session.test.mjs)、[`design.test.mjs`](../desktop/test/design.test.mjs)、[`node-runtime.test.mjs`](../desktop/test/node-runtime.test.mjs)及[`agent.test.mjs`](../desktop/test/agent.test.mjs)。原型测试覆盖：
 
 - 四孔安装板的尺寸、解析体积、孔径/孔心、STEP/STL输出与参数修改。
 - 几何失败、非法导入与不合法参数的拒绝，失败不追加有效版本。
@@ -38,6 +41,14 @@
 测试使用独立临时数据目录，不通过真实大模型生成。源码见 [`cad-studio/test/`](../cad-studio/test/)。
 
 ## 桌面与 FreeCAD 常驻桥接实测
+
+### v1.1.0 流式交互与视觉检查
+
+`node desktop/test/run-agent-live.mjs` 在实际 Electron 主进程启动独立 Node/DSH，使用独立原生飞机工程。证据：[`agent-experience-results.json`](../desktop/validation/agent-experience-results.json)。五种视角均生成非纯色图片，核对相机恢复与工程指纹不变；真实模型调用 skill_read、inspect、capture，接收等轴测和俯视图，描述实际三色组件并区分视觉观察、几何和未验证工艺。实测文字/思考/工具更新次数为280/272/276，这些是状态发布次数，不是token数或性能指标。模型仍可能误判细节，例如后掠角和装配风险，需要工程验证。
+
+测试期间发现标准视角切换后的空白图，修复为关闭观察动画、重绘、保存后恢复相机与动画，并增加纯色空图拒绝。该检测不能发现所有无内容或有遮挡的图，不把返回 PNG 当作视觉检查通过。另有原生相机浮点序列化差异，恢复校验使用1e-5相对/1e-4绝对容差。
+
+真实 renderer 自动检查跟随、上翻保位、跳最新和设置加载；`desktop/test/renderer-check.mjs` 是不请求模型、不写CAD的独立界面夹具，还覆盖安全文字排版、折叠状态、紧凑草稿和配置保存。原生窗口观察确认工具/思考卡片及新排版；多屏、快捷键冲突和完整人机协作仍未完成。原有 Electron 两轮“飞机创建→展长改120mm”回归也重新通过，结果见 [`electron-runtime-results.json`](../desktop/validation/electron-runtime-results.json)。
 
 2026-11-13，Windows、Electron45.3.1、FreeCAD1.1.4。独立常驻 GUI 桥接通过9组集成检查：连接、创建原生四孔板并读取选择、修改四孔直径、在真实写入边界拒绝过期计划、撤销、重做、保存到新路径、拒绝覆盖、拒绝不支持操作及非法孔径。记录见 [`native-results.json`](../desktop/validation/native-results.json)；最终为80×40×5mm、四孔8mm、单个有效实体，体积14994.690350851264mm³。该运行没有重新验证文件重开，重开证据仍来自原探针。
 
