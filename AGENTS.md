@@ -5,7 +5,13 @@
 - This workspace contains 构形 CAD, a local conversational CAD application built on DeepSeek Harness.
 - The primary application is `cad-studio/`. Root `start.cmd` and `npm start` launch it at 127.0.0.1:3090.
 - `start-harness.cmd` and `npm run harness` retain access to the original DSH web app.
-- Read root `README.md` for current scope, then `cad-studio/README.md` for implementation details.
+- Read root `README.md`, then `docs/README.md` for the documentation index. Product direction belongs in `docs/product.md`, staged work and acceptance in `docs/roadmap.md`, implementation in `docs/architecture.md`, and evidence in `docs/validation.md`.
+
+## Product direction
+
+- Help ordinary users describe ideas in everyday language and progress to physical objects that can be fabricated and assembled.
+- The next milestone is a printable, assemblable electronics enclosure: clarify requirements, design supports and connections, deliver per-part files, a parts list and assembly instructions, then validate a physical prototype and feedback-driven revision.
+- Treat that milestone as planned until its acceptance conditions in `docs/roadmap.md` are met. Static multi-solid geometry and successful exports alone do not prove manufacturability or assembly.
 
 ## Keep it simple
 
@@ -31,3 +37,4 @@
 - Root `npm test` runs the application tests in `cad-studio/test/`, including non-destructive previews and parameter validation.
 - Root `npm run status` checks the existing application without opening a browser or creating a project.
 - For documentation-only changes, verify paths and commands instead of rerunning CAD generation or paid model requests.
+- Keep detailed project documentation under `docs/`. Preserve sample and research evidence paths, and link to their indexes rather than duplicating their assets.

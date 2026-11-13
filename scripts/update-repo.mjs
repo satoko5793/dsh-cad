@@ -15,7 +15,7 @@ run(process.execPath,['--test','cad-studio/test/cad.test.mjs','cad-studio/test/p
 run(process.execPath,['scripts/export-samples.mjs']);
 const python=process.env.CAD_PYTHON||path.join(root,'cad-studio/.venv/Scripts/python.exe');
 run(python,['samples/verify-complex.py']);
-run('git',['add','--','AGENTS.md','README.md','.gitignore','.gitattributes','package.json','package-lock.json','start.cmd','start-harness.cmd','cad-studio','scripts','samples','research']);
+run('git',['add','--','AGENTS.md','README.md','.gitignore','.gitattributes','package.json','package-lock.json','start.cmd','start-harness.cmd','docs','cad-studio','scripts','samples','research']);
 const files=run('git',['diff','--cached','--name-only','--diff-filter=ACMR','-z'],{capture:true}).split('\0').filter(Boolean);
 for(const file of files){
   if(/(?:^|\/)(?:node_modules|\.venv|\.data|\.qa|\.dsh)(?:\/|$)|(?:^|\/)\.env(?:\.|$)|credentials\.json$/i.test(file))throw new Error(`不应发布的文件已暂存：${file}`);
