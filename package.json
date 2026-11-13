@@ -1,6 +1,6 @@
 {
   "name": "dsh",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "构形 CAD：基于 DeepSeek Harness 的本地对话式 CAD 工作台",
   "scripts": {
     "setup": "node scripts/setup-cad.mjs",

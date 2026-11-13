@@ -15,6 +15,7 @@ function showMessages(messages){
 }
 function render(state){
   current=state;document.body.classList.toggle('compact',state.window.small);
+  $('app-version').textContent=state.app?.version?`CAD 助手 · v${state.app.version}`:'CAD 助手 · 开发版';
   $('toggle').textContent=state.window.small?'展开':'缩为小窗';$('toggle').setAttribute('aria-expanded',String(!state.window.small));
   $('pin').hidden=!state.window.small;$('pin').textContent=state.window.pinned?'已置顶':'置顶';$('pin').setAttribute('aria-pressed',String(state.window.pinned));
   showMessages(state.messages);

@@ -6,7 +6,7 @@
   <title>构形 · CAD 助手</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="details.css"><script defer src="app.js"></script>
 </head>
 <body>
-  <header class="titlebar"><div class="brand"><span class="brand-mark">构</span><strong>构形</strong><span class="edition">CAD 助手 · 开发版</span></div><div class="window-controls"><button id="pin" hidden>置顶</button><button id="toggle">缩为小窗</button><button id="minimize" aria-label="收起到任务栏">—</button><button id="close" aria-label="退出应用">×</button></div></header>
+  <header class="titlebar"><div class="brand"><span class="brand-mark">构</span><strong>构形</strong><span class="edition" id="app-version">CAD 助手 · 开发版</span></div><div class="window-controls"><button id="pin" hidden>置顶</button><button id="toggle">缩为小窗</button><button id="minimize" aria-label="收起到任务栏">—</button><button id="close" aria-label="退出应用">×</button></div></header>
   <div class="workspace">
     <nav class="sidebar" aria-label="会话与工程"><div class="section-label">工作空间</div><div class="session-current"><span class="session-dot"></span><div><strong>我的 CAD 会话</strong><small>对话和草稿自动保存在本机</small></div></div><div class="sidebar-section"><div class="section-label">连接的软件</div><div class="software"><span class="software-logo">F</span><div><strong>FreeCAD</strong><small id="sidebar-connection">尚未连接</small></div></div><button class="button secondary full" id="connect">连接 FreeCAD</button><button class="text-button full" id="open">打开原生工程</button></div><details class="history-panel"><summary>最近操作</summary><div id="history"></div></details><div class="sidebar-bottom"><p>让想法成为实物</p><span>原生多零件 · 参数驱动</span></div></nav>
     <main class="conversation">

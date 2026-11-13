@@ -11,6 +11,7 @@ app.setName('构形');app.setPath('userData',path.join(data,'electron'));
 if(!app.requestSingleInstanceLock()){app.quit();}else{void start().catch(error=>{console.error(cleanError(error));app.exit(1);});}
 async function start(){
   await app.whenReady();
+  const appVersion=JSON.parse(await readFile(path.join(ROOT,'..','package.json'),'utf8')).version;
   await mkdir(data,{recursive:true});
   const bridge=new FreeCADBridge(data);await bridge.restore();
   const session=new Session(data,bridge);await session.load();await session.poll();
@@ -26,7 +27,7 @@ async function start(){
   window.webContents.on('will-navigate',(event,url)=>{if(url!==entry)event.preventDefault();});
   window.webContents.session.setPermissionRequestHandler((_wc,_permission,callback)=>callback(false));
   window.setAlwaysOnTop(preferences.small&&preferences.pinned);
-  const snapshot=()=>({...session.state,window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
+  const snapshot=()=>({...session.state,app:{version:appVersion},window:{small:preferences.small,pinned:preferences.pinned,shortcut:shortcutOk?'Ctrl + Alt + Space':'快捷键注册失败，可从任务栏恢复'},model:{provider:process.env.CAD_LLM_PROVIDER||'deepseek-official',name:process.env.CAD_LLM_MODEL||'deepseek-flash'}});
   const broadcast=()=>{if(!window.isDestroyed())window.webContents.send('harness:state',snapshot());};
   const persistPreferences=()=>atomicJson(path.join(data,'window.json'),preferences).catch(error=>{session.state.status=`窗口设置保存失败：${cleanError(error)}`;broadcast();});
   session.on('change',broadcast);session.on('storageError',error=>{session.state.status=`会话保存失败：${cleanError(error)}`;broadcast();});
@@ -98,5 +99,5 @@ async function start(){
   });
   const pollTimer=setInterval(()=>void session.poll().catch(error=>{session.state.status=cleanError(error);broadcast();}),650);
   app.on('will-quit',()=>globalShortcut.unregisterAll());
-  await window.loadFile(path.join(ROOT,'ui','index.html'));window.show();
+  await window.loadFile(path.join(ROOT,'ui','index.html'));window.setTitle(`构形 · CAD 助手 v${appVersion}`);window.show();
 }
